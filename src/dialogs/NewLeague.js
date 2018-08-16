@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Modal, Button, Form, Input, Select, Spin, Collapse, Icon } from 'antd';
+import { Modal, Button, Form, Input, Select, Spin, Collapse, Icon, Col } from 'antd';
+import forIn from 'lodash';
 import fire from './../fire.js';
 import SelectionTool from './../players/SelectionTool';
 import AddPlayerSmall from './../players/AddPlayerSmall';
@@ -25,17 +26,17 @@ const NewLeague = Form.create()(
 
         fetch() {
             /* Create reference to messages in Firebase Database */
-            let messagesRef = fire.database().ref('players').orderByKey().limitToLast(100);
-            messagesRef.on('value', snapshot => {
+            const playersList = fire.database().ref('players/list').orderByKey();
+
+            playersList.on('value', snapshot => {
                 /* Update React state when message is added at Firebase Database */
                 // let message = { text: snapshot.val(), id: snapshot.key };
+                console.log(snapshot.val());
                 if (snapshot.val()) {
-                    this.setState({ players: [snapshot.val()].concat(this.state.dataSource), loading: false });
+                    this.setState({ players: Object.values(snapshot.val()), loading: false });
                 } else {
                     this.setState({ loading: false });
                 }
-
-                console.log(snapshot.val());
             })
         }
 
@@ -43,8 +44,55 @@ const NewLeague = Form.create()(
             this.fetch();
         }
 
-        addPlayerCallback = (e) => {
+        addPlayerCallback = (values) => {
             console.log('callback');
+            this.setState({ loading: true });
+
+            const players = fire.database().ref('players');
+            const { name, nickname } = values;
+            players.child('list').orderByChild("name").equalTo(name).once('value', snapshot => {
+                console.log(snapshot.val());
+                if (!snapshot.val()) {
+                    players.child('list').orderByChild("nickname").equalTo(nickname).once('value', snapshot => {
+                        console.log(snapshot.val());
+                        if (!snapshot.val()) {
+                            players.once('value', snapshot => {
+                                const newID = snapshot.val().lastID + 1;
+
+                                fire.database().ref('players/list/_' + newID).set({ ...values, playerID: newID });
+                                fire.database().ref('players/lastID').set(newID);
+                            });
+                        }
+                    })
+                }
+
+            });
+        }
+
+        inlinePlayerFields(arr) {
+            const { form } = this.props;
+            const { getFieldDecorator } = form;
+            console.log('inlinePlayerFields');
+            return arr.map((v, i) => <FormItem label={'Player ' + (v + i)} key={'player_' + (v + i)}>
+                <Col span={12} style={{ paddingRight: '4px' }}>
+                    <FormItem>
+                        {getFieldDecorator('names[' + i + ']', {
+                            rules: [{ required: true, message: 'Name is required!' }],
+                        })(
+                            <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Name" />
+                        )}
+                    </FormItem>
+                </Col>
+                <Col span={12} style={{ paddingLeft: '4px' }}>
+                    <FormItem>
+                        {getFieldDecorator('nicknames[' + i + ']', {
+                            rules: [{ required: true, message: 'Nickname is required!' }],
+                        })(
+                            <Input prefix={<Icon type="smile-o" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Nickname" />
+                        )}
+                    </FormItem>
+                </Col>
+            </FormItem>);
         }
 
         render() {
@@ -52,8 +100,55 @@ const NewLeague = Form.create()(
             const { players, loading } = this.state;
             const { getFieldDecorator } = form;
             const onOk = () => {
+                const fieldsValues = form.getFieldsValue();
+                const fieldsNames = Object.keys(fieldsValues).filter((name) => {
+                    switch (name) {
+                        case 'names':
+                        case 'nicknames':
+                            if (players.length) {
+                                return false;
+                            }
+                            break;
+                        case 'players':
+                            if (!players.length) {
+                                return false;
+                            }
+                            break;
+                    }
+
+                    return true;
+                });
+
                 console.log('myOk');
-                onCancel()
+                console.log(fieldsValues);
+
+                form.validateFields(fieldsNames, (err, values) => {
+                    if (!err) {
+                        console.log('Received values of form: ', values);
+                        const { names, nicknames } = values;
+
+                        if (names) {
+                            let playerID;
+                            const players = names.reduce((obj, name, i) => {
+                                playerID = i + 1;
+                                obj[`_${playerID}`] = { playerID, name, nickname: nicknames[i] };
+                                return obj;
+                            }, {});
+
+                            console.log(players);
+
+                            const playersRef = fire.database().ref('players');
+                            playersRef.child('list').set(players)
+                                .then(function () {
+                                    console.log('Synchronization succeeded');
+                                });
+
+                            playersRef.child('lastID').set(playerID);
+                        }
+
+                        onCancel();
+                    }
+                });
             };
 
             return (
@@ -69,7 +164,7 @@ const NewLeague = Form.create()(
                     <Form layout="vertical">
                         <FormItem label="Title">
                             {getFieldDecorator('title', {
-                                rules: [{ required: true, message: 'Please input the title of collection!' }],
+                                rules: [{ required: true, message: 'Please input the league title!' }],
                             })(
                                 <Input />
                             )}
@@ -77,23 +172,28 @@ const NewLeague = Form.create()(
                         <FormItem label="Description">
                             {getFieldDecorator('description')(<Input type="textarea" />)}
                         </FormItem>
-                        <FormItem label="Players">
-                            {getFieldDecorator('description')(
-                                <Select
-                                    mode="multiple"
-                                    notFoundContent={loading ? <Spin size="small" /> : 'add players'}
-                                >
-                                    {players.map(p => <Option key={p.id}>{p.nickname}</Option>)}
-                                </Select>
-                            )}
-                        </FormItem>
-
+                        {loading ? <Spin size="small" style={{ width: '100%' }} /> : players.length ?
+                            <FormItem label="Players">
+                                {getFieldDecorator('players', {
+                                    rules: [{ required: true, len: 4, type: 'array' }],
+                                })(
+                                    <Select
+                                        mode="multiple"
+                                    // notFoundContent={loading ? <Spin size="small" /> : 'add players'}
+                                    >
+                                        {players.map(p => <Option key={p.playerID} value={p.playerID}>{p.nickname}</Option>)}
+                                    </Select>
+                                )}
+                            </FormItem> :
+                            this.inlinePlayerFields(Array(4 - players.length).fill(1), players.length > 0)
+                        }
                     </Form>
-                    <Collapse bordered={false}>
-                        <Panel header="add player">
-                            <AddPlayerSmall callback={this.addPlayerCallback} />
-                        </Panel>
-                    </Collapse>
+                    {!loading && players.length ?
+                        <Collapse bordered={false}>
+                            <Panel header="add player">
+                                <AddPlayerSmall callback={this.addPlayerCallback} />
+                            </Panel>
+                        </Collapse> : ''}
 
                     {/* <SelectionTool {...this.state} onSelectChange={this.onSelectChange} fetch={this.fetch.bind(this)} /> */}
                 </Modal>

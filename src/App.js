@@ -15,7 +15,7 @@ function Menu(props) {
         const { onClick, text, dialogProps } = item;
         return <li key={index}>
           <Button onClick={onClick} size="large" block>{text}</Button>
-          <NewLeagueDialog {...dialogProps} />
+          {dialogProps ? <NewLeagueDialog {...dialogProps} /> : ''}
         </li>;
       })
       }
