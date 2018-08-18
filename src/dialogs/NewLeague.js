@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Modal, Button, Form, Input, Select, Spin, Collapse, Icon, Col } from 'antd';
-import forIn from 'lodash';
 import fire from './../fire.js';
 import SelectionTool from './../players/SelectionTool';
 import AddPlayerSmall from './../players/AddPlayerSmall';
@@ -8,6 +7,7 @@ import AddPlayerSmall from './../players/AddPlayerSmall';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const Panel = Collapse.Panel;
+console.log(Collapse)
 
 
 const NewLeague = Form.create()(
@@ -17,12 +17,18 @@ const NewLeague = Form.create()(
             count: 0,
             loading: true,
             selectedRowKeys: [], // Check here to configure the default column
+            addPlayerCollapse: []
         };
 
         onSelectChange = (selectedRowKeys) => {
             this.setState({ selectedRowKeys });
         }
 
+        addPlayerCollapseChange = (key) => {
+            this.setState({
+                addPlayerCollapse: key,
+            });
+        }
 
         fetch() {
             /* Create reference to messages in Firebase Database */
@@ -30,44 +36,34 @@ const NewLeague = Form.create()(
 
             playersList.on('value', snapshot => {
                 /* Update React state when message is added at Firebase Database */
-                // let message = { text: snapshot.val(), id: snapshot.key };
                 console.log(snapshot.val());
                 if (snapshot.val()) {
                     this.setState({ players: Object.values(snapshot.val()), loading: false });
                 } else {
                     this.setState({ loading: false });
                 }
-            })
+            });
         }
 
         componentDidMount() {
             this.fetch();
         }
 
-        addPlayerCallback = (values) => {
-            console.log('callback');
-            this.setState({ loading: true });
+        addPlayerCallback(values) {
+            return new Promise((resolve, reject) => {
+                    this.setState({ loading: true });
+                    fire.database().ref('players').once('value', snapshot => {
 
-            const players = fire.database().ref('players');
-            const { name, nickname } = values;
-            players.child('list').orderByChild("name").equalTo(name).once('value', snapshot => {
-                console.log(snapshot.val());
-                if (!snapshot.val()) {
-                    players.child('list').orderByChild("nickname").equalTo(nickname).once('value', snapshot => {
-                        console.log(snapshot.val());
-                        if (!snapshot.val()) {
-                            players.once('value', snapshot => {
-                                const newID = snapshot.val().lastID + 1;
+                        const newID = snapshot.val().lastID + 1;
 
-                                fire.database().ref('players/list/_' + newID).set({ ...values, playerID: newID });
-                                fire.database().ref('players/lastID').set(newID);
-                            });
-                        }
-                    })
-                }
-
-            });
+                        fire.database().ref('players/list/_' + newID).set({ ...values, playerID: newID });
+                        fire.database().ref('players/lastID').set(newID);
+                        this.setState({ loading: false, addPlayerCollapse: [] });
+                        resolve(true);
+                    });
+                })
         }
+
 
         inlinePlayerFields(arr) {
             const { form } = this.props;
@@ -172,7 +168,7 @@ const NewLeague = Form.create()(
                         <FormItem label="Description">
                             {getFieldDecorator('description')(<Input type="textarea" />)}
                         </FormItem>
-                        {loading ? <Spin size="small" style={{ width: '100%' }} /> : players.length ?
+                        {players.length ?
                             <FormItem label="Players">
                                 {getFieldDecorator('players', {
                                     rules: [{ required: true, len: 4, type: 'array' }],
@@ -188,10 +184,10 @@ const NewLeague = Form.create()(
                             this.inlinePlayerFields(Array(4 - players.length).fill(1), players.length > 0)
                         }
                     </Form>
-                    {!loading && players.length ?
-                        <Collapse bordered={false}>
-                            <Panel header="add player">
-                                <AddPlayerSmall callback={this.addPlayerCallback} />
+                    {players.length ?
+                        <Collapse bordered={false} activeKey={this.state.addPlayerCollapse} onChange={this.addPlayerCollapseChange}>
+                            <Panel header="add player" key="1">
+                                <AddPlayerSmall callback={this.addPlayerCallback.bind(this)} players={this.state.players} loading={loading}/>
                             </Panel>
                         </Collapse> : ''}
 

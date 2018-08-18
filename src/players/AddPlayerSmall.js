@@ -8,18 +8,36 @@ function hasErrors(fieldsError) {
 }
 
 class AddPlayerForm extends Component {
+    validateNickname = (rule, value, callback) => {
+        const { players } = this.props;
+        if (players.some(player => player.nickname === value)) {
+            callback(['nickname already exist!'])
+        }
+        callback();
+    }
+
     addPlayerSubmit = (e) => {
         e.preventDefault();
-        this.props.form.validateFields((err, values) => {
+        const { form } = this.props;
+        form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
-                this.props.callback(values);
+
+                const { players, callback} = this.props;
+                const {  nickname } = values;
+                callback(values).then(response => {
+                    if(response) {
+                        form.resetFields();
+                    }
+                });
+
             }
         });
     }
 
     render() {
-        const { getFieldDecorator } = this.props.form;
+    const { form, loading} = this.props;
+    const { getFieldDecorator } = form;
         return (
             <Form layout="inline" onSubmit={this.addPlayerSubmit}>
                 <FormItem>
@@ -31,7 +49,9 @@ class AddPlayerForm extends Component {
                 </FormItem>
                 <FormItem>
                     {getFieldDecorator('nickname', {
-                        rules: [{ required: true, message: 'Please input your Nickname!' }],
+                        rules: [{ required: true, message: 'Please input your Nickname!' }, {
+                            validator: this.validateNickname
+                        }]
                     })(
                         <Input prefix={<Icon type="smile-o" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Nickname" />
                     )}
@@ -41,7 +61,7 @@ class AddPlayerForm extends Component {
                         type="default"
                         htmlType="submit"
                     >
-                        <Icon type="user-add" />
+                        <Icon type="user-add" spin={loading}/>
                     </Button>
                 </FormItem>
             </Form>
