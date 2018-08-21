@@ -133,7 +133,6 @@ const NewLeague = Form.create()(
                 const createLeague = (params) => new Promise((resolve) => {
                     const leaguesRef = fire.database().ref('leagues');
                     leaguesRef.once('value', snapshot => {
-                        debugger;
                         const lastID = snapshot.val() && snapshot.val().lastID;
                         const newID = lastID ? lastID + 1 : 1;
 
@@ -146,7 +145,7 @@ const NewLeague = Form.create()(
                 form.validateFields(fieldsNames, (err, values) => {
                     if (!err) {
                         console.log('Received values of form: ', values);
-                        const { names, nicknames } = values;
+                        const { names, nicknames, description } = values;
                         this.setState({ savingLeagueLoader: true });
 
                         if (names) {
@@ -162,14 +161,17 @@ const NewLeague = Form.create()(
 
                             const playersRef = fire.database().ref('players');
                             playersRef.child('list').set(newPlayers)
-                                .then(createLeague(values)
-                                    .then(redirect())
-                                );
+                                //.then(createLeague(values)
+                                //    .then(() => redirect())
+                                //);
 
                             playersRef.child('lastID').set(playerID);
                         } else {
-                            createLeague(values)
-                                .then(redirect());
+                            createLeague({
+                                ...values,
+                                description: description || ''
+                            })
+                                .then(() => redirect());
                         }
                     }
                 });
