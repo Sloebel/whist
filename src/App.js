@@ -1,75 +1,31 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import cards from './cards.png';
 import './App.css';
-import fire from './fire.js';
-import { Modal, Button } from 'antd';
+// import fire from './fire.js';
 import 'antd/dist/antd.css';
-import SelectionTool from './players/SelectionTool';
-import NewLeagueDialog from './dialogs/NewLeague';
+// import SelectionTool from './players/SelectionTool';
+import Main from './main/Main';
 
-function Menu(props) {
-  return (
-    <ul className="App-menu">
-      {props.items.map(function (item, index) {
-        const { onClick, text, dialogProps } = item;
-        return <li key={index}>
-          <Button onClick={onClick} size="large" block>{text}</Button>
-          {dialogProps ? <NewLeagueDialog {...dialogProps} /> : ''}
-        </li>;
-      })
-      }
-    </ul>
-  );
-}
+const About = () => <h3>About</h3>;
 
 class App extends Component {
-  state = {
-    dialogsPlayers: false
-  };
-
-  showPlayersDialog() {
-    this.setState({
-      dialogsPlayers: true
-    });
-  }
-
-  closePlayersDialog() {
-    this.setState({
-      dialogsPlayers: false
-    });
-  }
 
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={cards} className="App-logo" alt="logo" />
-          <h1 className="App-title">Sub Whist</h1>
-        </header>
-        <div className="App-main">
-          <Menu items={[
-            {
-              text: 'Resume League',
-              onClick: () => { console.log(this); }
-            }, {
-              text: 'Create League',
-              onClick: this.showPlayersDialog.bind(this),
-              dialogProps: {
-                onCancel: this.closePlayersDialog.bind(this),
-                // content: <SelectionTool />,
-                visible: this.state.dialogsPlayers
-              }
-            },
-            { text: 'Settings' },
-            { text: 'Scores' }
-          ]}
-          >
-          </Menu>
+      <Router>
+        <div className="App">
+          <header className="App-header">
+            <img src={cards} className="App-logo" alt="logo" />
+            <h1 className="App-title">Sub Whist</h1>
+          </header>
+          <Route exact path="/" component={Main} />
+          <Route path="/about" component={About} />
         </div>
-      </div>
+      </Router>
     );
   }
+
 
   // constructor(props) {
   //   super(props);

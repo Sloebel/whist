@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from "react-router-dom";
 import { Modal, Button, Form, Input, Select, Spin, Collapse, Icon, Col } from 'antd';
 import fire from './../fire.js';
 import SelectionTool from './../players/SelectionTool';
@@ -65,7 +66,7 @@ const NewLeague = Form.create()(
                     this.setState({ newPlayerLoader: false, addPlayerCollapse: [] });
                     resolve(true);
                 });
-            })
+            });
         }
 
 
@@ -123,6 +124,25 @@ const NewLeague = Form.create()(
                     return true;
                 });
 
+                const redirect = () => {
+                    this.setState({ savingLeagueLoader: false });
+                    onCancel().then(() => this.props.history.push('/about'));
+                };
+
+                // to do: check an error in console
+                const createLeague = (params) => new Promise((resolve) => {
+                    const leaguesRef = fire.database().ref('leagues');
+                    leaguesRef.once('value', snapshot => {
+                        debugger;
+                        const lastID = snapshot.val() && snapshot.val().lastID;
+                        const newID = lastID ? lastID + 1 : 1;
+
+                        fire.database().ref('leagues/list/_' + newID).set({ ...params, leagueID: newID })
+                            .then(resolve(true));
+                        fire.database().ref('leagues/lastID').set(newID);
+                    });
+                });
+
                 form.validateFields(fieldsNames, (err, values) => {
                     if (!err) {
                         console.log('Received values of form: ', values);
@@ -130,26 +150,27 @@ const NewLeague = Form.create()(
                         this.setState({ savingLeagueLoader: true });
 
                         if (names) {
+                            //creating new players
                             let playerID;
-                            const players = names.reduce((obj, name, i) => {
+                            const newPlayers = names.reduce((obj, name, i) => {
                                 playerID = i + 1;
                                 obj[`_${playerID}`] = { playerID, name, nickname: nicknames[i] };
                                 return obj;
                             }, {});
 
-                            console.log(players);
+                            console.log(newPlayers);
 
                             const playersRef = fire.database().ref('players');
-                            playersRef.child('list').set(players)
-                                .then(function () {
-                                    console.log('Synchronization succeeded');
-                                });
+                            playersRef.child('list').set(newPlayers)
+                                .then(createLeague(values)
+                                    .then(redirect())
+                                );
 
                             playersRef.child('lastID').set(playerID);
+                        } else {
+                            createLeague(values)
+                                .then(redirect());
                         }
-
-                        this.setState({ savingLeagueLoader: false });
-                        onCancel();
                     }
                 });
             };
@@ -207,4 +228,4 @@ const NewLeague = Form.create()(
         }
     }
 );
-export default NewLeague;
+export default withRouter(NewLeague);
