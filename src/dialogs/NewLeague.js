@@ -36,7 +36,7 @@ const NewLeague = Form.create()(
             const playersList = fire.database().ref('players/list').orderByKey();
 
             playersList.on('value', snapshot => {
-                /* Update React state when message is added at Firebase Database */
+                /* Update React state when a player is added at Firebase Database */
                 console.log(snapshot.val());
                 if (snapshot.val()) {
                     this.setState({ players: Object.values(snapshot.val()), loading: false });
@@ -68,7 +68,6 @@ const NewLeague = Form.create()(
                 });
             });
         }
-
 
         inlinePlayerFields(arr) {
             const { form } = this.props;
@@ -137,7 +136,7 @@ const NewLeague = Form.create()(
                         const newID = lastID ? lastID + 1 : 1;
 
                         fire.database().ref('leagues/list/_' + newID).set({ ...params, leagueID: newID })
-                            .then(resolve(true));
+                            .then(() => resolve(true));
                         fire.database().ref('leagues/lastID').set(newID);
                     });
                 });
@@ -161,9 +160,9 @@ const NewLeague = Form.create()(
 
                             const playersRef = fire.database().ref('players');
                             playersRef.child('list').set(newPlayers)
-                                //.then(createLeague(values)
-                                //    .then(() => redirect())
-                                //);
+                            //.then(createLeague(values)
+                            //    .then(() => redirect())
+                            //);
 
                             playersRef.child('lastID').set(playerID);
                         } else {
