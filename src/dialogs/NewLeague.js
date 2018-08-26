@@ -12,6 +12,7 @@ const Panel = Collapse.Panel;
 const NewLeague = Form.create()(
     class extends Component {
         state = {
+            showDialog: this.props.visible,
             players: [],
             count: 0,
             loading: true,
@@ -99,9 +100,15 @@ const NewLeague = Form.create()(
             this.playersSelect.focus();
         }
 
+        closeModal() {
+            this.setState({
+                showDialog: false
+            });
+        }
+
         render() {
-            const { visible, onCancel, form } = this.props;
-            const { players, loading, newPlayerLoader, savingLeagueLoader } = this.state;
+            const { onCancel, form } = this.props;
+            const { showDialog, players, loading, newPlayerLoader, savingLeagueLoader } = this.state;
             const { getFieldDecorator } = form;
             const onOk = () => {
                 const fieldsValues = form.getFieldsValue();
@@ -179,12 +186,13 @@ const NewLeague = Form.create()(
             return (
                 <Modal
                     title="Create League"
-                    visible={visible}
+                    visible={showDialog}
                     destroyOnClose={true}
                     maskClosable={false}
                     confirmLoading={savingLeagueLoader}
                     onOk={onOk}
-                    onCancel={onCancel}
+                    onCancel={this.closeModal.bind(this)}
+                    afterClose={onCancel}
                     width="600px"
                     okText="Save & Play"
                 >
