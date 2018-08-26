@@ -3,9 +3,9 @@ import { Form, Icon, Input, Button } from 'antd';
 
 const FormItem = Form.Item;
 
-function hasErrors(fieldsError) {
-    return Object.keys(fieldsError).some(field => fieldsError[field]);
-}
+// function hasErrors(fieldsError) {
+//     return Object.keys(fieldsError).some(field => fieldsError[field]);
+// }
 
 class AddPlayerForm extends Component {
     validateNickname = (rule, value, callback) => {
@@ -23,10 +23,10 @@ class AddPlayerForm extends Component {
             if (!err) {
                 console.log('Received values of form: ', values);
 
-                const { players, callback} = this.props;
-                const {  nickname } = values;
+                const { callback } = this.props;
+                // const { nickname } = values;
                 callback(values).then(response => {
-                    if(response) {
+                    if (response) {
                         form.resetFields();
                     }
                 });
@@ -36,8 +36,8 @@ class AddPlayerForm extends Component {
     }
 
     render() {
-    const { form, loading} = this.props;
-    const { getFieldDecorator } = form;
+        const { form, loading } = this.props;
+        const { getFieldDecorator } = form;
         return (
             <Form layout="inline" onSubmit={this.addPlayerSubmit}>
                 <FormItem>
@@ -61,7 +61,7 @@ class AddPlayerForm extends Component {
                         type="default"
                         htmlType="submit"
                     >
-                        <Icon type="user-add" spin={loading}/>
+                        <Icon type="user-add" spin={loading} />
                     </Button>
                 </FormItem>
             </Form>

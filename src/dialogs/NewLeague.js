@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { withRouter } from "react-router-dom";
-import { Modal, Button, Form, Input, Select, Spin, Collapse, Icon, Col } from 'antd';
+import { Modal, Form, Input, Select, Spin, Collapse, Icon, Col } from 'antd';
 import fire from './../fire.js';
-import SelectionTool from './../players/SelectionTool';
+// import SelectionTool from './../players/SelectionTool';
 import AddPlayerSmall from './../players/AddPlayerSmall';
 
 const FormItem = Form.Item;
@@ -100,7 +100,7 @@ const NewLeague = Form.create()(
         }
 
         render() {
-            const { visible, onCancel, content, form } = this.props;
+            const { visible, onCancel, form } = this.props;
             const { players, loading, newPlayerLoader, savingLeagueLoader } = this.state;
             const { getFieldDecorator } = form;
             const onOk = () => {

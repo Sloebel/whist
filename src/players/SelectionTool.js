@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Table, Input, Button, Popconfirm, Form } from 'antd';
+import { Table, Button } from 'antd';
 import './SelectionTool.css';
 
 
