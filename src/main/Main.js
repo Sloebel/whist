@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import { Button } from 'antd';
-import NewLeagueDialog from './../dialogs/NewLeague';
+import Dialog from './../dialogs/Dialog';
 
 function Menu(props) {
     return (
         <ul className="App-menu">
             {props.items.map(function (item, index) {
-                const { onClick, text, dialogProps } = item;
+                const { onClick, text, dialog, dialogProps } = item;
                 return <li key={index}>
                     <Button onClick={onClick} size="large" block>{text}</Button>
-                    {dialogProps ? <NewLeagueDialog {...dialogProps} /> : ''}
+                    {dialog && dialogProps.visible ? <Dialog dialog={dialog} dialogProps={dialogProps} /> : ''}
                 </li>;
             })
             }
@@ -19,19 +19,32 @@ function Menu(props) {
 
 class Main extends Component {
     state = {
-        dialogsPlayers: false
+        newLeague: false,
+        resumeLeague: false
     };
 
-    showPlayersDialog() {
+    showResumeLeagueDialog() {
         this.setState({
-            dialogsPlayers: true
+            resumeLeague: true
         });
     }
 
-    closePlayersDialog() {
+    closeResumeLeagueDialog() {
+        this.setState({
+            resumeLeague: false
+        });
+    }
+
+    showNewLeagueDialog() {
+        this.setState({
+            newLeague: true
+        });
+    }
+
+    closeNewLeagueDialog() {
         return new Promise((resolve, reject) => {
             this.setState({
-                dialogsPlayers: false
+                newLeague: false
             });
             resolve();
         });
@@ -42,14 +55,19 @@ class Main extends Component {
             <Menu items={[
                 {
                     text: 'Resume League',
-                    onClick: () => { console.log(this); }
+                    onClick: this.showResumeLeagueDialog.bind(this),
+                    dialog: 'resumeLeague',
+                    dialogProps: {
+                        onCancel: this.closeResumeLeagueDialog.bind(this),
+                        visible: this.state.resumeLeague
+                    }
                 }, {
                     text: 'Create League',
-                    onClick: this.showPlayersDialog.bind(this),
+                    onClick: this.showNewLeagueDialog.bind(this),
+                    dialog: 'newLeague',
                     dialogProps: {
-                        onCancel: this.closePlayersDialog.bind(this),
-                        // content: <SelectionTool />,
-                        visible: this.state.dialogsPlayers
+                        onCancel: this.closeNewLeagueDialog.bind(this),
+                        visible: this.state.newLeague
                     }
                 },
                 { text: 'Settings' },
