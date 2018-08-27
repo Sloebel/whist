@@ -32,7 +32,7 @@ const NewLeague = Form.create()(
             });
         }
 
-        /* Create reference to messages in Firebase Database */
+        /* Create reference to players in Firebase Database */
         playersList = fire.database().ref('players/list').orderByKey();
 
         fetch() {
@@ -146,7 +146,7 @@ const NewLeague = Form.create()(
                         const lastID = snapshot.val() && snapshot.val().lastID;
                         const newID = lastID ? lastID + 1 : 1;
 
-                        fire.database().ref('leagues/list/_' + newID).set({ ...params, leagueID: newID })
+                        fire.database().ref('leagues/list/_' + newID).set({ ...params, leagueID: newID, active: true })
                             .then(() => resolve(newID));
                         fire.database().ref('leagues/lastID').set(newID);
                     });
