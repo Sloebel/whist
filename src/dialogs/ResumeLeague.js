@@ -6,30 +6,7 @@ import fire from './../fire.js';
 
 class ResumeLeague extends Component {
     state = {
-        showDialog: this.props.visible
-    }
-
-    /* Create reference to messages in Firebase Database */
-    activeLeagues = fire.database().ref('leagues/list').orderByChild("active").equalTo(true);
-
-    fetch() {
-        this.activeLeagues.on('value', snapshot => {
-            /* Update React state when a player is added at Firebase Database */
-            console.log(snapshot.val());
-            // if (snapshot.val()) {
-            //     this.setState({ players: Object.values(snapshot.val()), loading: false });
-            // } else {
-            //     this.setState({ loading: false });
-            // }
-        });
-    }
-
-    componentDidMount() {
-        this.fetch();
-    }
-
-    componentWillUnmount() {
-        this.activeLeagues.off('value');
+        showDialog: this.props.visible,
     }
 
     closeModal() {
@@ -39,7 +16,7 @@ class ResumeLeague extends Component {
     }
 
     render() {
-        const { onCancel } = this.props;
+        const { onCancel, activeLeagues } = this.props;
         const { showDialog } = this.state;
 
         return (
@@ -56,9 +33,18 @@ class ResumeLeague extends Component {
                 <p>
                     List of open leagues
                 </p>
+                <ul className="">
+                    {activeLeagues.map((item, index) => {
+                        const { title } = item;
+                        return <li key={index}>
+                            {title}
+                        </li>;
+                    })
+                    }
+                </ul>
             </Modal>
         );
     }
 }
 
-export default ResumeLeague;
+export default withRouter(ResumeLeague);

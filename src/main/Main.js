@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { Button } from 'antd';
+import fire from './../fire.js';
 import Dialog from './../dialogs/Dialog';
 
 function Menu(props) {
     return (
         <ul className="App-menu">
             {props.items.map(function (item, index) {
-                const { onClick, text, dialog, dialogProps } = item;
+                const { onClick, text, dialog, dialogProps, disabled } = item;
                 return <li key={index}>
-                    <Button onClick={onClick} size="large" block>{text}</Button>
+                    <Button onClick={onClick} size="large" disabled={disabled} block>{text}</Button>
                     {dialog && dialogProps.visible ? <Dialog dialog={dialog} dialogProps={dialogProps} /> : ''}
                 </li>;
             })
@@ -19,9 +20,31 @@ function Menu(props) {
 
 class Main extends Component {
     state = {
+        activeLeagues: [],
         newLeague: false,
         resumeLeague: false
     };
+
+    /* Create reference to messages in Firebase Database */
+    activeLeagues = fire.database().ref('leagues/list').orderByChild("active").equalTo(true);
+
+    fetch() {
+        this.activeLeagues.on('value', snapshot => {
+            console.log(snapshot.val());
+            if (snapshot.val()) {
+                this.setState({ activeLeagues: Object.values(snapshot.val()), loading: false });
+            }
+        });
+    }
+
+    componentDidMount() {
+        this.fetch();
+    }
+
+    componentWillUnmount() {
+        this.activeLeagues.off('value');
+    }
+
 
     showResumeLeagueDialog() {
         this.setState({
@@ -57,9 +80,11 @@ class Main extends Component {
                     text: 'Resume League',
                     onClick: this.showResumeLeagueDialog.bind(this),
                     dialog: 'resumeLeague',
+                    disabled: this.state.activeLeagues.length === 0,
                     dialogProps: {
                         onCancel: this.closeResumeLeagueDialog.bind(this),
-                        visible: this.state.resumeLeague
+                        visible: this.state.resumeLeague,
+                        activeLeagues: this.state.activeLeagues
                     }
                 }, {
                     text: 'Create League',
