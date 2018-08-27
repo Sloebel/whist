@@ -6,13 +6,7 @@ import './App.css';
 import 'antd/dist/antd.css';
 // import SelectionTool from './players/SelectionTool';
 import Main from './main/Main';
-
-class League extends Component {
-  render() {
-    console.log(this.props.match);
-    return (<h3>League</h3>);
-  }
-}
+import League from './league/League.js';
 
 class App extends Component {
   constructor(props) {

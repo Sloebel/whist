@@ -25,7 +25,7 @@ class Main extends Component {
         resumeLeague: false
     };
 
-    /* Create reference to messages in Firebase Database */
+    /* Create reference to activeLeagues in Firebase Database */
     activeLeagues = fire.database().ref('leagues/list').orderByChild("active").equalTo(true);
 
     fetch() {
