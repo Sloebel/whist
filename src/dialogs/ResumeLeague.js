@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-//import { withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { Modal } from 'antd';
-import fire from './../fire.js';
+// import fire from './../fire.js';
 
 
 class ResumeLeague extends Component {
@@ -34,12 +34,13 @@ class ResumeLeague extends Component {
                     List of open leagues
                 </p>
                 <ul className="">
-                    {activeLeagues.map((item, index) => {
-                        const { title } = item;
-                        return <li key={index}>
-                            {title}
-                        </li>;
-                    })
+                    {
+                        activeLeagues.map((item, index) => {
+                            const { leagueID, title } = item;
+                            return <li key={index} onClick={() => this.props.history.push('/league/' + leagueID)}>
+                                {title}
+                            </li>;
+                        })
                     }
                 </ul>
             </Modal>

@@ -134,9 +134,9 @@ const NewLeague = Form.create()(
                     return true;
                 });
 
-                const redirect = () => {
+                const redirect = newID => {
                     this.setState({ savingLeagueLoader: false });
-                    onCancel().then(() => this.props.history.push('/about'));
+                    onCancel().then(() => this.props.history.push('/league/' + newID));
                 };
 
                 // to do: check an error in console
@@ -147,7 +147,7 @@ const NewLeague = Form.create()(
                         const newID = lastID ? lastID + 1 : 1;
 
                         fire.database().ref('leagues/list/_' + newID).set({ ...params, leagueID: newID })
-                            .then(() => resolve(true));
+                            .then(() => resolve(newID));
                         fire.database().ref('leagues/lastID').set(newID);
                     });
                 });
@@ -181,7 +181,7 @@ const NewLeague = Form.create()(
                                 ...values,
                                 description: description || ''
                             })
-                                .then(() => redirect());
+                                .then((newID) => redirect(newID));
                         }
                     }
                 });

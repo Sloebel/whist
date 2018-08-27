@@ -9,6 +9,7 @@ import Main from './main/Main';
 
 class League extends Component {
   render() {
+    console.log(this.props.match);
     return (<h3>League</h3>);
   }
 }
@@ -46,7 +47,7 @@ class App extends Component {
           <h1 className="App-title">Sub Whist</h1>
         </header>
         <Route exact path="/" component={Main} />
-        <Route path="/about" component={League} />
+        <Route path="/league/:id" component={League} />
       </div>
     );
   }
