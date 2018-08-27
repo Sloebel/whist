@@ -32,11 +32,11 @@ const NewLeague = Form.create()(
             });
         }
 
-        fetch() {
-            /* Create reference to messages in Firebase Database */
-            const playersList = fire.database().ref('players/list').orderByKey();
+        /* Create reference to messages in Firebase Database */
+        playersList = fire.database().ref('players/list').orderByKey();
 
-            playersList.on('value', snapshot => {
+        fetch() {
+            this.playersList.on('value', snapshot => {
                 /* Update React state when a player is added at Firebase Database */
                 console.log(snapshot.val());
                 if (snapshot.val()) {
@@ -49,6 +49,10 @@ const NewLeague = Form.create()(
 
         componentDidMount() {
             this.fetch();
+        }
+
+        componentWillUnmount() {
+            this.playersList.off('value');
         }
 
         addPlayerCallback(values) {

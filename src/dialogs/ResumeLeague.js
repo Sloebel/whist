@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 //import { withRouter } from "react-router-dom";
 import { Modal } from 'antd';
-//import fire from './../fire.js';
+import fire from './../fire.js';
 
 
 class ResumeLeague extends Component {
@@ -9,14 +9,37 @@ class ResumeLeague extends Component {
         showDialog: this.props.visible
     }
 
+    /* Create reference to messages in Firebase Database */
+    activeLeagues = fire.database().ref('leagues/list').orderByChild("active").equalTo(true);
+
+    fetch() {
+        this.activeLeagues.on('value', snapshot => {
+            /* Update React state when a player is added at Firebase Database */
+            console.log(snapshot.val());
+            // if (snapshot.val()) {
+            //     this.setState({ players: Object.values(snapshot.val()), loading: false });
+            // } else {
+            //     this.setState({ loading: false });
+            // }
+        });
+    }
+
+    componentDidMount() {
+        this.fetch();
+    }
+
+    componentWillUnmount() {
+        this.activeLeagues.off('value');
+    }
+
     closeModal() {
         this.setState({
             showDialog: false
         });
     }
-    
+
     render() {
-        const { visible , onCancel} = this.props;
+        const { onCancel } = this.props;
         const { showDialog } = this.state;
 
         return (
