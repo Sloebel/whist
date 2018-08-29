@@ -170,10 +170,16 @@ const NewLeague = Form.create()(
                             console.log(newPlayers);
 
                             const playersRef = fire.database().ref('players');
+                            const { title } = values;
+
                             playersRef.child('list').set(newPlayers)
-                            //.then(createLeague(values)
-                            //    .then(() => redirect())
-                            //);
+                                .then(createLeague({
+                                    title,
+                                    players: nicknames,
+                                    description: description || ''
+                                })
+                                    .then((newID) => redirect(newID))
+                                );
 
                             playersRef.child('lastID').set(playerID);
                         } else {
