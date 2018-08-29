@@ -1,0 +1,21 @@
+.league-stats {
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    border-radius: 0;
+
+    & > .ant-collapse-item:last-child, 
+    .ant-collapse > .ant-collapse-item:last-child > .ant-collapse-header,
+    .ant-collapse-item:last-child > .ant-collapse-content {
+        border-radius: 0;
+    }
+
+    .ant-collapse-header {
+        height: 46px;
+    }
+}
+
+.games-container {
+    top: 48px;
+}
