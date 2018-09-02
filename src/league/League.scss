@@ -14,6 +14,29 @@
     .ant-collapse-header {
         height: 46px;
     }
+    
+    .row-header {
+        > div {
+            font-weight: bold;
+            padding: 5px;
+            background: cadetblue;
+            color: #fff;
+            border: 1px solid;
+        }
+    }
+    
+
+    .row-data {
+        > div {
+            &:first-child {
+                background: #387cfd;
+            }
+            padding: 5px;
+            background: #7190c7;
+            color: #fff;
+            border: 1px solid;
+        }
+    }
 }
 
 .games-container {

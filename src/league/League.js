@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import fire from './../fire.js';
-import { Collapse, Tabs, Button, Carousel } from 'antd';
+import { Collapse, Tabs, Button, Carousel, Row, Col } from 'antd';
 import './League.css';
 
 const Panel = Collapse.Panel;
@@ -61,6 +61,52 @@ class League extends Component {
             <div>
                 <Collapse className="league-stats" defaultActiveKey="1">
                     <Panel header={title} key="1">
+                    	<Row>
+                    		<Col lg={{ span: 22, offset: 1 }} xl={{ span: 11, offset: 1 }}>
+                    			<Row className="row-header">
+    								<Col xs={{ span: 5, offset: 4 }} lg={{ span: 5, offset: 4 }}>Col Header</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Header</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Header</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Header</Col>
+    							</Row>
+    							<Row className="row-data">
+    								<Col xs={{ span: 4, offset: 0 }} lg={{ span: 4, offset: 0 }} className="col-subject">Col Subject</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    							</Row>
+    							<Row className="row-data">
+    								<Col xs={{ span: 4, offset: 0 }} lg={{ span: 4, offset: 0 }}>Col Subject</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    							</Row>
+                    		</Col>
+    						<Col lg={{ span: 22, offset: 1 }} xl={{ span: 11, offset: 1 }}>
+    							<Row className="row-header">
+    								<Col xs={{ span: 0, offset: 4 }} xl={{ span: 5, offset: 4 }}>Col Header</Col>
+    								<Col xs={{ span: 0, offset: 0 }} xl={{ span: 5, offset: 0 }}>Col Header</Col>
+    								<Col xs={{ span: 0, offset: 0 }} xl={{ span: 5, offset: 0 }}>Col Header</Col>
+    								<Col xs={{ span: 0, offset: 0 }} xl={{ span: 5, offset: 0 }}>Col Header</Col>
+    							</Row>
+    							<Row className="row-data">
+    								<Col xs={{ span: 4, offset: 0 }} lg={{ span: 4, offset: 0 }} className="col-subject">Col Subject</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    							</Row>
+    							<Row className="row-data">
+    								<Col xs={{ span: 4, offset: 0 }} lg={{ span: 4, offset: 0 }}>Col Subject</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    								<Col xs={{ span: 5, offset: 0 }} lg={{ span: 5, offset: 0 }}>Col Data</Col>
+    							</Row>
+    						</Col>
+                    	</Row>
                     </Panel>
                 </Collapse>
                 <Tabs
