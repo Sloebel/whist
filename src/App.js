@@ -11,8 +11,12 @@ import League from './league/League.js';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { inlineHeader: false };
+    this.state = { 
+      inlineHeader: false,
+      isMobile: window.innerWidth < 576 
+    };
     this.toggleHeaderInline = this.toggleHeaderInline.bind(this);
+    this.handleWindowSizeChange = this.handleWindowSizeChange.bind(this);
   }
 
   toggleHeaderInline(inline = true) {
@@ -20,6 +24,10 @@ class App extends Component {
       inlineHeader: inline
     });
   }
+ 
+  handleWindowSizeChange() {
+    this.setState({ isMobile: window.innerWidth < 576  });
+  };
 
   componentWillMount() {
     const { pathname } = this.props.location;
@@ -29,14 +37,17 @@ class App extends Component {
       const { pathname } = location;
       this.toggleHeaderInline(pathname !== '/');
     });
+
+    window.addEventListener('resize', this.handleWindowSizeChange);
   }
 
   componentWillUnmount() {
     this.unlisten();
+    window.removeEventListener('resize', this.handleWindowSizeChange);
   }
 
   render() {
-    const { inlineHeader } = this.state;
+    const { inlineHeader, isMobile } = this.state;
     return (
       <div className="App">
         <header id="app-header" className={`${inlineHeader ? 'inline' : ''}`}>
@@ -44,7 +55,7 @@ class App extends Component {
           <h1 className="App-title">Sub Whist</h1>
         </header>
         <Route exact path="/" component={Main} />
-        <Route path="/league/:id" component={League} />
+        <Route path="/league/:id" render={(props) => <League {...props} isMobile={isMobile}/>}/>
       </div>
     );
   }
