@@ -7,7 +7,7 @@
   background: limegreen;
 }
 
-ul.App-menu{
+ul.app-menu{
   list-style:none;
   display: inline-block; 
   padding: 0px;
@@ -15,7 +15,7 @@ ul.App-menu{
   width: 250px;
 }
 
-ul.App-menu li{
+ul.app-menu li{
   display: block;
   margin-top: 20px;
   /* padding: 10px 20px;
@@ -30,11 +30,15 @@ ul.App-menu li{
   color: #222;
 } */
 
-.App {
-  text-align: center;
+.app {
+  & header,
+  & .app-main,
+  & .league-stats {
+    text-align: center;
+  }
 }
 
-.App-logo {
+.app-logo {
   /* animation: App-logo-spin infinite 20s linear; */
   height: 150px;
   padding-bottom: 30px;
@@ -42,7 +46,7 @@ ul.App-menu li{
   transition: all 0.5s;
 }
 
-.inline .App-logo {
+.inline .app-logo {
   transform: translate(0px);
   padding-bottom: 0px;
   height: 90px;
@@ -55,7 +59,7 @@ ul.App-menu li{
   
 }
 
-.App-title {
+.app-title {
   /* font-size: 1.5em; */
   color: white;
   display: inline-block;
@@ -65,11 +69,11 @@ ul.App-menu li{
   transition: all 0.5s;
 }
 
-.inline .App-title {
+.inline .app-title {
   transform: translate(0px);
 }
 
-.App-intro {
+.app-intro {
   font-size: large;
 }
 

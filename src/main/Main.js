@@ -5,7 +5,7 @@ import Dialog from './../dialogs/Dialog';
 
 function Menu(props) {
     return (
-        <ul className="App-menu">
+        <ul className="app-menu">
             {props.items.map(function (item, index) {
                 const { onClick, text, dialog, dialogProps, disabled } = item;
                 return <li key={index}>
@@ -74,7 +74,7 @@ class Main extends Component {
     }
 
     render() {
-        return (<div className="App-main">
+        return (<div className="app-main">
             <Menu items={[
                 {
                     text: 'Resume League',

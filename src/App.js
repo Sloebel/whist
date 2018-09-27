@@ -11,9 +11,9 @@ import League from './league/League.js';
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
+    this.state = {
       inlineHeader: false,
-      isMobile: window.innerWidth < 576 
+      isMobile: window.innerWidth < 576
     };
     this.toggleHeaderInline = this.toggleHeaderInline.bind(this);
     this.handleWindowSizeChange = this.handleWindowSizeChange.bind(this);
@@ -24,9 +24,9 @@ class App extends Component {
       inlineHeader: inline
     });
   }
- 
+
   handleWindowSizeChange() {
-    this.setState({ isMobile: window.innerWidth < 576  });
+    this.setState({ isMobile: window.innerWidth < 576 });
   };
 
   componentWillMount() {
@@ -49,13 +49,13 @@ class App extends Component {
   render() {
     const { inlineHeader, isMobile } = this.state;
     return (
-      <div className="App">
+      <div className="app">
         <header id="app-header" className={`${inlineHeader ? 'inline' : ''}`}>
-          <img src={cards} className="App-logo" alt="logo" />
-          <h1 className="App-title">Sub Whist</h1>
+          <img src={cards} className="app-logo" alt="logo" />
+          <h1 className="app-title">Sub Whist</h1>
         </header>
         <Route exact path="/" component={Main} />
-        <Route path="/league/:id" render={(props) => <League {...props} isMobile={isMobile}/>}/>
+        <Route path="/league/:id" render={(props) => <League {...props} isMobile={isMobile} />} />
       </div>
     );
   }
