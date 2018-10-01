@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import fire from './../fire.js';
 import { Collapse, Tabs, Button, Carousel, Row, Col } from 'antd';
 import './League.css';
+import GameTab from './../game/GameTab';
 
 const Panel = Collapse.Panel;
 
-const TabPane = Tabs.TabPane;
+// const TabPane = Tabs.TabPane;
 
 class League extends Component {
     constructor(props) {
@@ -141,7 +142,7 @@ class League extends Component {
                     onChange={this.onTabChange}
                     tabBarExtraContent={<Button onClick={this.addGame}>New Game</Button>}
                 >
-                    {games.map((game) => <TabPane tab={game.title} key={game.key}>{game.content}</TabPane>)}
+                    {games.map((game) => <GameTab tab={game.title} key={game.key}>{game.content}</GameTab>)}
                 </Tabs>
             </div>);
     }
