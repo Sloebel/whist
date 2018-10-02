@@ -1,0 +1,19 @@
+.game-table {
+    .ant-table-small {
+        background: #fff;
+        & > .ant-table-content > .ant-table-body > table {
+            padding: 0px;
+        }
+    }
+    .ant-table-middle > .ant-table-content > .ant-table-scroll > .ant-table-header {
+        & tr:last-child {
+            th {
+                padding: 6px 16px;
+            }
+        }
+    }
+
+    th, td {
+        text-align: center !important;
+    }
+}
