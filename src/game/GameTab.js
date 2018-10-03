@@ -15,7 +15,7 @@ class GameTab extends TabPane {
 		for (let i = 0; i < 13; i++) {
 			dataSource.push({
 				round: i + 1,
-				bid1: '',
+				bid1: '0',
 				won1: null,
 				bid2: null,
 				won2: null,
@@ -130,7 +130,6 @@ class GameTab extends TabPane {
 		//     }),
 		//   };
 		// });
-
 
 
 		const components = {

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Form, Input } from 'antd';
+import { Form, Select } from 'antd';
 
 const FormItem = Form.Item;
+const Option = Select.Option;
 const EditableContext = React.createContext();
 
 const EditableRow = ({ form, index, ...props }) => (
@@ -40,20 +41,24 @@ class EditableCell extends Component {
 
   handleClickOutside = (e) => {
     const { editing } = this.state;
-    if (editing && this.cell !== e.target && !this.cell.contains(e.target)) {
-      this.save();
+    if (editing && this.cell !== e.target && !this.cell.contains(e.target) && e.target.tagName !== "LI") {
+      setTimeout(this.toggleEdit, 400);
     }
   }
 
   save = () => {
     const { record, handleSave } = this.props;
-    this.form.validateFields((error, values) => {
-      // if (error) {
-      //   return;
-      // }
-      this.toggleEdit();
-      handleSave({ ...record, ...values });
-    });
+
+    setTimeout(() => {
+      this.form.validateFields((error, values) => {
+        if (error) {
+          return;
+        }
+        this.toggleEdit();
+        handleSave({ ...record, ...values });
+      });
+    },400)
+    
   }
 
   render() {
@@ -83,16 +88,22 @@ class EditableCell extends Component {
                       // }],
                       initialValue: record[dataIndex],
                     })(
-                      <Input
+                      <Select
                         ref={node => (this.input = node)}
-                        onPressEnter={this.save}
-                      />
+                        // onPressEnter={this.save}
+                        onSelect={this.save}
+                        defaultOpen={true}
+                      >
+                        <Option value="0">0</Option>
+                        <Option value="1">1</Option>
+
+                      </Select>
                     )}
                   </FormItem>
                 ) : (
                   <div
                     className="editable-cell-value-wrap"
-                    style={{ paddingRight: 24 }}
+                    // style={{ paddingRight: 24 }}
                     onClick={this.toggleEdit}
                   >
                     {restProps.children}
