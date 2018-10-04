@@ -10,11 +10,13 @@ class GameTab extends TabPane {
 	constructor(props) {
 		super(props);
 
-		const dataSource = []
+		const rounds = []
 
 		for (let i = 0; i < 13; i++) {
-			dataSource.push({
+
+			rounds.push({
 				round: i + 1,
+				score: null,
 				bid1: '0',
 				won1: null,
 				bid2: null,
@@ -24,6 +26,14 @@ class GameTab extends TabPane {
 				bid4: null,
 				won4: null,
 			});
+		}
+
+		this.state = {
+			rounds,
+			totalScore1: 0,
+			totalScore2: 0,
+			totalScore3: 0,
+			totalScore4: 0
 		}
 
 		this.columns = [{
@@ -37,20 +47,13 @@ class GameTab extends TabPane {
 			}]
 		}, {
 			title: 'player 1',
-			editable: true,
+			player: 1,
 			children: [{
-				title: 'score',
+				title: '',
 				children: [{
 					title: 'Bid',
 					dataIndex: 'bid1',
 					width: 100,
-					onCell: record => ({
-						record,
-						editable: true,
-						dataIndex: 'bid1',
-						title: 'Bid',
-						handleSave: this.handleSave,
-					}),
 				}, {
 					title: 'Won',
 					dataIndex: 'won1',
@@ -59,6 +62,7 @@ class GameTab extends TabPane {
 			}],
 		}, {
 			title: 'player 2',
+			player: 2,
 			children: [{
 				title: 'score',
 				children: [{
@@ -73,6 +77,7 @@ class GameTab extends TabPane {
 			}],
 		}, {
 			title: 'player 3',
+			player: 3,
 			children: [{
 				title: 'score',
 				children: [{
@@ -87,6 +92,7 @@ class GameTab extends TabPane {
 			}],
 		}, {
 			title: 'player 4',
+			player: 4,
 			children: [{
 				title: 'score',
 				children: [{
@@ -100,37 +106,88 @@ class GameTab extends TabPane {
 				}]
 			}],
 		}];
-		this.state = {
-			dataSource
-		}
 	}
 
-	handleSave = (row) => {
-		const newData = [...this.state.dataSource];
+	handleSave = (row, player) => {
+		const newData = [...this.state.rounds];
+
+		let totalScore;
 		const index = newData.findIndex(item => row.round === item.round);
 
 		const item = newData[index];
+
+		// calculate score
+		const bid = row[`bid${player}`];
+		const won = row[`won${player}`];
+
+		if (won && bid) {
+			if (won === bid) {
+				if ((won * 1) === 0) {
+					row.score = 50;
+				} else {
+					row.score = (Math.pow(won, 2) + 10);
+				}
+			} else {
+				const diff = Math.abs(won - bid);
+
+				if ((bid * 1) === 0) {
+					row.score = -50 + (diff - 1) * 10;
+				} else {
+					row.score = diff * -10;
+				}
+			}
+
+			newData.forEach(function (round, i) {
+				totalScore += round.score;
+			});
+		}
+
 		newData.splice(index, 1, {
 			...item,
 			...row,
 		});
-		this.setState({ dataSource: newData });
-	}
-	render() {
-		const { dataSource } = this.state;
-		//    const columns = this.columns.map((col) => {      
-		//   return {
-		//     ...col,
-		//     onCell: record => ({
-		//       record,
-		//       editable: col.editable,
-		//       dataIndex: col.dataIndex,
-		//       title: col.title,
-		//       handleSave: this.handleSave,
-		//     }),
-		//   };
-		// });
 
+		const stateToUpdate = {
+			rounds: newData
+		};
+
+		stateToUpdate[`totalScore${player}`] = totalScore;
+
+
+		this.setState(stateToUpdate);
+	}
+
+	render() {
+		const {
+			rounds
+		} = this.state;
+
+		const columns = this.columns.map((col) => {
+			if (!col.player) {
+				return col;
+			}
+			return {
+				...col,
+				children: col.children.map((child) => {
+					return {
+						...child,
+						title: this.state[`totalScore${col.player}`],
+						children: child.children.map((subChild) => {
+							return {
+								...subChild,
+								onCell: record => ({
+									record,
+									editable: true,
+									dataIndex: subChild.dataIndex,
+									player: col.player,
+									handleSave: this.handleSave,
+								}),
+							}
+						})
+					}
+				})
+			};
+		});
 
 		const components = {
 			body: {
@@ -143,9 +200,9 @@ class GameTab extends TabPane {
 			<Table
 				className='game-table'
 				components={components}
-				columns={this.columns}
+				columns={columns}
 				rowKey='round'
-				dataSource={dataSource}
+				dataSource={rounds}
 				size='small'
 				bordered
 				pagination={false}

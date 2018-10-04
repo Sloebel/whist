@@ -46,7 +46,7 @@ class EditableCell extends Component {
     }
   }
 
-  save = () => {
+  save = (player) => {
     const { record, handleSave } = this.props;
 
     setTimeout(() => {
@@ -55,10 +55,10 @@ class EditableCell extends Component {
           return;
         }
         this.toggleEdit();
-        handleSave({ ...record, ...values });
+        handleSave({ ...record, ...values }, player);
       });
-    },400)
-    
+    }, 400)
+
   }
 
   render() {
@@ -66,7 +66,7 @@ class EditableCell extends Component {
     const {
       editable,
       dataIndex,
-      title,
+      player,
       record,
       index,
       handleSave,
@@ -91,24 +91,26 @@ class EditableCell extends Component {
                       <Select
                         ref={node => (this.input = node)}
                         // onPressEnter={this.save}
-                        onSelect={this.save}
+                        onSelect={() => this.save(player)}
                         defaultOpen={true}
                       >
+                        <Option value=""></Option>
                         <Option value="0">0</Option>
                         <Option value="1">1</Option>
+                        <Option value="2">2</Option>
 
                       </Select>
                     )}
                   </FormItem>
                 ) : (
-                  <div
-                    className="editable-cell-value-wrap"
-                    // style={{ paddingRight: 24 }}
-                    onClick={this.toggleEdit}
-                  >
-                    {restProps.children}
-                  </div>
-                )
+                    <div
+                      className="editable-cell-value-wrap"
+                      // style={{ paddingRight: 24 }}
+                      onClick={this.toggleEdit}
+                    >
+                      {restProps.children}
+                    </div>
+                  )
               );
             }}
           </EditableContext.Consumer>
