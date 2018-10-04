@@ -13,11 +13,10 @@ class GameTab extends TabPane {
 		const rounds = []
 
 		for (let i = 0; i < 13; i++) {
-
 			rounds.push({
 				round: i + 1,
 				score: null,
-				bid1: '0',
+				bid1: null,
 				won1: null,
 				bid2: null,
 				won2: null,
@@ -49,73 +48,67 @@ class GameTab extends TabPane {
 			title: 'player 1',
 			player: 1,
 			children: [{
-				title: '',
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid1',
-					width: 100,
+					dataIndex: 'bid1',					
 				}, {
 					title: 'Won',
-					dataIndex: 'won1',
-					width: 100,
+					dataIndex: 'won1',					
 				}]
 			}],
 		}, {
 			title: 'player 2',
 			player: 2,
 			children: [{
-				title: 'score',
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid2',
-					width: 100,
+					dataIndex: 'bid2',					
 				}, {
 					title: 'Won',
-					dataIndex: 'won2',
-					width: 100,
+					dataIndex: 'won2',					
 				}]
 			}],
 		}, {
 			title: 'player 3',
 			player: 3,
 			children: [{
-				title: 'score',
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid3',
-					width: 100,
+					dataIndex: 'bid3',					
 				}, {
 					title: 'Won',
-					dataIndex: 'won3',
-					width: 100,
+					dataIndex: 'won3',					
 				}]
 			}],
 		}, {
 			title: 'player 4',
 			player: 4,
 			children: [{
-				title: 'score',
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid4',
-					width: 100,
+					dataIndex: 'bid4',					
 				}, {
 					title: 'Won',
-					dataIndex: 'won4',
-					width: 100,
+					dataIndex: 'won4',					
 				}]
 			}],
 		}];
 	}
 
-	handleSave = (row, player) => {
+	handleSave = (row, player) => {		
 		const newData = [...this.state.rounds];
 
-		let totalScore;
+		let totalScore = 0;
 		const index = newData.findIndex(item => row.round === item.round);
 
 		const item = newData[index];
 
+		newData.splice(index, 1, {
+			...item,
+			...row,
+		});
+
+		row = newData[index];
 		// calculate score
 		const bid = row[`bid${player}`];
 		const won = row[`won${player}`];
@@ -135,17 +128,15 @@ class GameTab extends TabPane {
 				} else {
 					row.score = diff * -10;
 				}
-			}
-
-			newData.forEach(function (round, i) {
-				totalScore += round.score;
-			});
+			}	
+			
+		} else {
+			row.score = 0;
 		}
 
-		newData.splice(index, 1, {
-			...item,
-			...row,
-		});
+		newData.forEach(function (round, i) {
+			totalScore += round.score;
+		});			
 
 		const stateToUpdate = {
 			rounds: newData
@@ -175,6 +166,7 @@ class GameTab extends TabPane {
 						children: child.children.map((subChild) => {
 							return {
 								...subChild,
+								width: 100,
 								onCell: record => ({
 									record,
 									editable: true,

@@ -42,7 +42,7 @@ class EditableCell extends Component {
   handleClickOutside = (e) => {
     const { editing } = this.state;
     if (editing && this.cell !== e.target && !this.cell.contains(e.target) && e.target.tagName !== "LI") {
-      setTimeout(this.toggleEdit, 400);
+      setTimeout(this.toggleEdit, 300);
     }
   }
 
@@ -57,7 +57,7 @@ class EditableCell extends Component {
         this.toggleEdit();
         handleSave({ ...record, ...values }, player);
       });
-    }, 400)
+    }, 300)
 
   }
 
@@ -93,12 +93,13 @@ class EditableCell extends Component {
                         // onPressEnter={this.save}
                         onSelect={() => this.save(player)}
                         defaultOpen={true}
+                        showArrow={false}
+                        style={{width: 60}}
                       >
-                        <Option value=""></Option>
-                        <Option value="0">0</Option>
-                        <Option value="1">1</Option>
-                        <Option value="2">2</Option>
-
+                        {[...Array(15)].map((_, i) => {
+                          const value = (i - 1) < 0 ? '' : i - 1;
+                          return <Option key={i} value={`${value}`}>{value}</Option>;
+                        })}
                       </Select>
                     )}
                   </FormItem>
