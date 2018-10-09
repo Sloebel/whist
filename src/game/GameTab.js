@@ -50,10 +50,10 @@ class GameTab extends TabPane {
 			children: [{
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid1',					
+					dataIndex: 'bid1',
 				}, {
 					title: 'Won',
-					dataIndex: 'won1',					
+					dataIndex: 'won1',
 				}]
 			}],
 		}, {
@@ -62,10 +62,10 @@ class GameTab extends TabPane {
 			children: [{
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid2',					
+					dataIndex: 'bid2',
 				}, {
 					title: 'Won',
-					dataIndex: 'won2',					
+					dataIndex: 'won2',
 				}]
 			}],
 		}, {
@@ -74,10 +74,10 @@ class GameTab extends TabPane {
 			children: [{
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid3',					
+					dataIndex: 'bid3',
 				}, {
 					title: 'Won',
-					dataIndex: 'won3',					
+					dataIndex: 'won3',
 				}]
 			}],
 		}, {
@@ -86,16 +86,32 @@ class GameTab extends TabPane {
 			children: [{
 				children: [{
 					title: 'Bid',
-					dataIndex: 'bid4',					
+					dataIndex: 'bid4',
 				}, {
 					title: 'Won',
-					dataIndex: 'won4',					
+					dataIndex: 'won4',
 				}]
 			}],
+		}, {
+			children: [{
+				children: [{
+					title: 'Trump',
+					dataIndex: 'trump',
+					width: 75,
+				}]
+			}]
+		}, {
+			children: [{
+				children: [{
+					title: 'O/U',
+					dataIndex: 'segement',
+					width: 55,
+				}]
+			}]
 		}];
 	}
 
-	handleSave = (row, player) => {		
+	handleSave = (row, player) => {
 		const newData = [...this.state.rounds];
 
 		let totalScore = 0;
@@ -128,15 +144,15 @@ class GameTab extends TabPane {
 				} else {
 					row.score = diff * -10;
 				}
-			}	
-			
+			}
+
 		} else {
 			row.score = 0;
 		}
 
 		newData.forEach(function (round, i) {
 			totalScore += round.score;
-		});			
+		});
 
 		const stateToUpdate = {
 			rounds: newData

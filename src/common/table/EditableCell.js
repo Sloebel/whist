@@ -94,7 +94,7 @@ class EditableCell extends Component {
                         onSelect={() => this.save(player)}
                         defaultOpen={true}
                         showArrow={false}
-                        style={{width: 60}}
+                        style={{ width: 60 }}
                       >
                         {[...Array(15)].map((_, i) => {
                           const value = (i - 1) < 0 ? '' : i - 1;
