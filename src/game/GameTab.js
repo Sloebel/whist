@@ -24,6 +24,7 @@ class GameTab extends TabPane {
 				won3: null,
 				bid4: null,
 				won4: null,
+				trump: null
 			});
 		}
 
@@ -93,6 +94,7 @@ class GameTab extends TabPane {
 				}]
 			}],
 		}, {
+			editable: true,
 			children: [{
 				children: [{
 					title: 'Trump',
@@ -112,9 +114,9 @@ class GameTab extends TabPane {
 	}
 
 	handleSave = (row, player) => {
+		const stateToUpdate = {};
 		const newData = [...this.state.rounds];
-
-		let totalScore = 0;
+		
 		const index = newData.findIndex(item => row.round === item.round);
 
 		const item = newData[index];
@@ -125,40 +127,43 @@ class GameTab extends TabPane {
 		});
 
 		row = newData[index];
-		// calculate score
-		const bid = row[`bid${player}`];
-		const won = row[`won${player}`];
 
-		if (won && bid) {
-			if (won === bid) {
-				if ((won * 1) === 0) {
-					row.score = 50;
+		if (player) {
+			let totalScore = 0;
+			// calculate score
+			const bid = row[`bid${player}`];
+			const won = row[`won${player}`];
+
+			if (won && bid) {
+				if (won === bid) {
+					if ((won * 1) === 0) {
+						row.score = 50;
+					} else {
+						row.score = (Math.pow(won, 2) + 10);
+					}
 				} else {
-					row.score = (Math.pow(won, 2) + 10);
+					const diff = Math.abs(won - bid);
+
+					if ((bid * 1) === 0) {
+						row.score = -50 + (diff - 1) * 10;
+					} else {
+						row.score = diff * -10;
+					}
 				}
+
 			} else {
-				const diff = Math.abs(won - bid);
-
-				if ((bid * 1) === 0) {
-					row.score = -50 + (diff - 1) * 10;
-				} else {
-					row.score = diff * -10;
-				}
+				row.score = 0;
 			}
 
-		} else {
-			row.score = 0;
+			newData.forEach(function (round, i) {
+				totalScore += round.score;
+			});
+
+			stateToUpdate[`totalScore${player}`] = totalScore;
 		}
+		
 
-		newData.forEach(function (round, i) {
-			totalScore += round.score;
-		});
-
-		const stateToUpdate = {
-			rounds: newData
-		};
-
-		stateToUpdate[`totalScore${player}`] = totalScore;
+		stateToUpdate.rounds = newData;
 
 
 		this.setState(stateToUpdate);
@@ -170,7 +175,7 @@ class GameTab extends TabPane {
 		} = this.state;
 
 		const columns = this.columns.map((col) => {
-			if (!col.player) {
+			if (!col.editable && !col.player) {
 				return col;
 			}
 			return {
@@ -186,6 +191,7 @@ class GameTab extends TabPane {
 								onCell: record => ({
 									record,
 									editable: true,
+									editorType: subChild.dataIndex === 'trump' ? 'trump' : 'bidWin',
 									dataIndex: subChild.dataIndex,
 									player: col.player,
 									handleSave: this.handleSave,

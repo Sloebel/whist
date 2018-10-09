@@ -29,6 +29,19 @@ class EditableCell extends Component {
       document.removeEventListener('click', this.handleClickOutside, true);
     }
   }
+  
+  getOptionList(editorType) {
+    if (editorType === 'bidWin') {
+      return [...Array(15)].map((_, i) => {
+        const value = (i - 1) < 0 ? '' : i - 1;
+        return <Option key={i} value={`${value}`}>{value}</Option>;
+      });
+    } else if (editorType === 'trump') {
+      return ['Spade', 'Hart', 'Diamond', 'Club', 'NT'].map((value, i) => {
+        return <Option key={i} value={`${value}`}>{value}</Option>;
+      });
+    }
+  }
 
   toggleEdit = () => {
     const editing = !this.state.editing;
@@ -65,6 +78,7 @@ class EditableCell extends Component {
     const { editing } = this.state;
     const {
       editable,
+      editorType,
       dataIndex,
       player,
       record,
@@ -72,6 +86,7 @@ class EditableCell extends Component {
       handleSave,
       ...restProps
     } = this.props;
+
     return (
       <td ref={node => (this.cell = node)} {...restProps}>
         {editable ? (
@@ -96,10 +111,7 @@ class EditableCell extends Component {
                         showArrow={false}
                         style={{ width: 60 }}
                       >
-                        {[...Array(15)].map((_, i) => {
-                          const value = (i - 1) < 0 ? '' : i - 1;
-                          return <Option key={i} value={`${value}`}>{value}</Option>;
-                        })}
+                        {this.getOptionList(editorType)}
                       </Select>
                     )}
                   </FormItem>
