@@ -15,16 +15,22 @@ class GameTab extends TabPane {
 		for (let i = 0; i < 13; i++) {
 			rounds.push({
 				round: i + 1,
-				score: null,
+				segement: null,
+				trump: null,
+				check: true,
+				factor: 1,
+				score1: null,
 				bid1: null,
 				won1: null,
+				score2: null,
 				bid2: null,
 				won2: null,
+				score3: null,
 				bid3: null,
 				won3: null,
+				score4: null,
 				bid4: null,
-				won4: null,
-				trump: null
+				won4: null
 			});
 		}
 
@@ -108,6 +114,14 @@ class GameTab extends TabPane {
 					title: 'O/U',
 					dataIndex: 'segement',
 					width: 55,
+					render: (text, record) => {
+				    	return {
+				    		props: {
+					        	className: text === 0 ? 'failed-check' : '', 
+					      	},
+					      	children: text,
+					    };
+				  	},
 				}]
 			}]
 		}];
@@ -126,10 +140,11 @@ class GameTab extends TabPane {
 			...row,
 		});
 
+		//reference to the new Data relevent row to update with score and segment
 		row = newData[index];
 
 		if (player) {
-			let totalScore = 0;
+			let rowScore;
 			// calculate score
 			const bid = row[`bid${player}`];
 			const won = row[`won${player}`];
@@ -137,31 +152,57 @@ class GameTab extends TabPane {
 			if (won && bid) {
 				if (won === bid) {
 					if ((won * 1) === 0) {
-						row.score = 50;
+						rowScore = 50;
 					} else {
-						row.score = (Math.pow(won, 2) + 10);
+						rowScore = (Math.pow(won, 2) + 10);
 					}
 				} else {
 					const diff = Math.abs(won - bid);
 
 					if ((bid * 1) === 0) {
-						row.score = -50 + (diff - 1) * 10;
+						rowScore = -50 + (diff - 1) * 10;
 					} else {
-						row.score = diff * -10;
+						rowScore = diff * -10;
 					}
 				}
 
 			} else {
-				row.score = 0;
+				rowScore = 0;
 			}
 
-			newData.forEach(function (round, i) {
-				totalScore += round.score;
+			row[`score${player}`] = rowScore;
+
+			let totalScore = 0;
+			newData.forEach((round, i) => {
+				totalScore += round[`score${player}`];
+
+				//to do - calculate if round fell - change next round factor 
 			});
 
 			stateToUpdate[`totalScore${player}`] = totalScore;
-		}
-		
+
+			//update O/U
+			let currentTotalBid = null;
+			let currentTotalWon = null;
+			let allWonInput = true;
+
+			for (const [key, value] of Object.entries(row)) {
+			    if (key.indexOf('bid') > -1 && value !== null && value !== '') {
+			    	currentTotalBid += (value * 1); 
+			    }
+
+			    if (key.indexOf('won') > -1) {
+				    if (value !== null && value !== '') {
+				    	currentTotalWon += (value * 1);
+				    } else {
+				    	allWonInput = false;
+				    }
+				}
+			}
+
+			row.segement = currentTotalBid !== null ? currentTotalBid - 13 : null; 
+			row.check = allWonInput ? currentTotalWon === 13 : true;
+		}		
 
 		stateToUpdate.rounds = newData;
 
@@ -221,6 +262,7 @@ class GameTab extends TabPane {
 				bordered
 				pagination={false}
 				scroll={{ y: 520 }}
+				rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
 			/>
 		);
 	}

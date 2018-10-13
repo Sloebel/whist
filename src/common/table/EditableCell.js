@@ -109,6 +109,7 @@ class EditableCell extends Component {
                         onSelect={() => this.save(player)}
                         defaultOpen={true}
                         showArrow={false}
+                        size={'small'}
                         style={{ width: 60 }}
                       >
                         {this.getOptionList(editorType)}

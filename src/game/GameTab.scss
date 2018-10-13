@@ -19,7 +19,26 @@
 
     .editable-cell-value-wrap {
         // padding: 5px 12px;
-        height: 21px;
+        height: 24px;
         cursor: pointer;
     }
+    
+    tr {
+        &.failed-check { 
+            outline: 1px solid red;
+            outline-offset: -1px;                    
+        }
+        transition: outline-color .7s ease-out;
+    }
+
+    td {
+        .ant-form-item-control {
+            line-height: inherit;;
+        }
+
+        &.failed-check {
+            background: #ffc8c8 !important;
+        }
+    }
+    
 }
