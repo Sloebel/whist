@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 import fire from './../fire.js';
-import { Collapse, Tabs, Button, Carousel, Row, Col } from 'antd';
+import { Collapse, Tabs, Button, Row, Col } from 'antd';
 import './League.css';
 import GameTab from './../game/GameTab';
 
 const Panel = Collapse.Panel;
-
-// const TabPane = Tabs.TabPane;
 
 class League extends Component {
     constructor(props) {

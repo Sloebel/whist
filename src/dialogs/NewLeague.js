@@ -38,7 +38,6 @@ const NewLeague = Form.create()(
         fetch() {
             this.playersList.on('value', snapshot => {
                 /* Update React state when a player is added at Firebase Database */
-                console.log(snapshot.val());
                 if (snapshot.val()) {
                     this.setState({ players: Object.values(snapshot.val()), loading: false });
                 } else {

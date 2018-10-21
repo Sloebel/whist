@@ -2,19 +2,19 @@ import React, { Component } from 'react';
 import { withRouter, Route } from "react-router-dom";
 import cards from './cards.png';
 import './App.css';
-// import fire from './fire.js';
 import 'antd/dist/antd.css';
-// import SelectionTool from './players/SelectionTool';
 import Main from './main/Main';
 import League from './league/League.js';
 
 class App extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
       inlineHeader: false,
       isMobile: window.innerWidth < 576
     };
+    
     this.toggleHeaderInline = this.toggleHeaderInline.bind(this);
     this.handleWindowSizeChange = this.handleWindowSizeChange.bind(this);
   }
@@ -33,7 +33,7 @@ class App extends Component {
     const { pathname } = this.props.location;
     this.toggleHeaderInline(pathname !== '/');
 
-    this.unlisten = this.props.history.listen((location, action) => {
+    this.unlistenHistory = this.props.history.listen((location, action) => {
       const { pathname } = location;
       this.toggleHeaderInline(pathname !== '/');
     });
@@ -42,12 +42,13 @@ class App extends Component {
   }
 
   componentWillUnmount() {
-    this.unlisten();
+    this.unlistenHistory();
     window.removeEventListener('resize', this.handleWindowSizeChange);
   }
 
   render() {
     const { inlineHeader, isMobile } = this.state;
+
     return (
       <div className="app">
         <header id="app-header" className={`${inlineHeader ? 'inline' : ''}`}>
