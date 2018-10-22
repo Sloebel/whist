@@ -1,0 +1,26 @@
+.clickable-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+
+    li {
+        padding: 5px;
+        cursor: pointer;
+        transition: all .5s ease-out;
+
+        &:not(:first-child) {
+            border-top: 1px solid #e8e8e8;
+        }
+
+        &:hover {
+            color: #fff;
+            background: #1890ff;  
+            padding-left: 9px;       
+        }
+        &:active {
+            background: #096dd9;        
+        }
+    } 
+}

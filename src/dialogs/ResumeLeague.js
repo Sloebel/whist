@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from "react-router-dom";
 import { Modal } from 'antd';
-// import fire from './../fire.js';
+import './ResumeLeague.css';
 
 
 class ResumeLeague extends Component {
@@ -33,7 +33,7 @@ class ResumeLeague extends Component {
                 <p>
                     List of open leagues
                 </p>
-                <ul className="">
+                <ul className="clickable-list">
                     {
                         activeLeagues.map((item, index) => {
                             const { leagueID, title } = item;
