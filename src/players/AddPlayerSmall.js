@@ -18,14 +18,15 @@ class AddPlayerForm extends Component {
 
     addPlayerSubmit = (e) => {
         e.preventDefault();
-        const { form } = this.props;
+
+        const { form, callback } = this.props;
+
         form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
 
-                const { callback } = this.props;
-                // const { nickname } = values;
                 callback(values).then(response => {
+                    // when promise resolved than reset form
                     if (response) {
                         form.resetFields();
                     }
@@ -37,7 +38,7 @@ class AddPlayerForm extends Component {
 
     render() {
         const { form, loading } = this.props;
-        const { getFieldDecorator } = form;
+        const { getFieldDecorator } = form; // antd API
         return (
             <Form layout="inline" onSubmit={this.addPlayerSubmit}>
                 <FormItem>

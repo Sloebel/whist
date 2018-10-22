@@ -19,31 +19,45 @@ class App extends Component {
     this.handleWindowSizeChange = this.handleWindowSizeChange.bind(this);
   }
 
+  // set main header state by router value
+  // if in main menu page header is bigger
   toggleHeaderInline(inline = true) {
     this.setState({
       inlineHeader: inline
     });
   }
 
+  // set if view is mobile size 
   handleWindowSizeChange() {
     this.setState({ isMobile: window.innerWidth < 576 });
   };
 
+  // init window resize listener
+  listenToWinResize(callback) {
+    window.addEventListener('resize', callback);
+
+    return () => {
+      window.removeEventListener('resize', callback);
+    };
+  }
+
   componentWillMount() {
     const { pathname } = this.props.location;
+    // set initial header state
     this.toggleHeaderInline(pathname !== '/');
 
-    this.unlistenHistory = this.props.history.listen((location, action) => {
+    // listen to routing changes
+    this.unistenHistory = this.props.history.listen((location, action) => {
       const { pathname } = location;
       this.toggleHeaderInline(pathname !== '/');
     });
 
-    window.addEventListener('resize', this.handleWindowSizeChange);
+    this.unlistenWinResize = this.listenToWinResize(this.handleWindowSizeChange);
   }
 
   componentWillUnmount() {
-    this.unlistenHistory();
-    window.removeEventListener('resize', this.handleWindowSizeChange);
+    this.unistenHistory();
+    this.unlistenWinResize();
   }
 
   render() {
