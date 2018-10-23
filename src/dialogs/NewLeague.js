@@ -107,6 +107,86 @@ const NewLeague = Form.create()(
             </FormItem>);
         }
 
+        onCreateLeague() {
+            const { onCancel: onDialogClose, form } = this.props;
+            const { players } = this.state;
+            const fieldsValues = form.getFieldsValue();
+            const fieldsNames = Object.keys(fieldsValues).filter((name) => {
+                switch (name) {
+                    case 'names':
+                    case 'nicknames':
+                        if (players.length) {
+                            return false;
+                        }
+                        break;
+                    case 'players':
+                        if (!players.length) {
+                            return false;
+                        }
+                        break;
+                }
+
+                return true;
+            });
+
+            const redirect = newID => {
+                this.setState({ savingLeagueLoader: false });
+                onDialogClose().then(() => this.props.history.push('/league/' + newID));
+            };
+
+            const createLeague = (params) => new Promise((resolve) => {
+                const leaguesRef = fire.database().ref('leagues');
+
+                leaguesRef.once('value', snapshot => {
+                    const lastID = snapshot.val() && snapshot.val().lastID;
+                    const newID = lastID ? lastID + 1 : 1;
+
+                    fire.database().ref('leagues/list/_' + newID).set({ ...params, leagueID: newID, active: true })
+                        .then(() => resolve(newID));
+                    fire.database().ref('leagues/lastID').set(newID);
+                });
+            });
+
+            form.validateFields(fieldsNames, (err, values) => {
+                if (!err) {
+                    const { names, nicknames, description } = values;
+                    this.setState({ savingLeagueLoader: true });
+
+                    // if names means the form was with less then 4 players 
+                    // and players needs to be created before creating new league
+                    if (names) {
+                        //creating new players
+                        let playerID;
+                        const newPlayers = names.reduce((obj, name, i) => {
+                            playerID = i + 1;
+                            obj[`_${playerID}`] = { playerID, name, nickname: nicknames[i] };
+                            return obj;
+                        }, {});
+
+                        const playersRef = fire.database().ref('players');
+                        const { title } = values;
+
+                        playersRef.child('list').set(newPlayers)
+                            .then(createLeague({
+                                title,
+                                players: nicknames,
+                                description: description || ''
+                            })
+                                .then((newID) => redirect(newID))
+                            );
+
+                        playersRef.child('lastID').set(playerID);
+                    } else {
+                        createLeague({
+                            ...values,
+                            description: description || ''
+                        })
+                            .then((newID) => redirect(newID));
+                    }
+                }
+            });
+        }
+
         focusPlayersSelect = function () {
             this.playersSelect.focus();
         }
@@ -120,85 +200,7 @@ const NewLeague = Form.create()(
         render() {
             const { onCancel: onDialogClose, form } = this.props;
             const { showDialog, players, loading, newPlayerLoader, savingLeagueLoader } = this.state;
-            const { getFieldDecorator } = form; // antd API
-
-            const onCreateLeague = () => {
-                const fieldsValues = form.getFieldsValue();
-                const fieldsNames = Object.keys(fieldsValues).filter((name) => {
-                    switch (name) {
-                        case 'names':
-                        case 'nicknames':
-                            if (players.length) {
-                                return false;
-                            }
-                            break;
-                        case 'players':
-                            if (!players.length) {
-                                return false;
-                            }
-                            break;
-                    }
-
-                    return true;
-                });
-
-                const redirect = newID => {
-                    this.setState({ savingLeagueLoader: false });
-                    onDialogClose().then(() => this.props.history.push('/league/' + newID));
-                };
-
-                const createLeague = (params) => new Promise((resolve) => {
-                    const leaguesRef = fire.database().ref('leagues');
-
-                    leaguesRef.once('value', snapshot => {
-                        const lastID = snapshot.val() && snapshot.val().lastID;
-                        const newID = lastID ? lastID + 1 : 1;
-
-                        fire.database().ref('leagues/list/_' + newID).set({ ...params, leagueID: newID, active: true })
-                            .then(() => resolve(newID));
-                        fire.database().ref('leagues/lastID').set(newID);
-                    });
-                });
-
-                form.validateFields(fieldsNames, (err, values) => {
-                    if (!err) {
-                        const { names, nicknames, description } = values;
-                        this.setState({ savingLeagueLoader: true });
-
-                        // if names means the form was with less then 4 players 
-                        // and players needs to be created before creating new league
-                        if (names) {
-                            //creating new players
-                            let playerID;
-                            const newPlayers = names.reduce((obj, name, i) => {
-                                playerID = i + 1;
-                                obj[`_${playerID}`] = { playerID, name, nickname: nicknames[i] };
-                                return obj;
-                            }, {});
-
-                            const playersRef = fire.database().ref('players');
-                            const { title } = values;
-
-                            playersRef.child('list').set(newPlayers)
-                                .then(createLeague({
-                                    title,
-                                    players: nicknames,
-                                    description: description || ''
-                                })
-                                    .then((newID) => redirect(newID))
-                                );
-
-                            playersRef.child('lastID').set(playerID);
-                        } else {
-                            createLeague({
-                                ...values,
-                                description: description || ''
-                            })
-                                .then((newID) => redirect(newID));
-                        }
-                    }
-                });
-            };
+            const { getFieldDecorator } = form; // antd API            
 
             return (
                 <Modal
@@ -207,7 +209,7 @@ const NewLeague = Form.create()(
                     destroyOnClose={true}
                     maskClosable={false}
                     confirmLoading={savingLeagueLoader}
-                    onOk={onCreateLeague}
+                    onOk={() => this.onCreateLeague()}
                     onCancel={this.closeModal.bind(this)}
                     afterClose={onDialogClose}
                     width="600px"
