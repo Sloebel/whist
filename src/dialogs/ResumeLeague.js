@@ -9,14 +9,17 @@ class ResumeLeague extends Component {
         showDialog: this.props.visible,
     }
 
-    closeModal() {
+    closeModal(leagueID) {
+        // if leagueID - first close the modal then afterClose will pass the leagueID to rout to the right location
+        this.leagueID = leagueID;
+
         this.setState({
             showDialog: false
         });
     }
 
     render() {
-        const { onCancel, activeLeagues } = this.props;
+        const { afterClose, activeLeagues } = this.props;
         const { showDialog } = this.state;
 
         return (
@@ -27,8 +30,8 @@ class ResumeLeague extends Component {
                 maskClosable={false}
                 width="600px"
                 footer={null}
-                onCancel={this.closeModal.bind(this)}
-                afterClose={onCancel}
+                onCancel={() => this.closeModal()}
+                afterClose={() => afterClose(this.leagueID)}
             >
                 <p>
                     List of open leagues
@@ -37,7 +40,7 @@ class ResumeLeague extends Component {
                     {
                         activeLeagues.map((item, index) => {
                             const { leagueID, title } = item;
-                            return <li key={index} onClick={() => this.props.history.push('/league/' + leagueID)}>
+                            return <li key={index} onClick={() => this.closeModal(leagueID)}>
                                 {title}
                             </li>;
                         })

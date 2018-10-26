@@ -108,7 +108,7 @@ const NewLeague = Form.create()(
         }
 
         onCreateLeague() {
-            const { onCancel: onDialogClose, form } = this.props;
+            const { afterClose, form } = this.props;
             const { players } = this.state;
             const fieldsValues = form.getFieldsValue();
             const fieldsNames = Object.keys(fieldsValues).filter((name) => {
@@ -128,11 +128,6 @@ const NewLeague = Form.create()(
 
                 return true;
             });
-
-            const redirect = newID => {
-                this.setState({ savingLeagueLoader: false });
-                onDialogClose().then(() => this.props.history.push('/league/' + newID));
-            };
 
             const createLeague = (params) => new Promise((resolve) => {
                 const leaguesRef = fire.database().ref('leagues');
@@ -172,7 +167,7 @@ const NewLeague = Form.create()(
                                 players: nicknames,
                                 description: description || ''
                             })
-                                .then((newID) => redirect(newID))
+                                .then((newID) => this.closeModal(newID))
                             );
 
                         playersRef.child('lastID').set(playerID);
@@ -181,7 +176,7 @@ const NewLeague = Form.create()(
                             ...values,
                             description: description || ''
                         })
-                            .then((newID) => redirect(newID));
+                            .then((newID) => this.closeModal(newID));                            
                     }
                 }
             });
@@ -191,14 +186,18 @@ const NewLeague = Form.create()(
             this.playersSelect.focus();
         }
 
-        closeModal() {
+        // in order to preserve the animation when closing 
+        // there is also an inner state although visible state initialy is from props
+        closeModal(leagueID) {
+            this.leagueID = leagueID;
+
             this.setState({
                 showDialog: false
             });
         }
 
         render() {
-            const { onCancel: onDialogClose, form } = this.props;
+            const { afterClose, form } = this.props;
             const { showDialog, players, loading, newPlayerLoader, savingLeagueLoader } = this.state;
             const { getFieldDecorator } = form; // antd API            
 
@@ -210,8 +209,8 @@ const NewLeague = Form.create()(
                     maskClosable={false}
                     confirmLoading={savingLeagueLoader}
                     onOk={() => this.onCreateLeague()}
-                    onCancel={this.closeModal.bind(this)}
-                    afterClose={onDialogClose}
+                    onCancel={() => this.closeModal()}
+                    afterClose={() => afterClose(this.leagueID)}
                     width="600px"
                     okText="Save & Play"
                 >

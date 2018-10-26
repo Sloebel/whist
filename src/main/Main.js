@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Button } from 'antd';
 import fire from './../fire.js';
 import MainMenu from './MainMenu';
 
 class Main extends Component {
+    // Dialogs visible states controling if the Dialog should be instansiated or not
+    // this outer state is for saving unnecessary access to the DB
     state = {
         activeLeagues: [],
         newLeague: false,
@@ -36,10 +37,14 @@ class Main extends Component {
         });
     }
 
-    closeResumeLeagueDialog() {
+    closeResumeLeagueDialog(leagueID) {
         this.setState({
             resumeLeague: false
         });
+
+        if (leagueID) {
+            this.props.history.push('/league/' + leagueID)
+        }
     }
 
     showNewLeagueDialog() {
@@ -48,13 +53,14 @@ class Main extends Component {
         });
     }
 
-    closeNewLeagueDialog() {
-        return new Promise((resolve, reject) => {
-            this.setState({
-                newLeague: false
-            });
-            resolve();
+    closeNewLeagueDialog(leagueID) {
+        this.setState({
+            newLeague: false
         });
+
+        if (leagueID) {
+            this.props.history.push('/league/' + leagueID)
+        }
     }
 
     render() {
@@ -67,7 +73,7 @@ class Main extends Component {
                         dialog: 'resumeLeague',
                         disabled: this.state.activeLeagues.length === 0,
                         dialogProps: {
-                            onCancel: this.closeResumeLeagueDialog.bind(this),
+                            afterClose: this.closeResumeLeagueDialog.bind(this),
                             visible: this.state.resumeLeague,
                             activeLeagues: this.state.activeLeagues
                         }
@@ -76,7 +82,7 @@ class Main extends Component {
                         onClick: this.showNewLeagueDialog.bind(this),
                         dialog: 'newLeague',
                         dialogProps: {
-                            onCancel: this.closeNewLeagueDialog.bind(this),
+                            afterClose: this.closeNewLeagueDialog.bind(this),
                             visible: this.state.newLeague
                         }
                     },
