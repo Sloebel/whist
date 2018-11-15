@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from "react-router-dom";
 import { Modal, Form, Input, Select, Spin, Collapse, Icon, Col } from 'antd';
-import fire from './../fire.js';
+import { fire } from '../firebase';
 import AddPlayerSmall from './../players/AddPlayerSmall';
 
 const FormItem = Form.Item;
@@ -176,7 +176,7 @@ const NewLeague = Form.create()(
                             ...values,
                             description: description || ''
                         })
-                            .then((newID) => this.closeModal(newID));                            
+                            .then((newID) => this.closeModal(newID));
                     }
                 }
             });

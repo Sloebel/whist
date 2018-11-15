@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import fire from './../fire.js';
+import { fire } from '../firebase';
 import MainMenu from './MainMenu';
 
 class Main extends Component {
@@ -15,7 +15,7 @@ class Main extends Component {
     activeLeagues = fire.database().ref('leagues/list').orderByChild("active").equalTo(true);
 
     fetch() {
-        this.activeLeagues.on('value', snapshot => {            
+        this.activeLeagues.on('value', snapshot => {
             if (snapshot.val()) {
                 this.setState({ activeLeagues: Object.values(snapshot.val()), loading: false });
             }
@@ -87,7 +87,11 @@ class Main extends Component {
                         }
                     },
                     { text: 'Settings' },
-                    { text: 'Scores' }
+                    { text: 'Scores' },
+                    {
+                        text: 'Sign Out',
+                        onClick: () => fire.auth().signOut()
+                    }
                 ]}
                 />
             </div>

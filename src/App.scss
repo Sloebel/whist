@@ -1,11 +1,19 @@
-#root {
+@mixin full-view {
   position: absolute;
   top: 0px;
   bottom: 0px;
   right: 0px;
   left: 0px;
+}
+
+#root {  
+  @include full-view();
   overflow: auto;
-  background: limegreen;
+  background: rgb(52, 223, 52);
+}
+
+.full-view {
+  @include full-view();
 }
 
 ul.app-menu{
@@ -36,6 +44,12 @@ ul.app-menu li{
   & .app-main,
   & .league-stats {
     text-align: center;
+  }
+
+  & .loader {
+    .ant-spin-dot i {
+      background-color: #000;
+    }
   }
 }
 
