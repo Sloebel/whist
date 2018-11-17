@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { fire } from '../firebase';
+import { fire, auth } from '../firebase';
 import MainMenu from './MainMenu';
 
 class Main extends Component {
@@ -90,7 +90,7 @@ class Main extends Component {
                     { text: 'Scores' },
                     {
                         text: 'Sign Out',
-                        onClick: () => fire.auth().signOut()
+                        onClick: auth.signOut
                     }
                 ]}
                 />

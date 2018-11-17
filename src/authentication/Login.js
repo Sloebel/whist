@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { withRouter } from "react-router-dom";
+import { withRouter, Link} from "react-router-dom";
 import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import * as routes from '../constants/routes';
 import { fire } from '../firebase';
 import './Login.css';
 
@@ -31,9 +32,14 @@ const Login = Form.create()(
                 <Form onSubmit={this.handleSubmit} className="login-form">
                     <FormItem>
                         {getFieldDecorator('email', {
-                            rules: [{ required: true, message: 'Please input your email!' }],
+                            rules: [{
+                                type: 'email', message: 'The input is not valid E-mail!',
+                            },
+                            { 
+                                required: true, message: 'Please input your email!' 
+                            }],
                         })(
-                            <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="email" />
+                            <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="email" />
                         )}
                     </FormItem>
                     <FormItem>
@@ -54,7 +60,7 @@ const Login = Form.create()(
                         <Button type="primary" htmlType="submit" className="login-form-button">
                             Log in
                         </Button>
-                        Or <a href="">register now!</a>
+                        Or <Link to={routes.SIGN_UP}>register now!</Link>                        
                     </FormItem>
                 </Form>
             );

@@ -4,10 +4,12 @@ import cards from './cards.png';
 import { Spin } from 'antd';
 import * as routes from './constants/routes';
 import { fire } from './firebase';
+import withAuthentication from './authentication/withAuthentication';
 import './App.css';
 import 'antd/dist/antd.css';
 
 import Login from './authentication/Login';
+import SignUp from './authentication/SignUp';
 import Main from './main/Main';
 import League from './league/League.js';
 
@@ -16,7 +18,7 @@ const PrivateRoute = ({
   component: Component,
   authenticated,
   ...rest
-}) => {
+}) => { 
   console.log(authenticated);
 
   return (
@@ -78,12 +80,15 @@ class App extends Component {
         this.setState({
           authenticated: true,
           isLoading: false
-        }, () => this.props.history.push("/"));
+        // }, () => this.props.history.push("/"));
+        });
+
       } else {
         this.setState({
           authenticated: false,
           isLoading: false
-        }, () => this.props.history.push("/login"));
+        // }, () => this.props.history.push("/login"));
+        });        
       }
     });
 
@@ -120,6 +125,7 @@ class App extends Component {
             <PrivateRoute exact path={routes.MAIN} component={Main} authenticated={authenticated} />
             {/* <Route exact path="/" component={Main} /> */}
             <Route exact path={routes.SIGN_IN} component={Login} />
+            <Route exact path={routes.SIGN_UP} component={SignUp} />
             <Route path={`${routes.LEAGUE}/:id`} render={(props) => <League {...props} isMobile={isMobile} />} />
           </div>
         }

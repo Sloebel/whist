@@ -1,7 +1,7 @@
-// import * as auth from './auth';
-import fire from './fire';
+import * as auth from './auth';
+import { fire } from './fire';
 
 export {
-    //   auth,
+    auth,
     fire,
 };
