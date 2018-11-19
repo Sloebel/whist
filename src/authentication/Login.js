@@ -22,8 +22,6 @@ const Login = Form.create()(
                 if (!err) {
                     this.setState({ isLoading: true });
 
-                    console.log('Received values of form: ', values);
-
                     const { history } = this.props;
                     const { email, password } = values;
 
@@ -37,6 +35,7 @@ const Login = Form.create()(
                             var errorMessage = error.message;
                             // ...
                             alert(error.message);
+                            this.setState({ isLoading: false });
                         });
                 }
             });
