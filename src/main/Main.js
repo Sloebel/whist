@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { fire, auth } from '../firebase';
+import withAuthorization from '../authentication/withAuthorization';
 import MainMenu from './MainMenu';
 
 class Main extends Component {
@@ -99,4 +100,6 @@ class Main extends Component {
     }
 }
 
-export default Main;
+const authCondition = (authUser) => !!authUser;
+
+export default withAuthorization(authCondition)(Main);

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { fire } from '../firebase';
+import withAuthorization from '../authentication/withAuthorization';
 import { Collapse, Tabs, Button, Row, Col } from 'antd';
 import './League.css';
 import GameTab from './../game/GameTab';
@@ -146,5 +147,6 @@ class League extends Component {
 	}
 }
 
+const authCondition = (authUser) => !!authUser;
 
-export default League;
+export default withAuthorization(authCondition)(League);

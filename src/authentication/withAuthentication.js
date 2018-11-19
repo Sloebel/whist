@@ -4,7 +4,7 @@ import AuthUserContext from './AuthUserContext';
 
 const withAuthentication = (Component) => {
   class WithAuthentication extends React.Component {
-  	constructor(props) {
+    constructor(props) {
       super(props);
 
       this.state = {
