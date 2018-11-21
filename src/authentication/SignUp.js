@@ -81,7 +81,7 @@ const SignUp = Form.create()(
                         {getFieldDecorator('name', {
                             rules: [{ required: true, message: 'Please input your name!' }],
                         })(
-                            <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Name" />
+                            <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Name" size="large" />
                         )}
                     </FormItem>
                     <FormItem>
@@ -90,7 +90,7 @@ const SignUp = Form.create()(
                                 required: true, message: 'Please input your Nickname!'
                             }],
                         })(
-                            <Input prefix={<Icon type="smile-o" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Nickname" />
+                            <Input prefix={<Icon type="smile-o" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Nickname" size="large" />
                         )}
                     </FormItem>
                     <FormItem>
@@ -102,7 +102,7 @@ const SignUp = Form.create()(
                                 required: true, message: 'Please input your email!'
                             }],
                         })(
-                            <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Email" />
+                            <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Email" size="large" />
                         )}
                     </FormItem>
                     <FormItem>
@@ -113,7 +113,7 @@ const SignUp = Form.create()(
                                 validator: this.validateToNextPassword,
                             }],
                         })(
-                            <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+                            <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" size="large" />
                         )}
                     </FormItem>
                     <FormItem>
@@ -124,11 +124,11 @@ const SignUp = Form.create()(
                                 validator: this.compareToFirstPassword,
                             }],
                         })(
-                            <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Confirm password" onBlur={this.handleConfirmBlur} />
+                            <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Confirm password" onBlur={this.handleConfirmBlur} size="large" />
                         )}
                     </FormItem>
                     <FormItem>
-                        <Button type="primary" htmlType="submit" className="login-form-button" loading={isLoading}>
+                        <Button type="primary" htmlType="submit" size="large" className="login-form-button" loading={isLoading}>
                             Sign Up
                         </Button>
                     </FormItem>

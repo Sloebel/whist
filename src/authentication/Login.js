@@ -26,7 +26,8 @@ const Login = Form.create()(
                     const { email, password } = values;
 
                     auth.signInUser(email, password)
-                        .then(() => {
+                        .then((authUser) => {
+                            console.log(authUser);
                             history.push(routes.MAIN);
                         })
                         .catch(function (error) {
@@ -59,19 +60,19 @@ const Login = Form.create()(
                                         required: true, message: 'Please input your email!'
                                     }],
                                 })(
-                                    <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="email" />
+                                    <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="email" size="large"/>
                                 )}
                             </FormItem>
                             <FormItem>
                                 {getFieldDecorator('password', {
                                     rules: [{ required: true, message: 'Please input your Password!' }],
                                 })(
-                                    <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="password" />
+                                    <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="password"size="large" />
                                 )}
                             </FormItem>
                             <FormItem>
                                 <a className="login-form-forgot" href="">Forgot password</a>
-                                <Button type="primary" htmlType="submit" className="login-form-button" loading={isLoading}>
+                                <Button type="primary" htmlType="submit" size="large" className="login-form-button" loading={isLoading}>
                                     Log in
                                 </Button>
                                 Or <Link to={routes.SIGN_UP}>register now!</Link>
