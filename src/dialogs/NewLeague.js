@@ -34,7 +34,7 @@ const NewLeague = Form.create()(
         }
 
         /* Create reference to players in Firebase Database */
-        playersList = fire.database().ref('players/list').orderByKey();
+        playersList = fire.database().ref('users').orderByKey();
 
         fetch() {
             this.playersList.on('value', snapshot => {
@@ -225,7 +225,8 @@ const NewLeague = Form.create()(
                         <FormItem label="Description">
                             {getFieldDecorator('description')(<Input type="textarea" />)}
                         </FormItem>
-                        {loading ? <Spin size="small" style={{ width: '100%', marginBottom: '24px', height: '69px', paddingBottom: '8px' }} /> : players.length ?
+                        {
+                            // loading ? <Spin size="small" style={{ width: '100%', marginBottom: '24px', height: '69px', paddingBottom: '8px' }} /> : players.length ?
                             <FormItem label="Players">
                                 {getFieldDecorator('players', {
                                     rules: [{ required: true, len: 4, type: 'array' }],
@@ -233,12 +234,14 @@ const NewLeague = Form.create()(
                                     <Select
                                         mode="multiple"
                                         ref={node => this.playersSelect = node}
+                                        notFoundContent={loading ? <Spin size="small" /> : null}
                                     >
                                         {players.map(p => <Option key={p.playerID} value={p.nickname}>{p.nickname}</Option>)}
                                     </Select>
                                 )}
-                            </FormItem> :
-                            this.inlinePlayerFields(Array(4 - players.length).fill(1), players.length > 0)
+                            </FormItem> 
+                            // :
+                            // this.inlinePlayerFields(Array(4 - players.length).fill(1), players.length > 0)
                         }
                     </Form>
                     {players.length ?
