@@ -6,6 +6,7 @@ import './League.css';
 import GameTab from './../game/GameTab';
 
 const Panel = Collapse.Panel;
+const TabPane = Tabs.TabPane;
 
 class League extends Component {
 	constructor(props) {
@@ -60,8 +61,25 @@ class League extends Component {
 		const { title, games } = league;
 
 		return (
-			<div>
-				<Collapse className="league-stats" defaultActiveKey="1">
+			<div>				
+				<Tabs
+					className="games-container"
+					activeKey={activeGame}
+					onChange={this.onTabChange}
+					tabBarExtraContent={<Button onClick={this.addGame}>New Game</Button>}
+				>
+					{games.map((game) => <TabPane tab={game.title} key={game.key}><GameTab>{game.content}</GameTab></TabPane>)}
+				</Tabs>
+			</div>);
+	}
+}
+
+const authCondition = (authUser) => !!authUser;
+
+export default withAuthorization(authCondition)(League);
+
+/*
+<Collapse className="league-stats" defaultActiveKey="1">
 					<Panel header={title} key="1">
 						{isMobile ? (<div>'Mobile view'</div>) :
 							(<Row>
@@ -135,18 +153,4 @@ class League extends Component {
 
 					</Panel>
 				</Collapse>
-				<Tabs
-					className="games-container"
-					activeKey={activeGame}
-					onChange={this.onTabChange}
-					tabBarExtraContent={<Button onClick={this.addGame}>New Game</Button>}
-				>
-					{games.map((game) => <GameTab tab={game.title} key={game.key}>{game.content}</GameTab>)}
-				</Tabs>
-			</div>);
-	}
-}
-
-const authCondition = (authUser) => !!authUser;
-
-export default withAuthorization(authCondition)(League);
+*/

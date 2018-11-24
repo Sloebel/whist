@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { Component } from 'react';
 // import fire from './../fire.js';
-import { Tabs, Table } from 'antd';
+import { Layout, Menu, Tabs, Table, Card, Carousel, Button, Row, Col  } from 'antd';
 import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js'
 import './GameTab.css';
 
-const TabPane = Tabs.TabPane;
+const { Header, Content, Sider } = Layout;
 
-class GameTab extends TabPane {
+class GameTab extends Component {
 	constructor(props) {
 		super(props);
 
@@ -43,6 +43,56 @@ class GameTab extends TabPane {
 		}
 
 		this.columns = [{
+			title: 'Bid',
+			dataIndex: 'bid1',
+			width: 100,
+		}, {
+			title: 'Won',
+			dataIndex: 'won1',
+			width: 100,
+		}, {
+			title: 'Bid',
+			dataIndex: 'bid2',
+			width: 100,
+		}, {
+			title: 'Won',
+			dataIndex: 'won2',
+			width: 100,
+		}, {
+			title: 'Bid',
+			dataIndex: 'bid3',
+			width: 100,
+		}, {
+			title: 'Won',
+			dataIndex: 'won3',
+			width: 100,
+		}, {
+			title: 'Bid',
+			dataIndex: 'bid4',
+			width: 100,
+		}, {
+			title: 'Won',
+			dataIndex: 'won4',
+			width: 100,
+		}, {
+			title: 'Trump',
+			dataIndex: 'trump',
+			width: 75,
+		}, {
+			title: 'O/U',
+			dataIndex: 'segement',
+			width: 55,
+			render: (text, record) => {
+		    	return {
+		    		props: {
+			        	className: text === 0 ? 'failed-check' : '', 
+			      	},
+			      	children: text,
+			    };
+		  	},
+		}];
+
+		this.columns1 = [{
 			children: [{
 				title: 'Score',
 				children: [{
@@ -210,12 +260,14 @@ class GameTab extends TabPane {
 		this.setState(stateToUpdate);
 	}
 
+	next = () => this.carousel.next()
+
 	render() {
 		const {
 			rounds
 		} = this.state;
 
-		const columns = this.columns.map((col) => {
+		const columns = this.columns1.map((col) => {
 			if (!col.editable && !col.player) {
 				return col;
 			}
@@ -252,18 +304,72 @@ class GameTab extends TabPane {
 		};
 
 		return (
-			<Table
-				className='game-table'
-				components={components}
-				columns={columns}
-				rowKey='round'
-				dataSource={rounds}
-				size='small'
-				bordered
-				pagination={false}
-				scroll={{ y: 520 }}
-				rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
-			/>
+			<div>
+				<Layout className="game-layout">
+			        <Sider width={200} style={{ background: 'transparent' }} >
+				        <div style={{height: 119}}>
+				        	<Button icon="table" onClick={this.next}/>
+				        </div>
+			          	<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff' }}>
+				            {Array(13).fill(1).map((_, i) =><Menu.Item key={i + 1}>				              
+				              Option {i + 1}
+				            </Menu.Item> )}
+				            
+			          	</Menu>	
+			        </Sider>
+			        <Layout>
+			          	<Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
+			          		
+			          			{Array(4).fill(1).map((_, i) => (
+			          				
+					          			<Card key={i} title="Card title" style={{ display: 'inline-block', width: 200, height: 80, textAlign: 'center' }}>
+								      		Card content
+								    	</Card>
+							    	
+						    	))}
+							 
+							
+			          		
+			          		
+			          	</Header>
+			          	<Content>
+			            	<Carousel ref={node => this.carousel = node } dots={false}>
+			            	    <div>
+			            	    	<Table
+										className='game-table'
+										components={components}
+										columns={this.columns}
+										rowKey='round'
+										dataSource={rounds}
+										size='small'
+										bordered
+										pagination={false}
+										// scroll={{ y: 520 }}
+										rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
+										style={{display: 'inline-block'}}
+									/>
+								</div>
+			            	    <div><h3>2</h3></div>
+			            	  </Carousel>
+			            
+				            
+			          	</Content>
+			          
+			        </Layout>
+		      	</Layout>
+				<Table
+					className='game-table'
+					components={components}
+					columns={columns}
+					rowKey='round'
+					dataSource={rounds}
+					size='small'
+					bordered
+					pagination={false}
+					scroll={{ y: 520 }}
+					rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
+				/>
+			</div>
 		);
 	}
 }

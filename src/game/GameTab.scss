@@ -40,5 +40,52 @@
             background: #ffc8c8 !important;
         }
     }
+
     
+    
+}
+
+.game-layout {
+    .ant-layout,
+    &.ant-layout {
+        background: none;    
+    }
+    
+    .ant-menu {
+        .ant-menu-item { 
+            &:not(:last-child) {
+                margin: 0;
+            }
+            margin: 0;
+            line-height: 35px;
+            height: 35px;
+        }
+
+    }
+
+    // card
+    .ant-card {
+        border-radius: 0;
+    }
+    .ant-card-head {
+        min-height: 0;
+        padding: 0;
+    }
+    .ant-card-head-title {
+        padding: 8px 0;
+    }
+    .ant-card-body {
+        padding: 8px 0;
+    }
+
+    .ant-table-small {
+        & > .ant-table-content > .ant-table-body  {
+            margin: 0px;
+        }
+        .ant-table-row {
+            td {
+                height: 35px;
+            } 
+        }
+    }
 }
