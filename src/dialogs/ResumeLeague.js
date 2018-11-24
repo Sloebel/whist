@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter } from "react-router-dom";
-import { Modal } from 'antd';
+import { Modal, List } from 'antd';
 import './ResumeLeague.css';
 
 
@@ -36,16 +36,18 @@ class ResumeLeague extends Component {
                 <p>
                     List of open leagues
                 </p>
-                <ul className="clickable-list">
-                    {
-                        activeLeagues.map((item, index) => {
-                            const { leagueID, title } = item;
-                            return <li key={index} onClick={() => this.closeModal(leagueID)}>
-                                {title}
-                            </li>;
-                        })
-                    }
-                </ul>
+                <List
+                    itemLayout="horizontal"
+                    dataSource={activeLeagues}
+                    renderItem={item => (
+                      <List.Item>
+                        <List.Item.Meta
+                          title={<a onClick={() => this.closeModal(item.leagueID)}>{item.title}</a>}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                
             </Modal>
         );
     }
