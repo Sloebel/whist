@@ -18,7 +18,8 @@ class App extends Component {
 
     this.state = {
       inlineHeader: false,
-      isMobile: window.innerWidth < 576
+      isMobile: window.innerWidth < 576,
+      screenSize: window.innerWidth
     };
 
     this.toggleHeaderInline = this.toggleHeaderInline.bind(this);
@@ -35,7 +36,7 @@ class App extends Component {
 
   // set if view is mobile size 
   handleWindowSizeChange() {
-    this.setState({ isMobile: window.innerWidth < 576 });
+    this.setState({ isMobile: window.innerWidth < 576, screenSize: window.innerWidth });
   };
 
   // init window resize listener
@@ -67,7 +68,7 @@ class App extends Component {
   }
 
   render() {
-    const { inlineHeader, isMobile } = this.state;
+    const { inlineHeader, isMobile, screenSize } = this.state;
 
     return (
       <div className="app">
@@ -80,7 +81,7 @@ class App extends Component {
           <Route exact path="/" component={Main} />
           <Route exact path={routes.SIGN_IN} component={Login} />
           <Route exact path={routes.SIGN_UP} component={SignUp} />
-          <Route path={`${routes.LEAGUE}/:id`} render={(props) => <League {...props} isMobile={isMobile} />} />
+          <Route path={`${routes.LEAGUE}/:id`} render={(props) => <League {...props} isMobile={isMobile} screenSize={screenSize} />} />
         </div>
       </div >
     );

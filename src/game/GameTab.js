@@ -277,6 +277,7 @@ class GameTab extends Component {
 			currentView,
 			rounds
 		} = this.state;
+		const { screenSize } = this.props;
 
 		const columns = this.columns1.map((col) => {
 			if (!col.editable && !col.player) {
@@ -313,15 +314,17 @@ class GameTab extends Component {
 				cell: EditableCell,
 			},
 		};
-		console.log('render');
+		
+		//table width = 930px
+		const siderWidth = (screenSize - 930)/2;
 		return (
 			<div>
 				<Layout className="game-layout">
-					<Sider width={200} style={{ background: 'transparent' }} >
+					<Sider width={siderWidth} style={{ background: 'transparent' }} >
 						<div style={{ height: 119 }}>
 							<Button icon="table" onClick={this.toggleSlide} />
 						</div>
-						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? 100 : 0}px)` }}>
+						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? siderWidth/2 : 0}px)` }}>
 							{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1}>
 								Round {i + 1}
 							</Menu.Item>)}

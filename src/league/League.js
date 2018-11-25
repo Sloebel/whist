@@ -56,7 +56,7 @@ class League extends Component {
 	}
 
 	render() {
-		const { isMobile } = this.props;
+		const { isMobile, screenSize } = this.props;
 		const { league, activeGame } = this.state;
 		const { title, games } = league;
 
@@ -68,7 +68,7 @@ class League extends Component {
 					onChange={this.onTabChange}
 					tabBarExtraContent={<Button onClick={this.addGame}>New Game</Button>}
 				>
-					{games.map((game) => <TabPane tab={game.title} key={game.key}><GameTab>{game.content}</GameTab></TabPane>)}
+					{games.map((game) => <TabPane tab={game.title} key={game.key}><GameTab screenSize={screenSize}>{game.content}</GameTab></TabPane>)}
 				</Tabs>
 			</div>);
 	}
