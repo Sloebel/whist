@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 // import fire from './../fire.js';
-import { Layout, Menu, Tabs, Table, Card, Carousel, Button, Row, Col  } from 'antd';
+import { Layout, Menu, Tabs, Table, Card, Carousel, Button, Row, Col } from 'antd';
 import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js'
 import './GameTab.css';
 
@@ -34,7 +34,10 @@ class GameTab extends Component {
 			});
 		}
 
+		this.currentSlide = 0;
+
 		this.state = {
+			currentView: 'table',
 			rounds,
 			totalScore1: 0,
 			totalScore2: 0,
@@ -83,13 +86,13 @@ class GameTab extends Component {
 			dataIndex: 'segement',
 			width: 55,
 			render: (text, record) => {
-		    	return {
-		    		props: {
-			        	className: text === 0 ? 'failed-check' : '', 
-			      	},
-			      	children: text,
-			    };
-		  	},
+				return {
+					props: {
+						className: text === 0 ? 'failed-check' : '',
+					},
+					children: text,
+				};
+			},
 		}];
 
 		this.columns1 = [{
@@ -165,13 +168,13 @@ class GameTab extends Component {
 					dataIndex: 'segement',
 					width: 55,
 					render: (text, record) => {
-				    	return {
-				    		props: {
-					        	className: text === 0 ? 'failed-check' : '', 
-					      	},
-					      	children: text,
-					    };
-				  	},
+						return {
+							props: {
+								className: text === 0 ? 'failed-check' : '',
+							},
+							children: text,
+						};
+					},
 				}]
 			}]
 		}];
@@ -180,7 +183,7 @@ class GameTab extends Component {
 	handleSave = (row, player) => {
 		const stateToUpdate = {};
 		const newData = [...this.state.rounds];
-		
+
 		const index = newData.findIndex(item => row.round === item.round);
 
 		const item = newData[index];
@@ -237,22 +240,22 @@ class GameTab extends Component {
 			let allWonInput = true;
 
 			for (const [key, value] of Object.entries(row)) {
-			    if (key.indexOf('bid') > -1 && value !== null && value !== '') {
-			    	currentTotalBid += (value * 1); 
-			    }
+				if (key.indexOf('bid') > -1 && value !== null && value !== '') {
+					currentTotalBid += (value * 1);
+				}
 
-			    if (key.indexOf('won') > -1) {
-				    if (value !== null && value !== '') {
-				    	currentTotalWon += (value * 1);
-				    } else {
-				    	allWonInput = false;
-				    }
+				if (key.indexOf('won') > -1) {
+					if (value !== null && value !== '') {
+						currentTotalWon += (value * 1);
+					} else {
+						allWonInput = false;
+					}
 				}
 			}
 
-			row.segement = currentTotalBid !== null ? currentTotalBid - 13 : null; 
+			row.segement = currentTotalBid !== null ? currentTotalBid - 13 : null;
 			row.check = allWonInput ? currentTotalWon === 13 : true;
-		}		
+		}
 
 		stateToUpdate.rounds = newData;
 
@@ -260,10 +263,18 @@ class GameTab extends Component {
 		this.setState(stateToUpdate);
 	}
 
+	// toggleSlide = () => this.state.currentSlide ? this.carousel.prev() : this.carousel.next()
+	toggleSlide = () => {
+		this.setState({ currentView: this.currentSlide ? 'table' : 'panel' });
+		// this.currentSlide = !this.currentSlide;
+		this.currentSlide ? this.carousel.prev() : this.carousel.next()
+	}
+
 	next = () => this.carousel.next()
 
 	render() {
 		const {
+			currentView,
 			rounds
 		} = this.state;
 
@@ -302,40 +313,50 @@ class GameTab extends Component {
 				cell: EditableCell,
 			},
 		};
-
+		console.log('render');
 		return (
 			<div>
 				<Layout className="game-layout">
-			        <Sider width={200} style={{ background: 'transparent' }} >
-				        <div style={{height: 119}}>
-				        	<Button icon="table" onClick={this.next}/>
-				        </div>
-			          	<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff' }}>
-				            {Array(13).fill(1).map((_, i) =><Menu.Item key={i + 1}>				              
-				              Option {i + 1}
-				            </Menu.Item> )}
-				            
-			          	</Menu>	
-			        </Sider>
-			        <Layout>
-			          	<Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
-			          		
-			          			{Array(4).fill(1).map((_, i) => (
-			          				
-					          			<Card key={i} title="Card title" style={{ display: 'inline-block', width: 200, height: 80, textAlign: 'center' }}>
-								      		Card content
-								    	</Card>
-							    	
-						    	))}
-							 
-							
-			          		
-			          		
-			          	</Header>
-			          	<Content>
-			            	<Carousel ref={node => this.carousel = node } dots={false}>
-			            	    <div>
-			            	    	<Table
+					<Sider width={200} style={{ background: 'transparent' }} >
+						<div style={{ height: 119 }}>
+							<Button icon="table" onClick={this.toggleSlide} />
+						</div>
+						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? 100 : 0}px)` }}>
+							{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1}>
+								Round {i + 1}
+							</Menu.Item>)}
+
+						</Menu>
+					</Sider>
+					<Layout className={currentView === 'table' ? 'game-table' : 'game-panel'}>
+						<Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
+
+							{Array(4).fill(1).map((_, i) => (
+
+								<Card
+									key={i}
+									title="Card title"
+									className="card"
+									style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
+								>
+									Card content
+								</Card>
+
+							))}
+
+
+
+
+						</Header>
+						<Content>
+							<Carousel
+								ref={node => this.carousel = node}
+								dots={false}
+								// afterChange={(current) => this.setState({ currentSlide: current })}
+								afterChange={(current) => this.currentSlide = current}
+							>
+								<div>
+									<Table
 										className='game-table'
 										components={components}
 										columns={this.columns}
@@ -346,17 +367,17 @@ class GameTab extends Component {
 										pagination={false}
 										// scroll={{ y: 520 }}
 										rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
-										style={{display: 'inline-block'}}
+										style={{ display: 'inline-block' }}
 									/>
 								</div>
-			            	    <div><h3>2</h3></div>
-			            	  </Carousel>
-			            
-				            
-			          	</Content>
-			          
-			        </Layout>
-		      	</Layout>
+								<div><h3>2</h3></div>
+							</Carousel>
+
+
+						</Content>
+
+					</Layout>
+				</Layout>
 				<Table
 					className='game-table'
 					components={components}

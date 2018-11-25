@@ -1,5 +1,6 @@
 .game-table {
     .ant-table-small {
+        border-left: 0;
         background: #fff;
         & > .ant-table-content > .ant-table-body > table {
             padding: 0px;
@@ -52,6 +53,9 @@
     }
     
     .ant-menu {
+        width: 50%;
+        transition: all 0.3s;
+
         .ant-menu-item { 
             &:not(:last-child) {
                 margin: 0;
@@ -59,13 +63,20 @@
             margin: 0;
             line-height: 35px;
             height: 35px;
+            border-bottom: 1px solid #e8e8e8;
         }
 
     }
 
     // card
     .ant-card {
-        border-radius: 0;
+        &.card {
+            border-radius: 0;
+            display: inline-block;
+            width: 200px;
+            height: 80px;
+            text-align: center;
+        }       
     }
     .ant-card-head {
         min-height: 0;
