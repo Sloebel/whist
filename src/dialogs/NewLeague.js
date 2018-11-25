@@ -34,9 +34,10 @@ const NewLeague = Form.create()(
         }
 
         /* Create reference to players in Firebase Database */
+        // playersList = fire.database().ref('players/list').orderByKey();
         playersList = fire.database().ref('users').orderByKey();
 
-        fetch() {
+        fetchPlayers() {
             this.playersList.on('value', snapshot => {
                 /* Update React state when a player is added at Firebase Database */
                 if (snapshot.val()) {
@@ -48,7 +49,7 @@ const NewLeague = Form.create()(
         }
 
         componentDidMount() {
-            this.fetch();
+            this.fetchPlayers();
         }
 
         componentWillUnmount() {
@@ -239,7 +240,7 @@ const NewLeague = Form.create()(
                                         {players.map(p => <Option key={p.playerID} value={p.nickname}>{p.nickname}</Option>)}
                                     </Select>
                                 )}
-                            </FormItem> 
+                            </FormItem>
                             // :
                             // this.inlinePlayerFields(Array(4 - players.length).fill(1), players.length > 0)
                         }
