@@ -71,7 +71,7 @@ class App extends Component {
 
     return (
       <div className="app">
-        <header id="app-header" className={`${inlineHeader ? 'inline' : ''}`}>
+        <header id="app-header" className={inlineHeader ? 'inline' : ''}>
           <img src={cards} className="app-logo" alt="logo" />
           <h1 className="app-title">Sub Whist</h1>
         </header>
