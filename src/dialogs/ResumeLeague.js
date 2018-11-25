@@ -40,14 +40,14 @@ class ResumeLeague extends Component {
                     itemLayout="horizontal"
                     dataSource={activeLeagues}
                     renderItem={item => (
-                      <List.Item>
-                        <List.Item.Meta
-                          title={<a onClick={() => this.closeModal(item.leagueID)}>{item.title}</a>}
-                        />
-                      </List.Item>
+                        <List.Item>
+                            <List.Item.Meta
+                                title={<a onClick={() => this.closeModal(item.leagueID)}>{item.title}</a>}
+                            />
+                        </List.Item>
                     )}
-                  />
-                
+                />
+
             </Modal>
         );
     }
