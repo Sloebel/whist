@@ -314,9 +314,11 @@ class GameTab extends Component {
 				cell: EditableCell,
 			},
 		};
-		
+
 		//table width = 930px
-		const siderWidth = (screenSize - 930)/2;
+		const siderWidth = (screenSize - 930) / 2;
+		const menuTranslateX = siderWidth / 2 > 120 ? siderWidth - 120 : siderWidth / 2;
+
 		return (
 			<div>
 				<Layout className="game-layout">
@@ -324,7 +326,7 @@ class GameTab extends Component {
 						<div style={{ height: 119 }}>
 							<Button icon="table" onClick={this.toggleSlide} />
 						</div>
-						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? siderWidth/2 : 0}px)` }}>
+						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? menuTranslateX : siderWidth / 2 > 120 ? 120 : 0}px)` }}>
 							{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1}>
 								Round {i + 1}
 							</Menu.Item>)}
@@ -346,9 +348,6 @@ class GameTab extends Component {
 								</Card>
 
 							))}
-
-
-
 
 						</Header>
 						<Content>
@@ -381,7 +380,7 @@ class GameTab extends Component {
 
 					</Layout>
 				</Layout>
-				<Table
+				{/* <Table
 					className='game-table'
 					components={components}
 					columns={columns}
@@ -392,7 +391,7 @@ class GameTab extends Component {
 					pagination={false}
 					scroll={{ y: 520 }}
 					rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
-				/>
+				/> */}
 			</div>
 		);
 	}
