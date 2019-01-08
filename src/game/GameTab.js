@@ -358,9 +358,6 @@ class GameTab extends Component {
 
 							))}
 
-
-
-
 						</Header>
 						<Content>
 							<Carousel
