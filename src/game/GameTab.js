@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 // import fire from './../fire.js';
-import { Layout, Menu, Tabs, Table, Card, Carousel, Button, Row, Col } from 'antd';
+import { Layout, Menu, Tabs, Table, Card, Carousel, Button, Row, Col, Switch } from 'antd';
 import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js'
 import './GameTab.css';
 
@@ -95,7 +95,7 @@ class GameTab extends Component {
 			},
 		}];
 
-		this.columns1 = [{
+		const columns = [{
 			children: [{
 				title: 'Score',
 				children: [{
@@ -178,7 +178,38 @@ class GameTab extends Component {
 				}]
 			}]
 		}];
+
+		this.columns1 = this.initColumns(columns);
 	}
+
+	initColumns = (columns) => columns.map((col) => {
+		if (!col.editable && !col.player) {
+			return col;
+		}
+		return {
+			...col,
+			children: col.children.map((child) => {
+				return {
+					...child,
+					title: this.state[`totalScore${col.player}`],
+					children: child.children.map((subChild) => {
+						return {
+							...subChild,
+							width: 100,
+							onCell: record => ({
+								record,
+								editable: true,
+								editorType: subChild.dataIndex === 'trump' ? 'trump' : 'bidWin',
+								dataIndex: subChild.dataIndex,
+								player: col.player,
+								handleSave: this.handleSave,
+							}),
+						}
+					})
+				}
+			})
+		};
+	});
 
 	handleSave = (row, player) => {
 		const stateToUpdate = {};
@@ -279,34 +310,7 @@ class GameTab extends Component {
 		} = this.state;
 		const { screenSize } = this.props;
 
-		const columns = this.columns1.map((col) => {
-			if (!col.editable && !col.player) {
-				return col;
-			}
-			return {
-				...col,
-				children: col.children.map((child) => {
-					return {
-						...child,
-						title: this.state[`totalScore${col.player}`],
-						children: child.children.map((subChild) => {
-							return {
-								...subChild,
-								width: 100,
-								onCell: record => ({
-									record,
-									editable: true,
-									editorType: subChild.dataIndex === 'trump' ? 'trump' : 'bidWin',
-									dataIndex: subChild.dataIndex,
-									player: col.player,
-									handleSave: this.handleSave,
-								}),
-							}
-						})
-					}
-				})
-			};
-		});
+		const columns = this.columns1;
 
 		const components = {
 			body: {
@@ -314,9 +318,16 @@ class GameTab extends Component {
 				cell: EditableCell,
 			},
 		};
-		
+
 		//table width = 930px
-		const siderWidth = (screenSize - 930)/2;
+		const siderWidth = (screenSize - 930) / 2;
+		let translate;
+		if (siderWidth < 130) {
+			translate = siderWidth - 65;
+		} else {
+			translate = siderWidth / 2;
+		}
+
 		return (
 			<div>
 				<Layout className="game-layout">
@@ -324,9 +335,9 @@ class GameTab extends Component {
 						<div style={{ height: 119 }}>
 							<Button icon="table" onClick={this.toggleSlide} />
 						</div>
-						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? siderWidth/2 : 0}px)` }}>
-							{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1}>
-								Round {i + 1}
+						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? translate : 0}px)` }}>
+							{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1} style={{ textAlign: 'center' }}>
+								<span className="round-text" style={{ display: siderWidth < 200 ? 'none' : '' }}>Round</span> {i + 1}
 							</Menu.Item>)}
 
 						</Menu>
@@ -373,7 +384,54 @@ class GameTab extends Component {
 										style={{ display: 'inline-block' }}
 									/>
 								</div>
-								<div><h3>2</h3></div>
+								<div>
+									<div className="container">
+										<div class="item item1">
+											<Switch checkedChildren=" Won " unCheckedChildren=" Bid " />
+										</div>
+										<div class="item item2">
+											<div class="player-bid-won">
+												<span>Player 1</span>
+												<span>Bid:   Won:  </span>
+											</div>
+										</div>
+										<div class="item item3"></div>
+										<div class="item item4">
+											<div class="player-bid-won">
+												<span>Player 4</span>
+												<span>Bid:   Won:  </span>
+											</div>
+										</div>
+										<div class="item item5 dial-pad">
+											<Button size="large">0</Button>
+											<Button size="large">1</Button>
+											<Button size="large">2</Button>
+											<Button size="large">3</Button>
+											<Button size="large">4</Button>
+											<Button size="large">5</Button>
+											<Button size="large">6</Button>
+											<Button size="large">7</Button>
+											<Button size="large">8</Button>
+											<Button size="large">9</Button>
+											<Button size="large" className="more-btn">More...</Button>
+										</div>
+										<div class="item item6">
+											<div class="player-bid-won">
+												<span>Player 2</span>
+												<span>Bid:   Won:  </span>
+											</div>
+										</div>
+										<div class="item item7"></div>
+										<div class="item item8">
+											<div class="player-bid-won">
+												<span>Player 3</span>
+												<span>Bid:   Won:  </span>
+											</div>
+										</div>
+										<div class="item item9"></div>
+									</div>
+								</div>
+
 							</Carousel>
 
 
@@ -381,7 +439,7 @@ class GameTab extends Component {
 
 					</Layout>
 				</Layout>
-				<Table
+				{/* <Table
 					className='game-table'
 					components={components}
 					columns={columns}
@@ -392,7 +450,7 @@ class GameTab extends Component {
 					pagination={false}
 					scroll={{ y: 520 }}
 					rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
-				/>
+				/> */}
 			</div>
 		);
 	}
