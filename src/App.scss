@@ -38,8 +38,12 @@ ul.app-menu li{
   background-color:#a1a1a1;
   color: #222;
 } */
+$inline-header-height: 90px;
 
 .app {
+  height: 100%;
+  overflow: hidden;
+  
   & header,
   & .app-main,
   & .league-stats {
@@ -53,43 +57,108 @@ ul.app-menu li{
   }
 }
 
-.app-logo {
-  /* animation: App-logo-spin infinite 20s linear; */
-  height: 150px;
-  padding-bottom: 30px;
-  transform: translate(60px);
-  transition: all 0.5s;
-}
-
-.inline .app-logo {
-  transform: translate(0px);
-  padding-bottom: 0px;
-  height: 90px;
-}
-
 #app-header {
   background-color: #222;
-  /* height: 150px;
-  padding: 20px; */
   
+  .app-title {
+    /* font-size: 1.5em; */
+    color: white;
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 0px;
+    transform: translate(-84px,62px);
+    transition: all 0.5s;
+  }
+    
+  .app-logo {
+    /* animation: App-logo-spin infinite 20s linear; */
+    height: 150px;
+    padding-bottom: 30px;
+    transform: translate(60px);
+    transition: all 0.5s;   
+  }
+
+  .inline-header & {
+    .app-logo {
+      transform: translate(0px);
+      padding-bottom: 0px;
+      height: $inline-header-height;
+    }
+    .app-title {
+      transform: translate(0px);
+    }    
+  }
+
+  .mobile:not(.inline-header) & {
+    .app-logo {
+      height: 120px;
+    }
+
+    .app-title {
+      transform: translate(-63px, 43px);
+    }
+  }
+
+  .mobile.inline-header & {
+    .app-logo {
+      height: 60px;
+    }
+  }  
 }
 
-.app-title {
-  /* font-size: 1.5em; */
-  color: white;
-  display: inline-block;
-  vertical-align: middle;
-  margin-bottom: 0px;
-  transform: translate(-84px,62px);
-  transition: all 0.5s;
+.app-content {
+  height: calc(100% - #{$inline-header-height});
+
+  .mobile & {
+    height: calc(100% - 60px);
+  }
 }
 
-.inline .app-title {
-  transform: translate(0px);
-}
+.drawer {
+  .ant-menu-inline,
+  .ant-menu-vertical {
+    border-right: none;
+  }
+  &-content {
+    padding-top: 40px;
+  }
+  &-left {
+    .ant-menu-inline .ant-menu-item:after,
+    .ant-menu-vertical .ant-menu-item:after {
+      left: 0;
+      right: auto;
+    }
+  }
 
-.app-intro {
-  font-size: large;
+  &.drawer-left {
+    .drawer-handle {
+      top: 10px;
+      box-shadow: 2px 0 2px rgba(0, 0, 0, 0.15);
+      background: transparent;
+      transition: all 0.3s;   
+    }
+
+    .drawer-handle-icon {
+      background: #34df34;
+      &:after,
+      &:before {
+        background: #34df34;
+      }
+    }
+  }
+
+  &.drawer-open {
+    .drawer-handle {
+      background: #fff;
+    }
+
+    .drawer-handle-icon {
+      &:after,
+      &:before {
+        background: #1a911a;
+      }
+    }
+  }
 }
 
 @keyframes App-logo-spin {

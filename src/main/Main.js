@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { fire, auth } from '../firebase';
 import withAuthorization from '../authentication/withAuthorization';
 import MainMenu from './MainMenu';
+import * as routes from './../constants/routes';
 
 class Main extends Component {
     // Dialogs visible states controling if the Dialog should be instansiated or not
@@ -43,9 +44,7 @@ class Main extends Component {
             resumeLeague: false
         });
 
-        if (leagueID) {
-            this.props.history.push('/league/' + leagueID)
-        }
+        this.navigateToLeague(leagueID);
     }
 
     showNewLeagueDialog() {
@@ -59,8 +58,12 @@ class Main extends Component {
             newLeague: false
         });
 
+        this.navigateToLeague(leagueID);
+    }
+
+    navigateToLeague(leagueID) {
         if (leagueID) {
-            this.props.history.push('/league/' + leagueID)
+            this.props.history.push(`${routes.LEAGUE}/` + leagueID)
         }
     }
 

@@ -18,7 +18,7 @@ class App extends Component {
 
     this.state = {
       inlineHeader: false,
-      isMobile: window.innerWidth < 576,
+      isMobile: window.innerWidth < 1095,
       screenSize: window.innerWidth
     };
 
@@ -36,7 +36,7 @@ class App extends Component {
 
   // set if view is mobile size 
   handleWindowSizeChange() {
-    this.setState({ isMobile: window.innerWidth < 576, screenSize: window.innerWidth });
+    this.setState({ isMobile: window.innerWidth < 1095, screenSize: window.innerWidth });
   };
 
   // init window resize listener
@@ -71,17 +71,17 @@ class App extends Component {
     const { inlineHeader, isMobile, screenSize } = this.state;
 
     return (
-      <div className="app">
-        <header id="app-header" className={inlineHeader ? 'inline' : ''}>
+      <div className={`app ${isMobile ? 'mobile' : ''} ${inlineHeader ? 'inline-header' : ''}`}>
+        <header id="app-header">
           <img src={cards} className="app-logo" alt="logo" />
           <h1 className="app-title">Sub Whist</h1>
         </header>
 
-        <div>
+        <div className="app-content">
           <Route exact path="/" component={Main} />
           <Route exact path={routes.SIGN_IN} component={Login} />
           <Route exact path={routes.SIGN_UP} component={SignUp} />
-          <Route path={`${routes.LEAGUE}/:id`} render={(props) => <League {...props} isMobile={isMobile} screenSize={screenSize} />} />
+          <Route path={`${routes.LEAGUE}/:leagueID`} render={(props) => <League {...props} isMobile={isMobile} screenSize={screenSize} />} />
         </div>
       </div >
     );

@@ -1,0 +1,10 @@
+.cards-modal {
+  .ant-modal-body {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ant-modal-close-x {
+    display: none;
+  }
+}

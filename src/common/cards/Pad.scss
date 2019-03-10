@@ -1,0 +1,63 @@
+.card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid #d9d9d9;
+  border-radius: 5px;
+  height: 50px;
+  width: 40px;
+  border-radius: 5px;
+  
+  &:before {
+    content: none;
+  }
+}
+
+.cards-pad {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  grid-template-rows: repeat(3, 1fr);
+  grid-gap: 14px;
+
+  .ant-radio-button-wrapper {
+    background: transparent;
+    border-radius: 5px;
+  }
+  .anticon, .NT {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .spade {
+    grid-column-start: 2;
+    grid-column-end: 3;
+  }
+
+  .hart {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: row2-start;
+    grid-row-end: 2;  
+  }
+
+  .diamond {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: row2-start;
+    grid-row-end: 2;
+  }
+
+  .club {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: row3-start;
+    grid-row-end: 3;
+  }
+
+  .NT {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: row2-start;
+    grid-row-end: 2;
+  }
+}

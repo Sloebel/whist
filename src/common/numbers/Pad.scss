@@ -1,0 +1,23 @@
+.dial-pad {
+  padding: 12px;
+  display: grid;
+  min-width: 251px;
+  grid-template-columns: repeat(3, auto);
+  grid-template-rows: repeat(4, 1fr);
+  grid-gap: 18px;
+  background: #27a727;
+
+  .more-less-btn {
+    grid-column-start: 2;
+    grid-column-end: 4;
+  }
+
+  
+
+  @media screen and (max-width: 595px) {
+    grid-template-columns: repeat(3, 40px);
+    button {
+      padding: 0;
+    }
+  }
+}

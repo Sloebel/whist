@@ -1,0 +1,20 @@
+.player-pad {
+  .pad-name {
+    text-transform: capitalize;
+    font-weight: bold;
+  }
+
+  .pad-bid-won {
+    max-width: 55px;
+    word-break: break-word;
+  }
+
+  .pad-score {
+    float: right;
+    font-weight: 400;
+
+    > div {
+      display: inline-block;
+    }
+  }
+}

@@ -1,8 +1,16 @@
 import React, { Component } from 'react';
-// import fire from './../fire.js';
-import { Layout, Menu, Tabs, Table, Card, Carousel, Button, Row, Col, Switch } from 'antd';
-import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js'
+import { fire } from './../firebase';
+import { Layout, Menu, Tabs, Table, Card, Button, message } from 'antd';
+import ReactDragListView from "react-drag-listview";
+import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js';
 import './GameTab.css';
+import GamePad from './../common/game/Pad';
+import { hasTouch } from '../utils/Utils.js';
+import { INPUT_MODE } from '../constants/states';
+import { cardsRenderer } from '../common/table/renderers.js';
+import CssUp from '../common/transition/CssUp.js';
+import Loader from '../common/loader/Loader';
+import GameMobileView from './GameMobileView';
 
 const { Header, Content, Sider } = Layout;
 
@@ -10,179 +18,292 @@ class GameTab extends Component {
 	constructor(props) {
 		super(props);
 
-		const rounds = []
+		// const rounds = []
 
-		for (let i = 0; i < 13; i++) {
-			rounds.push({
-				round: i + 1,
-				segement: null,
-				trump: null,
-				check: true,
-				factor: 1,
-				score1: null,
-				bid1: null,
-				won1: null,
-				score2: null,
-				bid2: null,
-				won2: null,
-				score3: null,
-				bid3: null,
-				won3: null,
-				score4: null,
-				bid4: null,
-				won4: null
-			});
-		}
+		// for (let i = 0; i < 13; i++) {
+		// 	rounds.push({
+		// 		round: i + 1,
+		// 		segment: null,
+		// 		trump: null,
+		// 		check: false,
+		// 		factor: 1,
+		// 		highestBidder: undefined,
+		// 		inputMode: INPUT_MODE.BID,
+		// 		score0: null,
+		// 		aggregateScore0: null,
+		// 		bid0: null,
+		// 		won0: null,
+		// 		score1: null,
+		// 		aggregateScore1: null,
+		// 		bid1: null,
+		// 		won1: null,
+		// 		score2: null,
+		// 		aggregateScore2: null,
+		// 		bid2: null,
+		// 		won2: null,
+		// 		score3: null,
+		// 		aggregateScore3: null,
+		// 		bid3: null,
+		// 		won3: null
+		// 	});
+		// }
 
-		this.currentSlide = 0;
+		// this.currentSlide = 0;
+
+		// this.columns = [
+		// 	{
+		// 		player: 1,
+		// 		children: [{
+		// 			title: 'Bid',
+		// 			dataIndex: 'bid1',
+		// 			width: 100,
+		// 		}, {
+		// 			title: 'Won',
+		// 			dataIndex: 'won1',
+		// 			width: 100,
+		// 		}]
+		// 	},
+		// 	//  {
+		// 	// 	title: 'Bid',
+		// 	// 	dataIndex: 'bid1',
+		// 	// 	width: 100,
+		// 	// }, {
+		// 	// 	title: 'Won',
+		// 	// 	dataIndex: 'won1',
+		// 	// 	width: 100,
+		// 	// }, 
+		// 	{
+		// 		player: 2,
+		// 		children: [{
+		// 			title: 'Bid',
+		// 			dataIndex: 'bid2',
+		// 			width: 100,
+		// 		}, {
+		// 			title: 'Won',
+		// 			dataIndex: 'won2',
+		// 			width: 100,
+		// 		}]
+		// 	},
+		// 	// {
+		// 	// 	title: 'Bid',
+		// 	// 	dataIndex: 'bid2',
+		// 	// 	width: 100,
+		// 	// }, {
+		// 	// 	title: 'Won',
+		// 	// 	dataIndex: 'won2',
+		// 	// 	width: 100,
+		// 	// }, 
+		// 	{
+		// 		player: 3,
+		// 		children: [{
+		// 			title: 'Bid',
+		// 			dataIndex: 'bid3',
+		// 			width: 100,
+		// 		}, {
+		// 			title: 'Won',
+		// 			dataIndex: 'won3',
+		// 			width: 100,
+		// 		}]
+		// 	},
+		// 	// {
+		// 	// 	title: 'Bid',
+		// 	// 	dataIndex: 'bid3',
+		// 	// 	width: 100,
+		// 	// }, {
+		// 	// 	title: 'Won',
+		// 	// 	dataIndex: 'won3',
+		// 	// 	width: 100,
+		// 	// }, 
+		// 	{
+		// 		player: 4,
+		// 		children: [{
+		// 			title: 'Bid',
+		// 			dataIndex: 'bid4',
+		// 			width: 100,
+		// 		}, {
+		// 			title: 'Won',	
+		// 			dataIndex: 'won4',
+		// 			width: 100,
+		// 		}]
+		// 	},
+		// 	// {
+		// 	// 	title: 'Bid',
+		// 	// 	dataIndex: 'bid4',
+		// 	// 	width: 100,
+		// 	// }, {
+		// 	// 	title: 'Won',
+		// 	// 	dataIndex: 'won4',
+		// 	// 	width: 100,
+		// 	// },
+		// 	{
+		// 		children: [{
+		// 			title: 'Trump',
+		// 			dataIndex: 'trump',
+		// 			width: 75,
+		// 			render: cardsRenderer,
+		// 		}, {
+		// 			title: 'O/U',
+		// 			dataIndex: 'segment',
+		// 			width: 55,
+		// 			render: (text, record) => {
+		// 				return {
+		// 					props: {
+		// 						className: text === 0 ? 'failed-check' : '',
+		// 					},
+		// 					children: text,
+		// 				};
+		// 			},
+		// 		}]
+		// 	}
+		// ];
 
 		this.state = {
+			players: props.players,
+			columns: this.initColumns(props.players),
 			currentView: 'table',
-			rounds,
+			currentRound: 1,
+			rounds: [],
+			totalScore0: 0,
 			totalScore1: 0,
 			totalScore2: 0,
-			totalScore3: 0,
-			totalScore4: 0
+			totalScore3: 0
 		}
 
-		this.columns = [{
-			title: 'Bid',
-			dataIndex: 'bid1',
-			width: 100,
-		}, {
-			title: 'Won',
-			dataIndex: 'won1',
-			width: 100,
-		}, {
-			title: 'Bid',
-			dataIndex: 'bid2',
-			width: 100,
-		}, {
-			title: 'Won',
-			dataIndex: 'won2',
-			width: 100,
-		}, {
-			title: 'Bid',
-			dataIndex: 'bid3',
-			width: 100,
-		}, {
-			title: 'Won',
-			dataIndex: 'won3',
-			width: 100,
-		}, {
-			title: 'Bid',
-			dataIndex: 'bid4',
-			width: 100,
-		}, {
-			title: 'Won',
-			dataIndex: 'won4',
-			width: 100,
-		}, {
-			title: 'Trump',
-			dataIndex: 'trump',
-			width: 75,
-		}, {
-			title: 'O/U',
-			dataIndex: 'segement',
-			width: 55,
-			render: (text, record) => {
-				return {
-					props: {
-						className: text === 0 ? 'failed-check' : '',
-					},
-					children: text,
-				};
-			},
-		}];
+		const columns = [
+			{
+				children: [{
+					title: 'Score',
+					children: [{
+						title: 'round',
+						dataIndex: 'round',
+						width: 75,
+					}]
+				}]
+			}, {
+				title: 'player 1',
+				player: 1,
+				children: [{
+					children: [{
+						title: 'Bid',
+						dataIndex: 'bid1',
+					}, {
+						title: 'Won',
+						dataIndex: 'won1',
+					}]
+				}],
+			}, {
+				title: 'player 2',
+				player: 2,
+				children: [{
+					children: [{
+						title: 'Bid',
+						dataIndex: 'bid2',
+					}, {
+						title: 'Won',
+						dataIndex: 'won2',
+					}]
+				}],
+			}, {
+				title: 'player 3',
+				player: 3,
+				children: [{
+					children: [{
+						title: 'Bid',
+						dataIndex: 'bid3',
+					}, {
+						title: 'Won',
+						dataIndex: 'won3',
+					}]
+				}],
+			}, {
+				title: 'player 4',
+				player: 4,
+				children: [{
+					children: [{
+						title: 'Bid',
+						dataIndex: 'bid4',
+					}, {
+						title: 'Won',
+						dataIndex: 'won4',
+					}]
+				}],
+			}, {
+				editable: true,
+				children: [{
+					children: [{
+						title: 'Trump',
+						dataIndex: 'trump',
+						width: 75,
+						render: cardsRenderer,
+					}]
+				}]
+			}, {
+				children: [{
+					children: [{
+						title: 'O/U',
+						dataIndex: 'segment',
+						width: 55,
+						render: (text, record) => {
+							return {
+								props: {
+									className: text === 0 ? 'failed-check' : '',
+								},
+								children: text,
+							};
+						},
+					}]
+				}]
+			}
+		];
 
-		const columns = [{
-			children: [{
-				title: 'Score',
-				children: [{
-					title: 'round',
-					dataIndex: 'round',
-					width: 75,
-				}]
-			}]
-		}, {
-			title: 'player 1',
-			player: 1,
-			children: [{
-				children: [{
-					title: 'Bid',
-					dataIndex: 'bid1',
-				}, {
-					title: 'Won',
-					dataIndex: 'won1',
-				}]
-			}],
-		}, {
-			title: 'player 2',
-			player: 2,
-			children: [{
-				children: [{
-					title: 'Bid',
-					dataIndex: 'bid2',
-				}, {
-					title: 'Won',
-					dataIndex: 'won2',
-				}]
-			}],
-		}, {
-			title: 'player 3',
-			player: 3,
-			children: [{
-				children: [{
-					title: 'Bid',
-					dataIndex: 'bid3',
-				}, {
-					title: 'Won',
-					dataIndex: 'won3',
-				}]
-			}],
-		}, {
-			title: 'player 4',
-			player: 4,
-			children: [{
-				children: [{
-					title: 'Bid',
-					dataIndex: 'bid4',
-				}, {
-					title: 'Won',
-					dataIndex: 'won4',
-				}]
-			}],
-		}, {
-			editable: true,
-			children: [{
-				children: [{
-					title: 'Trump',
-					dataIndex: 'trump',
-					width: 75,
-				}]
-			}]
-		}, {
-			children: [{
-				children: [{
-					title: 'O/U',
-					dataIndex: 'segement',
-					width: 55,
-					render: (text, record) => {
-						return {
-							props: {
-								className: text === 0 ? 'failed-check' : '',
-							},
-							children: text,
-						};
-					},
-				}]
-			}]
-		}];
+		this.columns1 = this.initColumns1(columns);
 
-		this.columns1 = this.initColumns(columns);
+		this.selectActiveRound = this.selectActiveRound.bind(this);
+		this.setCurrentViewState = this.setCurrentViewState.bind(this);
 	}
 
-	initColumns = (columns) => columns.map((col) => {
+	initColumns = (players) => {
+		const playersColumn = players.map((name, i) => {
+			return {
+				playerName: name,
+				index: i,
+				children: [{
+					title: 'Bid',
+					dataIndex: `bid${i}`,
+					width: 100,
+				}, {
+					title: 'Won',
+					dataIndex: `won${i}`,
+					width: 100,
+				}]
+			};
+		});
+
+		const columns = playersColumn.concat([{
+			children: [{
+				title: 'Trump',
+				dataIndex: 'trump',
+				width: 75,
+				render: cardsRenderer,
+			}, {
+				title: 'O/U',
+				dataIndex: 'segment',
+				width: 55,
+				render: (text, record) => {
+					return {
+						props: {
+							className: text === 0 ? 'failed-check' : '',
+						},
+						children: text,
+					};
+				},
+			}]
+		}]);
+
+		return columns;
+	};
+
+	initColumns1 = (columns) => columns.map((col) => {
 		if (!col.editable && !col.player) {
 			return col;
 		}
@@ -211,10 +332,50 @@ class GameTab extends Component {
 		};
 	});
 
+	fetch() {
+		const { match } = this.props;
+		const { params } = match;
+		const { leagueID, gameID } = params;
+
+		const dbRef = fire.database().ref();
+
+		if (this.gameRef) {
+			this.gameRef.off('value');
+		}
+
+		this.leagueGamesRef = dbRef.child(`leagueGames/_${leagueID * 1}`).orderByChild('gameID').equalTo(gameID * 1);
+
+		this.leagueGamesRef.once('value', snapshot => {
+			this.gameRef = fire.database().ref(`games/${Object.keys(snapshot.val())[0]}`);
+
+			this.gameRef.on('value', snap => {
+				this.setState({
+					...this.state,
+					...snap.val()
+				});
+				this.props.loaderStateCb(false);
+			});
+		});
+	}
+
+	componentDidMount() {
+		this.fetch();
+	}
+
+	componentWillUnmount() {
+		this.gameRef.off('value');
+	}
+
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		if (prevProps.match.params.gameID !== this.props.match.params.gameID) {
+			this.fetch();
+		}
+	}
+
 	handleSave = (row, player) => {
 		const stateToUpdate = {};
 		const newData = [...this.state.rounds];
-
+		console.log(row);
 		const index = newData.findIndex(item => row.round === item.round);
 
 		const item = newData[index];
@@ -227,13 +388,13 @@ class GameTab extends Component {
 		//reference to the new Data relevent row to update with score and segment
 		row = newData[index];
 
-		if (player) {
+		if (typeof player === 'number') {
 			let rowScore;
 			// calculate score
 			const bid = row[`bid${player}`];
 			const won = row[`won${player}`];
 
-			if (won && bid) {
+			if (won !== '' && bid !== '') {
 				if (won === bid) {
 					if ((won * 1) === 0) {
 						rowScore = 50;
@@ -250,20 +411,31 @@ class GameTab extends Component {
 					}
 				}
 
-			} else {
-				rowScore = 0;
+				row[`score${player}`] = rowScore;
+
+				//calculate aggregate score
+				if (index === 0) {
+					row[`aggregateScore${player}`] = rowScore;
+				} else {
+					row[`aggregateScore${player}`] = newData[index - 1][`aggregateScore${player}`] + rowScore;
+				}
+
+				let totalScore = 0;
+				newData.forEach((round, i) => {
+					totalScore += round[`score${player}`];
+
+					//to do - calculate if round fell - change next round factor 
+				});
+
+				// const totalScore = this.state[`totalScore${player}`] + rowScore;
+
+				stateToUpdate[`totalScore${player}`] = totalScore;
 			}
+			// else {
+			// 	rowScore = 0;
+			// }
 
-			row[`score${player}`] = rowScore;
 
-			let totalScore = 0;
-			newData.forEach((round, i) => {
-				totalScore += round[`score${player}`];
-
-				//to do - calculate if round fell - change next round factor 
-			});
-
-			stateToUpdate[`totalScore${player}`] = totalScore;
 
 			//update O/U
 			let currentTotalBid = null;
@@ -284,43 +456,79 @@ class GameTab extends Component {
 				}
 			}
 
-			row.segement = currentTotalBid !== null ? currentTotalBid - 13 : null;
-			row.check = allWonInput ? currentTotalWon === 13 : true;
+			row.segment = currentTotalBid !== null ? currentTotalBid - 13 : null;
+			row.check = allWonInput && currentTotalWon === 13;
 		}
 
 		stateToUpdate.rounds = newData;
 
-
-		this.setState(stateToUpdate);
+		// this.setState(stateToUpdate);
+		this.gameRef.update(stateToUpdate);
 	}
 
-	// toggleSlide = () => this.state.currentSlide ? this.carousel.prev() : this.carousel.next()
 	toggleSlide = () => {
-		this.setState({ currentView: this.currentSlide ? 'table' : 'panel' });
-		// this.currentSlide = !this.currentSlide;
-		this.currentSlide ? this.carousel.prev() : this.carousel.next()
+		const currentView = this.state.currentView === 'panel' ? 'table' : 'panel';
+		this.setCurrentViewState(currentView);
 	}
 
-	next = () => this.carousel.next()
+	setCurrentViewState(currentView) {
+		this.setState({ currentView });
+	}
+
+	selectActiveRound(newRound) {
+		const { rounds, currentRound, currentView } = this.state;
+
+		if (newRound < currentRound || rounds[currentRound - 1].check) {
+			// this.setState({
+			// 	currentRound: newRound
+			// });
+			this.gameRef.update({
+				currentRound: newRound
+			});
+
+			const { isMobile } = this.props;
+			if (isMobile && currentView === 'table') {
+				this.toggleSlide();
+			}
+		} else {
+			message.warning('Current round is not completed');
+		}
+	}
+
+	onDragEnd = (fromIndex, toIndex) => {
+		const { columns, players } = this.state;
+
+		const columnsCopy = columns.slice();
+		const column = columnsCopy.splice(fromIndex, 1)[0];
+		columnsCopy.splice(toIndex, 0, column);
+
+		const playersCopy = players.slice();
+		const player = playersCopy.splice(fromIndex, 1)[0];
+		playersCopy.splice(toIndex, 0, player);
+
+		this.setState({
+			columns: columnsCopy,
+			players: playersCopy
+		});
+	};
 
 	render() {
-		const {
-			currentView,
-			rounds
-		} = this.state;
-		const { screenSize } = this.props;
+		const { columns, currentView, rounds, currentRound } = this.state;
+		const { screenSize, isMobile, loading } = this.props;
 
-		const columns = this.columns1;
-
+		const columns1 = this.columns1;
+		const playersColumns = columns.slice(0, 4);
 		const components = {
 			body: {
 				row: EditableFormRow,
 				cell: EditableCell,
 			},
 		};
-
+		console.log(rounds);
 		//table width = 930px
-		const siderWidth = (screenSize - 930) / 2;
+		// const siderWidth = (screenSize - 930) / 2;
+		// 200 is league layout sider width
+		const siderWidth = (screenSize - 200 - 930) / 2;
 		let translate;
 		if (siderWidth < 130) {
 			translate = siderWidth - 65;
@@ -330,123 +538,134 @@ class GameTab extends Component {
 
 		return (
 			<div>
-				<Layout className="game-layout">
-					<Sider width={siderWidth} style={{ background: 'transparent' }} >
-						<div style={{ height: 119 }}>
-							<Button icon="table" onClick={this.toggleSlide} />
-						</div>
-						<Menu defaultSelectedKeys={['1']} mode="inline" style={{ background: '#fff', transform: `translate(${currentView === 'table' ? translate : 0}px)` }}>
-							{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1} style={{ textAlign: 'center' }}>
-								<span className="round-text" style={{ display: siderWidth < 200 ? 'none' : '' }}>Round</span> {i + 1}
-							</Menu.Item>)}
-
-						</Menu>
-					</Sider>
-					<Layout className={currentView === 'table' ? 'game-table' : 'game-panel'}>
-						<Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
-
-							{Array(4).fill(1).map((_, i) => (
-
-								<Card
-									key={i}
-									title="Card title"
-									className="card"
-									style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
+				{loading ? <Loader /> :
+					isMobile ?
+						<GameMobileView
+							currentView={currentView}
+							rounds={rounds}
+							playersColumns={playersColumns}
+							currentRound={currentRound}
+							handleSave={this.handleSave}
+							onCurrentViewChange={this.setCurrentViewState}
+							setNextRound={() => this.selectActiveRound(currentRound + 1)}
+						/>
+						:
+						<Layout className="game-layout">
+							<Sider width={siderWidth} style={{ background: 'transparent' }} >
+								<div style={{ height: 119 }}>
+									<Button icon="table" onClick={this.toggleSlide} />
+								</div>
+								<Menu
+									defaultSelectedKeys={['1']}
+									mode="inline"
+									// style={{ transform: `translate(${currentView === 'table' ? translate : 0}px)` }}
+									style={{ left: `${currentView === 'table' ? 0 : translate / 2 * -1}px` }}
+									onSelect={(item) => this.selectActiveRound(item.key)}
+									selectedKeys={[`${currentRound}`]}
 								>
-									Card content
-								</Card>
+									{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1} style={{ textAlign: 'center' }}>
+										<span className="round-text" style={{ display: siderWidth < 200 ? 'none' : '' }}>Round</span> {i + 1}
+									</Menu.Item>)}
 
-							))}
-
-						</Header>
-						<Content>
-							<Carousel
-								ref={node => this.carousel = node}
-								dots={false}
-								// afterChange={(current) => this.setState({ currentSlide: current })}
-								afterChange={(current) => this.currentSlide = current}
-							>
-								<div>
-									<Table
-										className='game-table'
-										components={components}
-										columns={this.columns}
-										rowKey='round'
-										dataSource={rounds}
-										size='small'
-										bordered
-										pagination={false}
-										// scroll={{ y: 520 }}
-										rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
-										style={{ display: 'inline-block' }}
-									/>
-								</div>
-								<div>
-									<div className="container">
-										<div class="item item1">
-											<Switch checkedChildren=" Won " unCheckedChildren=" Bid " />
-										</div>
-										<div class="item item2">
-											<div class="player-bid-won">
-												<span>Player 1</span>
-												<span>Bid:   Won:  </span>
-											</div>
-										</div>
-										<div class="item item3"></div>
-										<div class="item item4">
-											<div class="player-bid-won">
-												<span>Player 4</span>
-												<span>Bid:   Won:  </span>
-											</div>
-										</div>
-										<div class="item item5 dial-pad">
-											<Button size="large">0</Button>
-											<Button size="large">1</Button>
-											<Button size="large">2</Button>
-											<Button size="large">3</Button>
-											<Button size="large">4</Button>
-											<Button size="large">5</Button>
-											<Button size="large">6</Button>
-											<Button size="large">7</Button>
-											<Button size="large">8</Button>
-											<Button size="large">9</Button>
-											<Button size="large" className="more-btn">More...</Button>
-										</div>
-										<div class="item item6">
-											<div class="player-bid-won">
-												<span>Player 2</span>
-												<span>Bid:   Won:  </span>
-											</div>
-										</div>
-										<div class="item item7"></div>
-										<div class="item item8">
-											<div class="player-bid-won">
-												<span>Player 3</span>
-												<span>Bid:   Won:  </span>
-											</div>
-										</div>
-										<div class="item item9"></div>
+								</Menu>
+							</Sider>
+							<Layout className={currentView === 'table' ? 'game-table' : 'game-panel'}>
+								<Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
+									<ReactDragListView
+										onDragEnd={this.onDragEnd}
+										nodeSelector="div.card"
+									>
+										{playersColumns.map(({ index: playerIndex, playerName }, i) => (
+											<Card
+												key={i}
+												title={playerName}
+												className="card"
+												style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
+											>
+												<CssUp>
+													{this.state[`totalScore${playerIndex}`]}
+												</CssUp>
+											</Card>
+										))}
+									</ReactDragListView>
+								</Header>
+								<Content>
+									{/* <Carousel
+									ref={node => this.carousel = node}
+									dots={false}
+									afterChange={(current) => this.currentSlide = current}
+								>
+									<div>
+										<Table
+											className='game-table'
+											components={components}
+											columns={this.columns}
+											rowKey='round'
+											dataSource={rounds}
+											size='small'
+											bordered
+											pagination={false}
+											// scroll={{ y: 520 }}
+											rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
+											style={{ display: 'inline-block' }}
+										/>
 									</div>
-								</div>
+									{console.log('before gamepad')}
+									<GamePad
+										isMobile={false}
+										roundData={rounds[currentRound]}
+										onChange={this.handleSave}
+									/>
 
-							</Carousel>
+								</Carousel> */}
+									<div className="my-carousel">
+										<div className={`my-carousel-slides-container ${currentView}`}>
+											<div className="my-carousel-slide">
+												<Table
+													className='game-table'
+													components={components}
+													columns={columns}
+													rowKey='round'
+													dataSource={rounds}
+													size='small'
+													bordered
+													pagination={false}
+													//TODO: give class to active row when row===currentRound
+													//TODO: find a way to validate a row other then row.check
+													// rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
+													style={{ display: 'inline-block' }}
+												/>
+											</div>
+											<div className="my-carousel-slide">
+												<GamePad
+													isMobile={false}
+													roundData={rounds.length && rounds[currentRound - 1]}
+													players={playersColumns}
+													onChange={this.handleSave}
+												/>
+											</div>
+										</div>
+									</div>
 
 
-						</Content>
+								</Content>
 
-					</Layout>
-				</Layout>
+							</Layout>
+						</Layout>
+				}
+
+				{/** editable table */}
 				{/* <Table
 					className='game-table'
 					components={components}
-					columns={columns}
+					columns={columns1}
 					rowKey='round'
 					dataSource={rounds}
 					size='small'
 					bordered
 					pagination={false}
 					scroll={{ y: 520 }}
-					rowClassName={row => !row.check || row.segement === 0 ? 'failed-check' : ''}
+					rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
 				/> */}
 			</div>
 		);

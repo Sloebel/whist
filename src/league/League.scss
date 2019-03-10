@@ -1,62 +1,98 @@
-.league-stats {
-    position: absolute;
-    right: 0;
-    left: 0;
-    z-index: 100;
-    border-radius: 0;
+// .league-stats {
+//     position: absolute;
+//     right: 0;
+//     left: 0;
+//     z-index: 100;
+//     border-radius: 0;
 
-    & > .ant-collapse-item:last-child, 
-    .ant-collapse > .ant-collapse-item:last-child > .ant-collapse-header,
-    .ant-collapse-item:last-child > .ant-collapse-content {
-        border-radius: 0;
-    }
+//     & > .ant-collapse-item:last-child, 
+//     .ant-collapse > .ant-collapse-item:last-child > .ant-collapse-header,
+//     .ant-collapse-item:last-child > .ant-collapse-content {
+//         border-radius: 0;
+//     }
 
-    .ant-collapse-header {
-        height: 46px;
-    }
+//     .ant-collapse-header {
+//         height: 46px;
+//     }
     
-    .row-header {
-        > div {
-            font-weight: bold;
-            padding: 5px;
-            background: cadetblue;
-            color: #fff;
-            border: 1px solid;
-        }
-    }
+//     .row-header {
+//         > div {
+//             font-weight: bold;
+//             padding: 5px;
+//             background: cadetblue;
+//             color: #fff;
+//             border: 1px solid;
+//         }
+//     }
     
 
-    .row-data {
-        > div {
-            &:first-child {
-                background: transparent;
-                color: #333;
-                border: 0px;
-                text-align: left;
-                padding: 8px 0 0 2px;
+//     .row-data {
+//         > div {
+//             &:first-child {
+//                 background: transparent;
+//                 color: #333;
+//                 border: 0px;
+//                 text-align: left;
+//                 padding: 8px 0 0 2px;
+//             }
+//             padding: 5px;
+//             background: #7190c7;
+//             color: #fff;
+//             border: 1px solid;
+//         }
+//     }
+
+//     @media (min-width: 992px) {
+//        .row-data {
+//             > div {
+//                 &:first-child {
+//                     background: #387cfd;
+//                     padding: 5px;
+//                     color: #fff;
+//                     border: 1px solid;
+//                     text-align: center;
+//                 }   
+//             }  
+//         }
+//     }
+// }
+
+// .games-container {
+//     /*top: 48px;*/
+// }
+
+.league-container {
+    background: transparent;
+    height: 100%;
+
+    .ant-layout {
+        background: transparent;
+    }
+
+    .btn-menu-arrow-container {
+        float: right;
+    }
+
+    .rotate-180 {
+        transform: rotate(180deg);
+    }
+    .ant-menu-inline-collapsed {
+        .ant-menu-item {
+            > a {
+                max-width: 0;
+                display: inline-block;
+                opacity: 0;
             }
-            padding: 5px;
-            background: #7190c7;
-            color: #fff;
-            border: 1px solid;
-        }
-    }
-
-    @media (min-width: 992px) {
-       .row-data {
-            > div {
-                &:first-child {
-                    background: #387cfd;
-                    padding: 5px;
-                    color: #fff;
-                    border: 1px solid;
-                    text-align: center;
-                }   
-            }  
         }
     }
 }
 
-.games-container {
-    /*top: 48px;*/
+.league-menu {    
+    .ant-menu-item {
+        > a {
+            display: inline;
+            transition: opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), width 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+            opacity: 1;
+        }
+    }
 }

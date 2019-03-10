@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Form, Select } from 'antd';
+import { CARDS } from '../../constants/cards';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -29,7 +30,7 @@ class EditableCell extends Component {
       document.removeEventListener('click', this.handleClickOutside, true);
     }
   }
-  
+
   getOptionList(editorType) {
     if (editorType === 'bidWin') {
       return [...Array(15)].map((_, i) => {
@@ -37,7 +38,7 @@ class EditableCell extends Component {
         return <Option key={i} value={`${value}`}>{value}</Option>;
       });
     } else if (editorType === 'trump') {
-      return ['Spade', 'Hart', 'Diamond', 'Club', 'NT'].map((value, i) => {
+      return Object.values(CARDS).map((value, i) => {
         return <Option key={i} value={`${value}`}>{value}</Option>;
       });
     }

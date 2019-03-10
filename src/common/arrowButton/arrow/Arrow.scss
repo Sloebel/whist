@@ -1,0 +1,95 @@
+@mixin menu-arrow-button($direction, $width: 18px, $height: 14px) {
+  height: $height;
+  transform: rotate(0deg);
+  transition: transform .5s ease;
+  
+  $rotate-spin-value: '';
+  $rotate-before-value: '';
+  $rotate-after-value: '';
+  $transform-origin: '';
+
+  @if $direction == 'right' { 
+    $rotate-before-value: 45deg;
+    $rotate-after-value: -45deg;
+    $rotate-spin-value: 360deg;
+    $transform-origin: 0;
+  } @else if $direction == 'left' {
+    $rotate-before-value: -45deg;
+    $rotate-after-value: 45deg;
+    $rotate-spin-value: -360deg;
+    $transform-origin: $width / 2;
+  } 
+
+  & > span {
+      display: inline-block;
+      width: 100%;
+      height: 2px;
+      position: relative;
+      top: ($height / 2) * -1;
+      background: #0e6b11;
+
+      &:before,
+      &:after {
+        content: '';
+        display: inline-block;
+        width: $width; 
+        height: 2px;
+        background-color: inherit;
+        position: absolute;
+        right: 0;
+      }
+
+      &:before {
+        top: -5px;
+        transition: transform .3s ease;
+        transform-origin: $transform-origin;
+      }
+
+      &:after {
+        bottom: -5px;
+        transition: transform .3s ease, width .25s ease .25s;
+        transform-origin: $transform-origin;
+
+      }
+  }    
+          
+  &.spin {
+      transform: rotate($rotate-spin-value);
+  }
+
+  &.arrow {
+    span {
+        &:before {
+            #{$direction}: -4px;
+            top: -4px;
+            transform: rotate($rotate-before-value) scaleX(0.6);
+        }
+        
+        &:after {
+            #{$direction}: -4px;
+            bottom: -4px;
+            transform: rotate($rotate-after-value) scaleX(0.6);
+        }
+    }
+}
+  
+}
+
+$arrow-width: 18px;
+
+.btn-menu-arrow {
+  width: $arrow-width;
+  &.right {
+      @include menu-arrow-button($direction: 'right', $width: $arrow-width);
+  }   
+  &.left {
+      @include menu-arrow-button($direction: 'left', $width: $arrow-width);
+  } 
+}
+
+.btn-menu-arrow-container {
+  width: 32px;
+  margin: 10px 0;
+  padding: 6px 7px 8px;
+  cursor: pointer;
+}

@@ -14,6 +14,11 @@
         }
     }
 
+    thead {
+        tr:first-child {
+            display: none;
+        }
+    }
     th, td {
         text-align: center !important;
     }
@@ -40,9 +45,7 @@
         &.failed-check {
             background: #ffc8c8 !important;
         }
-    }
-
-    
+    }   
     
 }
 
@@ -54,7 +57,10 @@
     
     .ant-menu {
         width: 50%;
+        max-width: 150px;
         min-width: 65px;
+        float: right;
+        position: relative;
         transition: all 0.3s;
 
         .ant-menu-item { 
@@ -77,6 +83,8 @@
             width: 200px;
             height: 80px;
             text-align: center;
+            overflow: hidden;
+            cursor: move;
         }       
     }
     .ant-card-head {
@@ -97,44 +105,174 @@
         .ant-table-row {
             td {
                 height: 36px;
+                line-height: 1;
             } 
         }
     }
 
-    .container {
-        display: grid;
-        width: 100%;
-        height: 100%;
-        max-width: 980px;
-        grid-auto-rows: auto;
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-template-rows: 1fr 2.5fr 1fr;
-        // grid-gap: 1rem;
-        justify-items: center;
-        margin-top: 50px;;
+    
 
-        .item {
-            // border: 2px solid #171717;
-        }
+    span.card-btn {
+        background: url(/src/images/spades.svg) no-repeat center;
+        background-size: contain;
+        display: inline-block;
+        height: 52px;
+        width: 40px;
+    }
+}
 
-        .dial-pad {
-            padding: 12px;
-            display: grid;
-            min-width: 251px;
-            grid-template-columns: repeat(3, auto);
-            grid-template-rows: repeat(4, 1fr);
-            grid-gap: 18px;
-            background: #27a727;
+.mobile {
+    .game-table {
+        text-align:  center;
 
-            .more-btn {
-                grid-column-start: 2;
-                grid-column-end: 4;
+        .table-row {
+            &:not(:last-child) {
+                .table-cell {                
+                    border-bottom: 1px solid #e8e8e8;
+                }               
             }
         }
 
-        .item6 {
-            justify-self: left;
+        .table-cell {
+            background: #fff;
+            padding: 4px;
+            height: 30px;
+
+            &.fell {
+                color: red;
+            }
         }
-      }
+    }
+
+    .dial-pad {
+        min-width: auto;
+    }
+
+    .item2 {
+        margin-bottom: 10px;
+    }
 }
 
+.game-pad-container {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    max-width: 980px;
+    grid-auto-rows: auto;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    // grid-gap: 1rem;
+    justify-items: center;
+    margin-top: 20px;
+
+    .item2,
+    .item4,
+    .item6,
+    .item8 {
+        align-self: center;
+        
+        .ant-radio-button-wrapper {
+            height: auto;
+        }
+    }
+    
+    .item4 {
+        justify-self: end;
+        margin-right: 52px;
+    }
+
+    .item6 {
+        justify-self: left;
+        margin-left: 50px;
+    }
+
+    .item8 {
+        grid-column-start: 2;
+        grid-column-end: 3;
+        transform: translateY(-15px);
+    }
+
+    .mobile & {
+        margin-top: 0px;
+        display: block;  
+
+        .item2,
+        .item4,
+        .item6 {
+            align-self: center;
+        }
+        .item4 {
+            margin-right: 0;
+            justify-self: auto;
+        }
+        .item6 {
+            justify-self: auto;
+            margin-left: 0;
+        }
+        .item8 {
+            transform: translateY(12px);
+        }
+        .cards-pad {
+            grid-gap: 4px;
+        }
+        .dial-pad {
+            padding: 6px;
+            grid-gap: 16px 8px;
+        }
+    }
+ 
+    @media screen and (max-width: 360px) {
+        label {
+            padding: 0 10px;
+        }
+    }
+}
+
+.my-carousel {
+    overflow: hidden;
+
+    .my-carousel-slides-container {
+        display: flex;
+        width: 100%;
+        transition: all 0.3s ease-in;
+
+        &.panel{
+            transform: translateX(-100%);
+        }
+    }
+
+    .my-carousel-slide {
+        width: 100%;
+        min-width: 100%
+    }
+}
+
+@keyframes bounce-right {
+    0%, 100% {transform: translateX(0);}    
+    60% {transform: translateX(20px);}
+} 
+
+.bounce-right {
+    animation-duration: 0.4s;
+    animation-name: bounce-right;
+}
+
+@keyframes bounce-left {
+    0%, 100% {transform: translateX(0);}    
+    60% {transform: translateX(-20px);}
+} 
+
+.bounce-left {
+    animation-duration: 0.4s;
+    animation-name: bounce-left;
+}
+
+@keyframes slide-up {
+    0% {transform: translateY(30px);}
+    100% {transform: translateY(0);}
+}
+
+.slide-up {
+    animation-duration: 0.4s;
+    animation-name: slide-up;
+}

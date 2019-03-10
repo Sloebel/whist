@@ -4,7 +4,15 @@
   bottom: 0px;
   right: 0px;
   left: 0px;
-  background: limegreen; }
+  overflow: auto;
+  background: #34df34; }
+
+.full-view {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  right: 0px;
+  left: 0px; }
 
 ul.app-menu {
   list-style: none;
@@ -26,42 +34,78 @@ ul.app-menu li {
   background-color:#a1a1a1;
   color: #222;
 } */
-.app header,
-.app .app-main,
-.app .league-stats {
-  text-align: center; }
-
-.app-logo {
-  /* animation: App-logo-spin infinite 20s linear; */
-  height: 150px;
-  padding-bottom: 30px;
-  transform: translate(60px);
-  transition: all 0.5s; }
-
-.inline .app-logo {
-  transform: translate(0px);
-  padding-bottom: 0px;
-  height: 90px; }
+.app {
+  height: 100%;
+  overflow: hidden; }
+  .app header,
+  .app .app-main,
+  .app .league-stats {
+    text-align: center; }
+  .app .loader .ant-spin-dot i {
+    background-color: #000; }
 
 #app-header {
-  background-color: #222;
-  /* height: 150px;
-  padding: 20px; */ }
+  background-color: #222; }
+  #app-header .app-title {
+    /* font-size: 1.5em; */
+    color: white;
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 0px;
+    transform: translate(-84px, 62px);
+    transition: all 0.5s; }
+  #app-header .app-logo {
+    /* animation: App-logo-spin infinite 20s linear; */
+    height: 150px;
+    padding-bottom: 30px;
+    transform: translate(60px);
+    transition: all 0.5s; }
+  .inline-header #app-header .app-logo {
+    transform: translate(0px);
+    padding-bottom: 0px;
+    height: 90px; }
+  .inline-header #app-header .app-title {
+    transform: translate(0px); }
+  .mobile:not(.inline-header) #app-header .app-logo {
+    height: 120px; }
+  .mobile:not(.inline-header) #app-header .app-title {
+    transform: translate(-63px, 43px); }
+  .mobile.inline-header #app-header .app-logo {
+    height: 60px; }
 
-.app-title {
-  /* font-size: 1.5em; */
-  color: white;
-  display: inline-block;
-  vertical-align: middle;
-  margin-bottom: 0px;
-  transform: translate(-84px, 62px);
-  transition: all 0.5s; }
+.app-content {
+  height: calc(100% - 90px); }
+  .mobile .app-content {
+    height: calc(100% - 60px); }
 
-.inline .app-title {
-  transform: translate(0px); }
+.drawer .ant-menu-inline,
+.drawer .ant-menu-vertical {
+  border-right: none; }
 
-.app-intro {
-  font-size: large; }
+.drawer-content {
+  padding-top: 40px; }
+
+.drawer-left .ant-menu-inline .ant-menu-item:after,
+.drawer-left .ant-menu-vertical .ant-menu-item:after {
+  left: 0;
+  right: auto; }
+
+.drawer.drawer-left .drawer-handle {
+  top: 10px;
+  box-shadow: 2px 0 2px rgba(0, 0, 0, 0.15);
+  background: transparent;
+  transition: all 0.3s; }
+
+.drawer.drawer-left .drawer-handle-icon {
+  background: #34df34; }
+  .drawer.drawer-left .drawer-handle-icon:after, .drawer.drawer-left .drawer-handle-icon:before {
+    background: #34df34; }
+
+.drawer.drawer-open .drawer-handle {
+  background: #fff; }
+
+.drawer.drawer-open .drawer-handle-icon:after, .drawer.drawer-open .drawer-handle-icon:before {
+  background: #1a911a; }
 
 @keyframes App-logo-spin {
   from {
