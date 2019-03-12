@@ -95,7 +95,8 @@ class GamePad extends Component {
   }
 
   calculateDisableNum() {
-    const { players, roundData } = this.props;
+    const { players, allRounds, currentRound } = this.props;
+    const roundData = allRounds.length && allRounds[currentRound - 1];
     const { highestBidder, inputMode } = roundData;
     const { selectedPlayer } = this.state;
 
@@ -165,21 +166,54 @@ class GamePad extends Component {
 
   // getAfterPlayers = (selectedPlayer) => [1, 2, 3].map(afterPlayer => selectedPlayer + afterPlayer > 4 ? selectedPlayer + afterPlayer - 4 : selectedPlayer + afterPlayer);
 
-  getPlayersButtons = (players, roundData, highestBidder) => players.map(({ index: playerIndex, playerName }, i) => (
-    <Badge key={playerIndex} dot={highestBidder === playerIndex}>
-      <Radio.Button value={playerIndex}>
-        <PlayerPad name={playerName} bid={roundData[`bid${playerIndex}`]} won={roundData[`won${playerIndex}`]} score={roundData[`aggregateScore${playerIndex}`]} />
-      </Radio.Button>
-    </Badge>)
-  );
+  getPlayerAggregateScore = (playerIndex) => {
+    const { isMobile, allRounds, currentRound } = this.props;
+    const currentRoundData = allRounds.length && allRounds[currentRound - 1];
+    const roundBeforeData = currentRound > 1 ? allRounds.length && allRounds[currentRound - 2] : undefined;
+
+    if (isMobile) {
+      if (currentRoundData[`aggregateScore${playerIndex}`]) {
+        return currentRoundData[`aggregateScore${playerIndex}`];
+      }
+      if (roundBeforeData) {
+        return roundBeforeData[`aggregateScore${playerIndex}`];
+      }
+
+      return 0;
+    }
+
+    return undefined;
+  }
+
+  getPlayersButtons = () => {
+    const { allRounds, currentRound, players } = this.props;
+    const currentRoundData = allRounds.length && allRounds[currentRound - 1];
+    const highestBidder = currentRoundData.highestBidder;
+
+    return players.map(({ index: playerIndex, playerName }, i) => {
+      return (
+        <Badge key={playerIndex} dot={highestBidder === playerIndex}>
+          <Radio.Button value={playerIndex}>
+            <PlayerPad
+              name={playerName}
+              bid={currentRoundData[`bid${playerIndex}`]}
+              won={currentRoundData[`won${playerIndex}`]}
+              score={this.getPlayerAggregateScore(playerIndex)}
+            />
+          </Radio.Button>
+        </Badge>
+      );
+    });
+  };
 
   render() {
-    const { isMobile, roundData, players } = this.props;
-    const { round, check, trump, segment, inputMode, bid0, won0, bid1, won1, bid2, won2, bid3, won3 } = roundData;
+    const { isMobile, allRounds, currentRound, players } = this.props;
+    const currentRoundData = allRounds.length && allRounds[currentRound - 1];
+    const { round, check, trump, segment, inputMode } = currentRoundData;
     const { selectedPlayer } = this.state;
-    const highestBidder = roundData.highestBidder;
+    const highestBidder = currentRoundData.highestBidder;
 
-    const playersButtons = this.getPlayersButtons(players, roundData, highestBidder);
+    const playersButtons = this.getPlayersButtons(players, currentRoundData, highestBidder);
 
     return (
       <div ref={(el) => this.padContainer = el}>

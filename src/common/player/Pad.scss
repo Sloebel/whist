@@ -12,6 +12,7 @@
   .pad-score {
     float: right;
     font-weight: 400;
+    overflow: hidden;
 
     > div {
       display: inline-block;

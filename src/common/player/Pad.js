@@ -9,9 +9,10 @@ const PlayerPad = (props) => {
     <div className="player-pad">
       <div className="pad-name">
         {name}&nbsp;
-        <span className="pad-score">
-          [<CssUp>{score}</CssUp>]
-        </span>
+        {score !== undefined &&
+          <span className="pad-score">
+            [<CssUp>{score}</CssUp>]
+        </span>}
       </div>
 
       <div className="pad-bid-won">

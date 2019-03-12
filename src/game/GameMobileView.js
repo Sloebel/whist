@@ -72,6 +72,8 @@ export default class GameMobileView extends Component {
             <div className="my-carousel-slide">
               <GamePad
                 isMobile={true}
+                currentRound={currentRound}
+                allRounds={rounds}
                 roundData={rounds.length && rounds[currentRound - 1]}
                 players={playersColumns}
                 onChange={handleSave}

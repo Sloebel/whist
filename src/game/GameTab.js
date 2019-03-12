@@ -479,9 +479,6 @@ class GameTab extends Component {
 		const { rounds, currentRound, currentView } = this.state;
 
 		if (newRound < currentRound || rounds[currentRound - 1].check) {
-			// this.setState({
-			// 	currentRound: newRound
-			// });
 			this.gameRef.update({
 				currentRound: newRound
 			});
@@ -524,7 +521,6 @@ class GameTab extends Component {
 				cell: EditableCell,
 			},
 		};
-		console.log(rounds);
 		//table width = 930px
 		// const siderWidth = (screenSize - 930) / 2;
 		// 200 is league layout sider width
@@ -639,7 +635,8 @@ class GameTab extends Component {
 											<div className="my-carousel-slide">
 												<GamePad
 													isMobile={false}
-													roundData={rounds.length && rounds[currentRound - 1]}
+													currentRound={currentRound}
+													allRounds={rounds}
 													players={playersColumns}
 													onChange={this.handleSave}
 												/>
