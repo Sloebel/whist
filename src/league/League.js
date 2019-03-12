@@ -178,6 +178,7 @@ class League extends Component {
 						onHandleClick={this.toggleDrawer}
 						onMaskClick={this.toggleDrawer}
 					>
+						<div className="drawer-title">{league.title}</div>
 						{this.getMenu()}
 					</RcDrawer>
 				)

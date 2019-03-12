@@ -82,13 +82,19 @@ ul.app-menu li {
 .drawer .ant-menu-vertical {
   border-right: none; }
 
-.drawer-content {
-  padding-top: 40px; }
-
 .drawer-left .ant-menu-inline .ant-menu-item:after,
 .drawer-left .ant-menu-vertical .ant-menu-item:after {
   left: 0;
   right: auto; }
+
+.drawer-title {
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+  border-bottom: 1px solid #c7d1c5; }
 
 .drawer.drawer-left .drawer-handle {
   top: 10px;
