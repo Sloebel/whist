@@ -49,32 +49,48 @@ export default class GameMobileView extends Component {
     }
   }
 
+  nextRound = () => {
+    const { goToRound, currentRound } = this.props;
+    const round = Number(currentRound);
+
+    if (round < 13) {
+      goToRound && goToRound(round + 1);
+    }
+  }
+
+  toRoundBefore = () => {
+    const { goToRound, currentRound } = this.props;
+    const round = Number(currentRound);
+
+    if (round !== 1) {
+      goToRound && goToRound(round - 1);
+    }
+  }
+
   render() {
     const {
       currentView,
       rounds,
       playersColumns,
       currentRound,
-      handleSave,
-      setNextRound
+      handleSave
     } = this.props;
 
     return (
-      <div>
+      <div className="game-mobile-view">
         <div
           className="my-carousel"
           ref={el => (this.carouselEl = el)}
         >
           <div className={`my-carousel-slides-container ${currentView}`}>
             <div className="my-carousel-slide">
-              <MobileTable dataSource={rounds} players={playersColumns} />
+              <MobileTable dataSource={rounds} players={playersColumns} currentRound={currentRound} />
             </div>
             <div className="my-carousel-slide">
               <GamePad
                 isMobile={true}
                 currentRound={currentRound}
                 allRounds={rounds}
-                roundData={rounds.length && rounds[currentRound - 1]}
                 players={playersColumns}
                 onChange={handleSave}
               />
@@ -82,9 +98,17 @@ export default class GameMobileView extends Component {
           </div>
         </div>
         <div className="round-navigation">
-          <Button type="primary" onClick={setNextRound}>
-            Next<Icon type="right" />
-          </Button>
+          {currentRound !== 1 &&
+            <Button type="primary" className="left" ghost onClick={this.toRoundBefore}>
+              <Icon type="left" />{`Round ${currentRound - 1}`}
+            </Button>
+          }
+
+          {currentRound !== 13 &&
+            <Button type="primary" ghost onClick={this.nextRound}>
+              {`Round ${parseInt(currentRound) + 1}`}<Icon type="right" />
+            </Button>
+          }
         </div>
       </div>
     );

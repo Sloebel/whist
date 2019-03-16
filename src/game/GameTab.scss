@@ -131,15 +131,38 @@
                     border-bottom: 1px solid #e8e8e8;
                 }               
             }
+
+            &.current-round {
+                > div:first-child {
+                    border-right: 2px solid #1a911a;
+                    
+                    .table-cell {
+                        background: #c7d1c5;
+                        color: #1a911a;
+                    }
+                }
+            }
         }
 
         .table-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: #fff;
             padding: 4px;
             height: 30px;
 
             &.fell {
                 color: red;
+            }
+
+            &.highest-bidder {
+                background: #f8f8f8;
+            }
+            .trump {
+                position: absolute;
+                right: 4px; 
+                font-size: 12px;
             }
         }
     }
@@ -150,6 +173,28 @@
 
     .item2 {
         margin-bottom: 10px;
+    }
+
+    .game-mobile-view {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        .round-navigation {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+
+            button {
+                border: none;
+                box-shadow: none;
+
+                &.left {
+                    margin-right: auto;
+                } 
+            }
+        }
     }
 }
 
@@ -194,7 +239,13 @@
 
     .mobile & {
         margin-top: 0px;
+        padding-top: 8px;
         display: block;  
+        
+        h3 {
+            margin-bottom: 12px;
+            padding-left: 6px;
+        }
 
         .item2,
         .item4,
@@ -210,7 +261,8 @@
             margin-left: 0;
         }
         .item8 {
-            transform: translateY(12px);
+            transform: translateY(0px);
+            margin-top: 12px;
         }
         .cards-pad {
             grid-gap: 4px;

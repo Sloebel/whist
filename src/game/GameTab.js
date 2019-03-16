@@ -260,6 +260,7 @@ class GameTab extends Component {
 
 		this.selectActiveRound = this.selectActiveRound.bind(this);
 		this.setCurrentViewState = this.setCurrentViewState.bind(this);
+		this.selectActiveRound = this.selectActiveRound.bind(this);
 	}
 
 	initColumns = (players) => {
@@ -478,9 +479,9 @@ class GameTab extends Component {
 	selectActiveRound(newRound) {
 		const { rounds, currentRound, currentView } = this.state;
 
-		if (newRound < currentRound || rounds[currentRound - 1].check) {
+		if (parseInt(newRound) < parseInt(currentRound) || rounds[currentRound - 1].check) {
 			this.gameRef.update({
-				currentRound: newRound
+				currentRound: parseInt(newRound)
 			});
 
 			const { isMobile } = this.props;
@@ -532,61 +533,66 @@ class GameTab extends Component {
 			translate = siderWidth / 2;
 		}
 
-		return (
-			<div>
-				{loading ? <Loader /> :
-					isMobile ?
-						<GameMobileView
-							currentView={currentView}
-							rounds={rounds}
-							playersColumns={playersColumns}
-							currentRound={currentRound}
-							handleSave={this.handleSave}
-							onCurrentViewChange={this.setCurrentViewState}
-							setNextRound={() => this.selectActiveRound(currentRound + 1)}
-						/>
-						:
-						<Layout className="game-layout">
-							<Sider width={siderWidth} style={{ background: 'transparent' }} >
-								<div style={{ height: 119 }}>
-									<Button icon="table" onClick={this.toggleSlide} />
-								</div>
-								<Menu
-									defaultSelectedKeys={['1']}
-									mode="inline"
-									// style={{ transform: `translate(${currentView === 'table' ? translate : 0}px)` }}
-									style={{ left: `${currentView === 'table' ? 0 : translate / 2 * -1}px` }}
-									onSelect={(item) => this.selectActiveRound(item.key)}
-									selectedKeys={[`${currentRound}`]}
-								>
-									{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1} style={{ textAlign: 'center' }}>
-										<span className="round-text" style={{ display: siderWidth < 200 ? 'none' : '' }}>Round</span> {i + 1}
-									</Menu.Item>)}
+		if (loading) {
+			return <Loader />
+		}
 
-								</Menu>
-							</Sider>
-							<Layout className={currentView === 'table' ? 'game-table' : 'game-panel'}>
-								<Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
-									<ReactDragListView
-										onDragEnd={this.onDragEnd}
-										nodeSelector="div.card"
-									>
-										{playersColumns.map(({ index: playerIndex, playerName }, i) => (
-											<Card
-												key={i}
-												title={playerName}
-												className="card"
-												style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
-											>
-												<CssUp>
-													{this.state[`totalScore${playerIndex}`]}
-												</CssUp>
-											</Card>
-										))}
-									</ReactDragListView>
-								</Header>
-								<Content>
-									{/* <Carousel
+		if (isMobile) {
+			return (
+				<GameMobileView
+					currentView={currentView}
+					rounds={rounds}
+					playersColumns={playersColumns}
+					currentRound={currentRound}
+					handleSave={this.handleSave}
+					onCurrentViewChange={this.setCurrentViewState}
+					goToRound={this.selectActiveRound}
+				/>
+			);
+		}
+
+		return (
+			<Layout className="game-layout">
+				<Sider width={siderWidth} style={{ background: 'transparent' }} >
+					<div style={{ height: 119 }}>
+						<Button icon="table" onClick={this.toggleSlide} />
+					</div>
+					<Menu
+						defaultSelectedKeys={['1']}
+						mode="inline"
+						// style={{ transform: `translate(${currentView === 'table' ? translate : 0}px)` }}
+						style={{ left: `${currentView === 'table' ? 0 : translate / 2 * -1}px` }}
+						onSelect={(item) => this.selectActiveRound(item.key)}
+						selectedKeys={[`${currentRound}`]}
+					>
+						{Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1} style={{ textAlign: 'center' }}>
+							<span className="round-text" style={{ display: siderWidth < 200 ? 'none' : '' }}>Round</span> {i + 1}
+						</Menu.Item>)}
+
+					</Menu>
+				</Sider>
+				<Layout className={currentView === 'table' ? 'game-table' : 'game-panel'}>
+					<Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
+						<ReactDragListView
+							onDragEnd={this.onDragEnd}
+							nodeSelector="div.card"
+						>
+							{playersColumns.map(({ index: playerIndex, playerName }, i) => (
+								<Card
+									key={i}
+									title={playerName}
+									className="card"
+									style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
+								>
+									<CssUp>
+										{this.state[`totalScore${playerIndex}`]}
+									</CssUp>
+								</Card>
+							))}
+						</ReactDragListView>
+					</Header>
+					<Content>
+						{/* <Carousel
 									ref={node => this.carousel = node}
 									dots={false}
 									afterChange={(current) => this.currentSlide = current}
@@ -614,59 +620,60 @@ class GameTab extends Component {
 									/>
 
 								</Carousel> */}
-									<div className="my-carousel">
-										<div className={`my-carousel-slides-container ${currentView}`}>
-											<div className="my-carousel-slide">
-												<Table
-													className='game-table'
-													components={components}
-													columns={columns}
-													rowKey='round'
-													dataSource={rounds}
-													size='small'
-													bordered
-													pagination={false}
-													//TODO: give class to active row when row===currentRound
-													//TODO: find a way to validate a row other then row.check
-													// rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
-													style={{ display: 'inline-block' }}
-												/>
-											</div>
-											<div className="my-carousel-slide">
-												<GamePad
-													isMobile={false}
-													currentRound={currentRound}
-													allRounds={rounds}
-													players={playersColumns}
-													onChange={this.handleSave}
-												/>
-											</div>
-										</div>
-									</div>
+						<div className="my-carousel">
+							<div className={`my-carousel-slides-container ${currentView}`}>
+								<div className="my-carousel-slide">
+									<Table
+										className='game-table'
+										components={components}
+										columns={columns}
+										rowKey='round'
+										dataSource={rounds}
+										size='small'
+										bordered
+										pagination={false}
+										//TODO: give class to active row when row===currentRound
+										//TODO: find a way to validate a row other then row.check
+										// rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
+										style={{ display: 'inline-block' }}
+									/>
+								</div>
+								<div className="my-carousel-slide">
+									<GamePad
+										isMobile={false}
+										currentRound={currentRound}
+										allRounds={rounds}
+										players={playersColumns}
+										onChange={this.handleSave}
+									/>
+								</div>
+							</div>
+						</div>
 
 
-								</Content>
+					</Content>
 
-							</Layout>
-						</Layout>
-				}
-
-				{/** editable table */}
-				{/* <Table
-					className='game-table'
-					components={components}
-					columns={columns1}
-					rowKey='round'
-					dataSource={rounds}
-					size='small'
-					bordered
-					pagination={false}
-					scroll={{ y: 520 }}
-					rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
-				/> */}
-			</div>
+				</Layout>
+			</Layout>
 		);
 	}
 }
 
 export default GameTab;
+
+
+
+
+/** editable table */
+/* <Table
+			className='game-table'
+			components={components}
+			columns={columns1}
+			rowKey='round'
+			dataSource={rounds}
+			size='small'
+			bordered
+			pagination={false}
+			scroll={{ y: 520 }}
+			rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
+		/> */

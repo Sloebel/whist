@@ -7,7 +7,11 @@
   height: 50px;
   width: 40px;
   border-radius: 5px;
-  
+
+  .mobile & {
+    font-size: 18px;
+  }  
+
   &:before {
     content: none;
   }
@@ -26,6 +30,7 @@
   .anticon, .NT {
     font-size: 14px;
     font-weight: bold;
+    color: #333;
   }
 
   .spade {

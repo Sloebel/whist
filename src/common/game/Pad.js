@@ -28,7 +28,8 @@ class GamePad extends Component {
   }
 
   handleSwitchMode(checked) {
-    const { roundData, onChange } = this.props;
+    const { allRounds, currentRound, onChange } = this.props;
+    const roundData = allRounds.length && allRounds[currentRound - 1];
 
     const everyoneBid = Array(4).fill(1).every((_, i) => typeof roundData[`bid${i}`] === 'number');
 
@@ -44,7 +45,6 @@ class GamePad extends Component {
 
   setSelectedPlayer(e) {
     if (e.target.type === 'radio') {
-      console.log('selecting player');
       this.setState({
         selectedPlayer: e.target.value
       });
@@ -52,7 +52,8 @@ class GamePad extends Component {
   }
 
   handleCardsPadChange(trump) {
-    const { roundData, onChange } = this.props;
+    const { allRounds, currentRound, onChange } = this.props;
+    const roundData = allRounds.length && allRounds[currentRound - 1];
     const { inputMode } = roundData;
 
     if (inputMode !== INPUT_MODE.WON) {
@@ -61,7 +62,8 @@ class GamePad extends Component {
   }
 
   handleNumberSelect(num) {
-    const { players, roundData, onChange } = this.props;
+    const { players, allRounds, currentRound, onChange } = this.props;
+    const roundData = allRounds.length && allRounds[currentRound - 1];
     const { inputMode, highestBidder } = roundData;
     const { selectedPlayer } = this.state;
     const mode = inputMode === INPUT_MODE.BID ? 'bid' : 'won';
@@ -215,90 +217,84 @@ class GamePad extends Component {
 
     const playersButtons = this.getPlayersButtons(players, currentRoundData, highestBidder);
 
-    return (
-      <div ref={(el) => this.padContainer = el}>
-        {isMobile ? (
-          <div>
-            <h3>Round: {round}</h3>
-            <Radio.Group
-              buttonStyle="solid"
-              className="game-pad-container"
-              onChange={this.setSelectedPlayer}
-              value={selectedPlayer}
-            >
-              <Row type="flex" justify="space-around">
-
-                <Col>
-                  <Switch
-                    onChange={this.handleSwitchMode}
-                    checkedChildren=" Won "
-                    unCheckedChildren=" Bid "
-                    checked={inputMode === INPUT_MODE.WON}
-                  />
-                  <div>Bids: {segment}</div>
-                  <div>Check: {check ? 'yes' : 'no'}</div>
-                </Col>
-                <Col className="item item2">
-                  {playersButtons[0]}
-                </Col>
-                <Col>
-                  <CardsModal trump={trump} onChange={this.handleCardsPadChange} disabled={inputMode === INPUT_MODE.WON} />
-                </Col>
-
-
-              </Row>
-              <Row type="flex" justify="space-around">
-                <Col className="item item4">
-                  {playersButtons[3]}
-                </Col>
-                <Col>
-                  <NumbersPad isMobile={isMobile} disabledNumber={this.calculateDisableNum()} onSelect={this.handleNumberSelect} disabled={selectedPlayer === undefined} />
-                </Col>
-                <Col className="item item6">
-                  {playersButtons[1]}
-                </Col>
-              </Row>
-              <Row type="flex" justify="center">
-                <Col className="item item8">
-                  {playersButtons[2]}
-                </Col>
-
-              </Row>
-            </Radio.Group>
-          </div>
-        ) :
-          (<Radio.Group
-            buttonStyle="solid"
-            className="game-pad-container"
-            onChange={this.setSelectedPlayer}
-            value={selectedPlayer}
-          >
-            <div className="item item1">
-              <Switch onChange={this.handleSwitchMode} checkedChildren=" Won " unCheckedChildren=" Bid " checked={inputMode === INPUT_MODE.WON} />
+    if (isMobile) {
+      return (
+        <Radio.Group
+          buttonStyle="solid"
+          className="game-pad-container"
+          onChange={this.setSelectedPlayer}
+          value={selectedPlayer}
+        >
+          <h3>Round: {round}</h3>
+          <Row type="flex" justify="space-around">
+            <Col>
+              <Switch
+                onChange={this.handleSwitchMode}
+                checkedChildren=" Won "
+                unCheckedChildren=" Bid "
+                checked={inputMode === INPUT_MODE.WON}
+              />
               <div>Bids: {segment}</div>
               <div>Check: {check ? 'yes' : 'no'}</div>
-            </div>
-            <div className="item item2">
+            </Col>
+            <Col className="item item2">
               {playersButtons[0]}
-            </div>
-
-
-            <CardsPad isMobile={isMobile} trump={trump} onChange={this.handleCardsPadChange} />
-            <div className="item item4">
+            </Col>
+            <Col>
+              <CardsModal trump={trump} onChange={this.handleCardsPadChange} disabled={inputMode === INPUT_MODE.WON} />
+            </Col>
+          </Row>
+          <Row type="flex" justify="space-around">
+            <Col className="item item4">
               {playersButtons[3]}
-            </div>
-
-            <NumbersPad isMobile={isMobile} disabledNumber={this.calculateDisableNum()} onSelect={this.handleNumberSelect} disabled={selectedPlayer === undefined} />
-            <div className="item item6">
+            </Col>
+            <Col>
+              <NumbersPad isMobile={isMobile} disabledNumber={this.calculateDisableNum()} onSelect={this.handleNumberSelect} disabled={selectedPlayer === undefined} />
+            </Col>
+            <Col className="item item6">
               {playersButtons[1]}
-            </div>
-
-            <div className="item item8">
+            </Col>
+          </Row>
+          <Row type="flex" justify="center">
+            <Col className="item item8">
               {playersButtons[2]}
-            </div>
-          </Radio.Group>)}
+            </Col>
+
+          </Row>
+        </Radio.Group>
+      );
+    }
+
+    return (<Radio.Group
+      buttonStyle="solid"
+      className="game-pad-container"
+      onChange={this.setSelectedPlayer}
+      value={selectedPlayer}
+    >
+      <div className="item item1">
+        <Switch onChange={this.handleSwitchMode} checkedChildren=" Won " unCheckedChildren=" Bid " checked={inputMode === INPUT_MODE.WON} />
+        <div>Bids: {segment}</div>
+        <div>Check: {check ? 'yes' : 'no'}</div>
       </div>
-    );
+      <div className="item item2">
+        {playersButtons[0]}
+      </div>
+
+
+      <CardsPad isMobile={isMobile} trump={trump} onChange={this.handleCardsPadChange} />
+      <div className="item item4">
+        {playersButtons[3]}
+      </div>
+
+      <NumbersPad isMobile={isMobile} disabledNumber={this.calculateDisableNum()} onSelect={this.handleNumberSelect} disabled={selectedPlayer === undefined} />
+      <div className="item item6">
+        {playersButtons[1]}
+      </div>
+
+      <div className="item item8">
+        {playersButtons[2]}
+      </div>
+    </Radio.Group>);
   }
 };
 

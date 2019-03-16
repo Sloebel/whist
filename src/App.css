@@ -98,7 +98,7 @@ ul.app-menu li {
 
 .drawer.drawer-left .drawer-handle {
   top: 10px;
-  box-shadow: 2px 0 2px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
   background: transparent;
   transition: all 0.3s; }
 
