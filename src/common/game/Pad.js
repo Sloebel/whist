@@ -30,10 +30,15 @@ class GamePad extends Component {
   handleSwitchMode(checked) {
     const { allRounds, currentRound, onChange } = this.props;
     const roundData = allRounds.length && allRounds[currentRound - 1];
+    const { trump, segment } = roundData;
+
+    if (segment === 0) {
+      return message.warning('Total Bids are 13?!?!');
+    }
 
     const everyoneBid = Array(4).fill(1).every((_, i) => typeof roundData[`bid${i}`] === 'number');
 
-    if (roundData.trump && everyoneBid) {
+    if (trump && everyoneBid) {
       this.setState({
         selectedPlayer: undefined
       });
@@ -72,23 +77,29 @@ class GamePad extends Component {
     const newRoundData = {};
 
     if (inputMode === INPUT_MODE.BID) {
-      const nextPlayer = this.getNextPlayer(selectedPlayer, players);
-
-      if (roundData[`bid${nextPlayer}`] === '' || nextPlayer === highestBidder) {
-        // validate first bid is more then 5
-        if ((!highestBidder && highestBidder !== 0) || highestBidder === selectedPlayer) {
-          if (num < 5) {
-            return message.warning('First Bid should be more then 5');
-          } else {
-            newRoundData.highestBidder = selectedPlayer;
-          }
-        } else if (num >= 5) {
-          this.showChangeHighestBidderConfirm(onChange, roundData, prop, num, selectedPlayer, players);
-        } else if (!Number.isInteger(roundData[`bid${this.getBeforePlayer(selectedPlayer, players)}`])) {
-          return message.warning('The Bids are not in the right order!!');
+      if (currentRound === 13) {
+        if (num >= 5 && !roundData[`bid${highestBidder}`] || roundData[`bid${highestBidder}`] < num) {
+          newRoundData.highestBidder = selectedPlayer;
         }
       } else {
-        return message.warning('The Next Player already Bid, Can not change bid');
+        const nextPlayer = this.getNextPlayer(selectedPlayer, players);
+
+        if (roundData[`bid${nextPlayer}`] === '' || nextPlayer === highestBidder) {
+          // validate first bid is more then 5
+          if ((!highestBidder && highestBidder !== 0) || highestBidder === selectedPlayer) {
+            if (num < 5) {
+              return message.warning('First Bid should be more then 5');
+            } else {
+              newRoundData.highestBidder = selectedPlayer;
+            }
+          } else if (num >= 5) {
+            this.showChangeHighestBidderConfirm(onChange, roundData, prop, num, selectedPlayer, players);
+          } else if (!Number.isInteger(roundData[`bid${this.getBeforePlayer(selectedPlayer, players)}`])) {
+            return message.warning('The Bids are not in the right order!!');
+          }
+        } else {
+          return message.warning('The Next Player already Bid, Can not change bid');
+        }
       }
     }
 
