@@ -4,4 +4,4 @@ export const CARDS = {
   DIAMOND: 'DIAMOND',
   CLUB: 'CLUB',
   NT: 'NT'
-}
+};

@@ -132,6 +132,12 @@
                 }               
             }
 
+            &:last-child {
+                .table-cell {
+                    border-top: 1px solid #e8e8e8;
+                }
+            }
+
             &.current-round {
                 > div:first-child {
                     border-right: 2px solid #1a911a;

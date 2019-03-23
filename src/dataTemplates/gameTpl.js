@@ -1,4 +1,4 @@
-import { INPUT_MODE } from '../constants/states';
+import { INPUT_MODE, GAME_STATUS } from '../constants/states';
 
 export default function gameDataTpl() {
   const rounds = []
@@ -37,6 +37,11 @@ export default function gameDataTpl() {
     totalScore0: 0,
     totalScore1: 0,
     totalScore2: 0,
-    totalScore3: 0
+    totalScore3: 0,
+    leagueScore0: '',
+    leagueScore1: '',
+    leagueScore2: '',
+    leagueScore3: '',
+    status: GAME_STATUS.ACTIVE
   }
 }

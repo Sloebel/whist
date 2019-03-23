@@ -6,11 +6,12 @@ import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js
 import './GameTab.css';
 import GamePad from './../common/game/Pad';
 import { hasTouch } from '../utils/Utils.js';
-import { INPUT_MODE } from '../constants/states';
+import { GAME_STATUS } from '../constants/states';
 import { cardsRenderer } from '../common/table/renderers.js';
 import CssUp from '../common/transition/CssUp.js';
 import Loader from '../common/loader/Loader';
 import GameMobileView from './GameMobileView';
+import { GAME_DEFAULT_SCORES } from '../constants/scores';
 
 const { Header, Content, Sider } = Layout;
 
@@ -166,7 +167,12 @@ class GameTab extends Component {
 			totalScore0: 0,
 			totalScore1: 0,
 			totalScore2: 0,
-			totalScore3: 0
+			totalScore3: 0,
+			leagueScore0: '',
+			leagueScore1: '',
+			leagueScore2: '',
+			leagueScore3: '',
+			status: ''
 		}
 
 		const columns = [
@@ -459,12 +465,52 @@ class GameTab extends Component {
 
 			row.segment = currentTotalBid !== null ? currentTotalBid - 13 : null;
 			row.check = allWonInput && currentTotalWon === 13;
+
+			if (row.round === 13 && row.check) {
+				stateToUpdate.status = GAME_STATUS.FINISHED;
+				const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state;
+				const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
+				scores[`totalScore${player}`] = stateToUpdate[`totalScore${player}`];
+
+				this.calculateLeagueScores(scores, stateToUpdate);
+			}
 		}
 
 		stateToUpdate.rounds = newData;
 
 		// this.setState(stateToUpdate);
 		this.gameRef.update(stateToUpdate);
+	}
+
+	calculateLeagueScores = (scores, stateToUpdate) => {
+		const sorted = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+
+		sorted.forEach((scoreIndex, i) => {
+			const score = scores[scoreIndex];
+			let leagueScore = GAME_DEFAULT_SCORES[i];
+
+			// score < 0 => -1
+			if (score < 0) {
+				leagueScore--;
+			}
+
+			// score reminder from 100 == 0 => leagueScore + 1
+			if (score % 10 === 0) {
+				leagueScore++;
+			}
+
+			// score > 300 => +3
+			if (score > 300) {
+				leagueScore += 3;
+			}
+
+			// score < -100 => -3
+			if (score < -100) {
+				leagueScore -= 3;
+			}
+
+			stateToUpdate[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
+		});
 	}
 
 	toggleSlide = () => {
@@ -511,7 +557,10 @@ class GameTab extends Component {
 	};
 
 	render() {
-		const { columns, currentView, rounds, currentRound } = this.state;
+		const {
+			columns, currentView, rounds, currentRound,
+			leagueScore0, leagueScore1, leagueScore2, leagueScore3
+		} = this.state;
 		const { screenSize, isMobile, loading } = this.props;
 
 		const columns1 = this.columns1;
@@ -547,6 +596,7 @@ class GameTab extends Component {
 					handleSave={this.handleSave}
 					onCurrentViewChange={this.setCurrentViewState}
 					goToRound={this.selectActiveRound}
+					leagueScores={{ leagueScore0, leagueScore1, leagueScore2, leagueScore3 }}
 				/>
 			);
 		}

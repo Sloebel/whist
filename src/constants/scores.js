@@ -1,0 +1,1 @@
+export const GAME_DEFAULT_SCORES = [10, 7, 3, 1];

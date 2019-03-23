@@ -73,7 +73,8 @@ export default class GameMobileView extends Component {
       rounds,
       playersColumns,
       currentRound,
-      handleSave
+      handleSave,
+      leagueScores,
     } = this.props;
 
     return (
@@ -84,7 +85,12 @@ export default class GameMobileView extends Component {
         >
           <div className={`my-carousel-slides-container ${currentView}`}>
             <div className="my-carousel-slide">
-              <MobileTable dataSource={rounds} players={playersColumns} currentRound={currentRound} />
+              <MobileTable
+                dataSource={rounds}
+                leagueScores={leagueScores}
+                players={playersColumns}
+                currentRound={currentRound}
+              />
             </div>
             <div className="my-carousel-slide">
               <GamePad
