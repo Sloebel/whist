@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { fire } from '../firebase';
 import { Route, Link } from "react-router-dom";
 import withAuthorization from '../authentication/withAuthorization';
-import { Menu, Icon, Layout } from 'antd';
+import { Menu, Icon, Layout, message } from 'antd';
 import './League.css';
 import GameTab from './../game/GameTab';
 import Arrow from '../common/arrowButton/arrow/Arrow';
@@ -11,6 +11,7 @@ import gameDataTpl from './../dataTemplates/gameTpl';
 import RcDrawer from 'rc-drawer';
 import 'rc-drawer/assets/index.css';
 import Loader from '../common/loader/Loader';
+import { GAME_STATUS } from '../constants/states';
 
 const { Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -47,9 +48,7 @@ class League extends Component {
 		this.leagueRef.on('value', snapshot => {
 			console.log(snapshot.val());
 			const leagueData = snapshot.val();
-			// if (!leagueData.games) {
-			// 	leagueData.games = [{ title: 'Game 1', key: 1 }];
-			// }
+
 			if (leagueData) {
 				this.setState({
 					league: {
@@ -64,6 +63,23 @@ class League extends Component {
 		this.leagueGamesRef.on('child_added', snapshot => {
 			this.setState(prevState => {
 				return { leagueGames: [...prevState.leagueGames, snapshot.val()] };
+			});
+		});
+
+		this.leagueGamesRef.on('child_changed', snapshot => {
+			this.setState(prevState => {
+				const leagueGames = prevState.leagueGames;
+				const changedIndex = leagueGames.findIndex(game => game.gameID === snapshot.val().gameID);
+
+				return {
+					leagueGames: [
+						...leagueGames.slice(0, changedIndex),
+						{
+							...snapshot.val()
+						},
+						...leagueGames.slice(changedIndex + 1)
+					]
+				};
 			});
 		});
 	}
@@ -83,25 +99,32 @@ class League extends Component {
 	addGame = () => {
 		const { league, leagueGames } = this.state;
 		const { leagueID } = league;
+		const lastGame = leagueGames[leagueGames.length - 1];
 
-		const newGameId = leagueGames.length + 1;
+		if (!lastGame || lastGame.status === GAME_STATUS.FINISHED) {
+			const newGameId = leagueGames.length + 1;
 
-		const newGameKey = fire.database().ref().child('games').push().key;
+			const newGameKey = fire.database().ref().child('games').push().key;
 
-		const updates = {};
-		const gameTpl = { gameID: newGameId, ...gameDataTpl() };
+			const gameTpl = gameDataTpl();
+			const updates = {};
 
-		updates[`/games/${newGameKey}`] = gameTpl;
-		updates[`/leagueGames/_${leagueID}/${newGameKey}`] = { gameID: newGameId };
+			updates[`/games/${newGameKey}`] = { gameID: newGameId, ...gameTpl.gameData };
+			updates[`/leagueGames/_${leagueID}/${newGameKey}`] = { gameID: newGameId, status: GAME_STATUS.ACTIVE };
+			updates[`/leagueGamesSummary/_${leagueID}/${newGameKey}`] = { ...gameTpl.gameSummary };
 
-		fire.database().ref().update(updates);
+			fire.database().ref().update(updates);
+		} else {
+			setTimeout(this.toggleDrawer, 300);
+			message.warning('Last Game is not finished yet!!');
+		}
 	}
 
 	handleMenuItemClick = (item) => {
 		const key = item.key;
 
 		if (key === 'new_game') {
-			this.addGame();
+			return this.addGame();
 		}
 
 		if (key !== "main_menu" && key !== this.state.menuSelected) {
