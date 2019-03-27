@@ -44,7 +44,7 @@ const SignUp = Form.create()(
                     const { name, nickname, email, password } = values;
                     auth.createUser(email, password)
                         .then(authUser => {
-                            // Create a user in your own accessible Firebase Database too
+                            // Create a user in own accessible Firebase Database too
                             db.doCreateUser(authUser.user.uid, { name, nickname, email })
                                 .then(() => {
                                     this.props.history.push('/');

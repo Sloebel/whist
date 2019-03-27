@@ -162,17 +162,21 @@ class GameTab extends Component {
 			players: props.players,
 			columns: this.initColumns(props.players),
 			currentView: 'table',
-			currentRound: 1,
-			rounds: [],
-			totalScore0: 0,
-			totalScore1: 0,
-			totalScore2: 0,
-			totalScore3: 0,
-			leagueScore0: '',
-			leagueScore1: '',
-			leagueScore2: '',
-			leagueScore3: '',
-			status: ''
+			gameData: {
+				currentRound: 1,
+				rounds: [],
+				totalScore0: 0,
+				totalScore1: 0,
+				totalScore2: 0,
+				totalScore3: 0,
+				status: '',
+			},
+			gameSummary: {
+				leagueScore0: '',
+				leagueScore1: '',
+				leagueScore2: '',
+				leagueScore3: '',
+			}
 		}
 
 		const columns = [
@@ -270,9 +274,9 @@ class GameTab extends Component {
 	}
 
 	initColumns = (players) => {
-		const playersColumn = players.map((name, i) => {
+		const playersColumn = players.map(({ nickname }, i) => {
 			return {
-				playerName: name,
+				playerName: nickname,
 				index: i,
 				children: [{
 					title: 'Bid',
@@ -314,12 +318,14 @@ class GameTab extends Component {
 		if (!col.editable && !col.player) {
 			return col;
 		}
+		const playerScore = this.state.gameData[`totalScore${col.player}`];
+
 		return {
 			...col,
 			children: col.children.map((child) => {
 				return {
 					...child,
-					title: this.state[`totalScore${col.player}`],
+					title: playerScore,
 					children: child.children.map((subChild) => {
 						return {
 							...subChild,
@@ -353,15 +359,30 @@ class GameTab extends Component {
 		this.leagueGamesRef = dbRef.child(`leagueGames/_${leagueID * 1}`).orderByChild('gameID').equalTo(gameID * 1);
 
 		this.leagueGamesRef.once('value', snapshot => {
-			this.gameRef = fire.database().ref(`games/${Object.keys(snapshot.val())[0]}`);
+			const gameKey = Object.keys(snapshot.val())[0];
+			this.gameKey = gameKey;
+			this.gameRef = fire.database().ref(`games/${gameKey}`);
+			this.gameSummaryRef = fire.database().ref(`leagueGamesSummary/_${leagueID * 1}/${gameKey}`);
 
 			this.gameRef.on('value', snap => {
 				this.setState({
-					...this.state,
-					...snap.val()
+					gameData: {
+						...this.state.gameData,
+						...snap.val()
+					}
 				});
 				this.props.loaderStateCb(false);
 			});
+
+			this.gameSummaryRef.on('value', snap => {
+				console.log(snap.val());
+				this.setState({
+					gameSummary: {
+						...this.state.gameSummary,
+						...snap.val()
+					}
+				});
+			})
 		});
 	}
 
@@ -381,7 +402,7 @@ class GameTab extends Component {
 
 	handleSave = (row, player) => {
 		const stateToUpdate = {};
-		const newData = [...this.state.rounds];
+		const newData = [...this.state.gameData.rounds];
 		console.log(row);
 		const index = newData.findIndex(item => row.round === item.round);
 
@@ -434,7 +455,7 @@ class GameTab extends Component {
 					//to do - calculate if round fell - change next round factor 
 				});
 
-				// const totalScore = this.state[`totalScore${player}`] + rowScore;
+				// const totalScore = this.state.gameData[`totalScore${player}`] + rowScore;
 
 				stateToUpdate[`totalScore${player}`] = totalScore;
 			}
@@ -468,11 +489,14 @@ class GameTab extends Component {
 
 			if (row.round === 13 && row.check) {
 				stateToUpdate.status = GAME_STATUS.FINISHED;
-				const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state;
+				const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state.gameData;
 				const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
 				scores[`totalScore${player}`] = stateToUpdate[`totalScore${player}`];
 
-				this.calculateLeagueScores(scores, stateToUpdate);
+				// this.calculateLeagueScores(scores, stateToUpdate);
+
+				this.gameSummaryRef.update(this.calculateLeagueScores(scores));
+				this.updateGameStatus(GAME_STATUS.FINISHED);
 			}
 		}
 
@@ -484,6 +508,7 @@ class GameTab extends Component {
 
 	calculateLeagueScores = (scores, stateToUpdate) => {
 		const sorted = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+		const leagueScores = {};
 
 		sorted.forEach((scoreIndex, i) => {
 			const score = scores[scoreIndex];
@@ -509,8 +534,19 @@ class GameTab extends Component {
 				leagueScore -= 3;
 			}
 
-			stateToUpdate[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
+			leagueScores[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
+			// stateToUpdate[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
 		});
+
+		return leagueScores;
+	}
+
+	updateGameStatus = (status) => {
+		const { match } = this.props;
+		const { params } = match;
+		const { leagueID } = params;
+
+		fire.database().ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`).update({ status });
 	}
 
 	toggleSlide = () => {
@@ -523,7 +559,8 @@ class GameTab extends Component {
 	}
 
 	selectActiveRound(newRound) {
-		const { rounds, currentRound, currentView } = this.state;
+		const { gameData, currentView } = this.state;
+		const { rounds, currentRound } = gameData;
 
 		if (parseInt(newRound) < parseInt(currentRound) || rounds[currentRound - 1].check) {
 			this.gameRef.update({
@@ -557,10 +594,9 @@ class GameTab extends Component {
 	};
 
 	render() {
-		const {
-			columns, currentView, rounds, currentRound,
-			leagueScore0, leagueScore1, leagueScore2, leagueScore3
-		} = this.state;
+		const { columns, currentView, gameData, gameSummary } = this.state;
+		const { rounds, currentRound } = gameData;
+		const { leagueScore0, leagueScore1, leagueScore2, leagueScore3 } = gameSummary;
 		const { screenSize, isMobile, loading } = this.props;
 
 		const columns1 = this.columns1;
@@ -635,7 +671,7 @@ class GameTab extends Component {
 									style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
 								>
 									<CssUp>
-										{this.state[`totalScore${playerIndex}`]}
+										{gameData[`totalScore${playerIndex}`]}
 									</CssUp>
 								</Card>
 							))}

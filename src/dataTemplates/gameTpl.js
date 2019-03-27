@@ -32,16 +32,20 @@ export default function gameDataTpl() {
   }
 
   return {
-    rounds,
-    currentRound: 1,
-    totalScore0: 0,
-    totalScore1: 0,
-    totalScore2: 0,
-    totalScore3: 0,
-    leagueScore0: '',
-    leagueScore1: '',
-    leagueScore2: '',
-    leagueScore3: '',
-    status: GAME_STATUS.ACTIVE
+    gameData: {
+      rounds,
+      currentRound: 1,
+      totalScore0: 0,
+      totalScore1: 0,
+      totalScore2: 0,
+      totalScore3: 0,
+      status: GAME_STATUS.ACTIVE
+    },
+    gameSummary: {
+      leagueScore0: '',
+      leagueScore1: '',
+      leagueScore2: '',
+      leagueScore3: '',
+    }
   }
 }
