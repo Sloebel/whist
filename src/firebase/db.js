@@ -7,3 +7,6 @@ export const doCreateUser = (id, userInfo) =>
 
 export const onceGetUsers = () =>
     db.ref('users').once('value');
+
+export const onceGetLeagues = () =>
+    db.ref('leagues').once('value');
