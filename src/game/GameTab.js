@@ -425,7 +425,7 @@ class GameTab extends Component {
 			if (won !== '' && bid !== '') {
 				if (won === bid) {
 					if ((won * 1) === 0) {
-						rowScore = 50;
+						rowScore = row.segment > 0 ? 25 : 50;
 					} else {
 						rowScore = (Math.pow(won, 2) + 10);
 					}
