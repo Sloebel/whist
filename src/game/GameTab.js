@@ -172,10 +172,10 @@ class GameTab extends Component {
 				status: '',
 			},
 			gameSummary: {
-				leagueScore0: '',
-				leagueScore1: '',
-				leagueScore2: '',
-				leagueScore3: '',
+				// leagueScore0: '',
+				// leagueScore1: '',
+				// leagueScore2: '',
+				// leagueScore3: '',
 			}
 		}
 
@@ -362,7 +362,7 @@ class GameTab extends Component {
 			const gameKey = Object.keys(snapshot.val())[0];
 			this.gameKey = gameKey;
 			this.gameRef = fire.database().ref(`games/${gameKey}`);
-			this.gameSummaryRef = fire.database().ref(`leagueGamesSummary/_${leagueID * 1}/${gameKey}`);
+			this.gameSummaryRef = fire.database().ref(`leagueGamesSummary/_${leagueID * 1}/${gameKey}/players`);
 
 			this.gameRef.on('value', snap => {
 				this.setState({
@@ -378,7 +378,7 @@ class GameTab extends Component {
 				console.log(snap.val());
 				this.setState({
 					gameSummary: {
-						...this.state.gameSummary,
+						// ...this.state.gameSummary,
 						...snap.val()
 					}
 				});
@@ -507,10 +507,13 @@ class GameTab extends Component {
 	}
 
 	calculateLeagueScores = (scores, stateToUpdate) => {
+		const players = this.props.players;
 		const sorted = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
 		const leagueScores = {};
 
 		sorted.forEach((scoreIndex, i) => {
+			console.log('i: ' + i);
+			console.log('scoreIndex: ' + scoreIndex);
 			const score = scores[scoreIndex];
 			let leagueScore = GAME_DEFAULT_SCORES[i];
 
@@ -520,7 +523,7 @@ class GameTab extends Component {
 			}
 
 			// score reminder from 100 == 0 => leagueScore + 1
-			if (score % 10 === 0) {
+			if (score % 100 === 0) {
 				leagueScore++;
 			}
 
@@ -534,7 +537,8 @@ class GameTab extends Component {
 				leagueScore -= 3;
 			}
 
-			leagueScores[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
+			leagueScores[players[`${scoreIndex.slice(-1)}`].key] = { leagueScore };
+			// leagueScores[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
 			// stateToUpdate[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
 		});
 
@@ -593,6 +597,25 @@ class GameTab extends Component {
 		});
 	};
 
+	getLeagueScores = () => {
+		const players = this.props.players;
+		const { gameSummary } = this.state;
+
+		if (Object.keys(gameSummary).length === 0) {
+			return {
+				leagueScore0: '',
+				leagueScore1: '',
+				leagueScore2: '',
+				leagueScore3: '',
+			};
+		}
+
+		return players.reduce((scoresObj, player, i) => {
+			scoresObj[`leagueScore${i}`] = gameSummary[player.key].leagueScore;
+			return scoresObj;
+		}, {});
+	}
+
 	render() {
 		const { columns, currentView, gameData, gameSummary } = this.state;
 		const { rounds, currentRound } = gameData;
@@ -632,7 +655,8 @@ class GameTab extends Component {
 					handleSave={this.handleSave}
 					onCurrentViewChange={this.setCurrentViewState}
 					goToRound={this.selectActiveRound}
-					leagueScores={{ leagueScore0, leagueScore1, leagueScore2, leagueScore3 }}
+					leagueScores={this.getLeagueScores()}
+				// leagueScores={{ leagueScore0, leagueScore1, leagueScore2, leagueScore3 }}
 				/>
 			);
 		}
