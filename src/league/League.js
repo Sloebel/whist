@@ -98,7 +98,7 @@ class League extends Component {
 
 	addGame = () => {
 		const { league, leagueGames } = this.state;
-		const { leagueID } = league;
+		const { leagueID, players } = league;
 		const lastGame = leagueGames[leagueGames.length - 1];
 
 		if (!lastGame || lastGame.status === GAME_STATUS.FINISHED) {
@@ -106,7 +106,7 @@ class League extends Component {
 
 			const newGameKey = fire.database().ref().child('games').push().key;
 
-			const gameTpl = gameDataTpl();
+			const gameTpl = gameDataTpl(players);
 			const updates = {};
 
 			updates[`/games/${newGameKey}`] = { gameID: newGameId, ...gameTpl.gameData };

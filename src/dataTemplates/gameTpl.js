@@ -1,6 +1,6 @@
 import { INPUT_MODE, GAME_STATUS } from '../constants/states';
 
-export default function gameDataTpl() {
+export default function gameDataTpl(players) {
   const rounds = []
 
   for (let i = 0; i < 13; i++) {
@@ -42,10 +42,13 @@ export default function gameDataTpl() {
       status: GAME_STATUS.ACTIVE
     },
     gameSummary: {
-      leagueScore0: '',
-      leagueScore1: '',
-      leagueScore2: '',
-      leagueScore3: '',
+      players: players.reduce((summaryObj, player) => {
+        summaryObj[player.key] = {
+          leagueScore: ''
+        };
+
+        return summaryObj;
+      }, {})
     }
   }
 }
