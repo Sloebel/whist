@@ -48,17 +48,16 @@ export default class LeagueSummary extends Component {
     const { league } = this.props;
     const { title } = league;
     const { players } = this.state;
-    console.log(players);
+
     return (
       <div className="game-summery">
         <h3>{title}</h3>
 
+        <h3>League Score:</h3>
         <Row gutter={1} className="table-header" style={{ marginBottom: 1 }}>
-          <Col span={4}><div className="table-cell"></div></Col>
           {this.getTableHeaders(players)}
         </Row>
-        <Row>
-          <Col span={4}>Score:</Col>
+        <Row gutter={1}>
           {this.getScoreRow(players)}
         </Row>
       </div>
@@ -68,17 +67,15 @@ export default class LeagueSummary extends Component {
   getTableHeaders = (
     players
   ) => players.map(({ key, nickname }) => (
-    <Col key={key} span={5}><div className="table-cell">{nickname}</div></Col>
+    <Col key={key} span={6}><div className="table-cell">{nickname}</div></Col>
   ));
 
   getScoreRow = (players) => players.map(player => (
-    <Col span={5} key={player.key}>
-      {player.games && player.games.reduce((score, game) => score + game.leagueScore, 0)}
+    <Col span={6} key={player.key}>
+      <div className="table-cell">
+        {player.games && player.games.reduce((score, game) => score + game.leagueScore, 0)}
+      </div>
     </Col>
   ));
 }
-
-///////////////////////////
-// helpers
-///////////////////////////
 

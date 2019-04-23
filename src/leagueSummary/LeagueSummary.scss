@@ -1,5 +1,13 @@
 .game-summery {
-    h3 {
+    padding: 0 5px;
+
+    h3:first-child {
         text-align: center;
+    }
+
+    .table-cell {
+        background: #fff;
+        text-align: center;
+        padding: 4px 0;
     }
 }
