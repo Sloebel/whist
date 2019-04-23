@@ -380,8 +380,6 @@ class GameTab extends Component {
         let totalScore = 0;
         newData.forEach((round, i) => {
           totalScore += round[`score${player}`];
-
-          //to do - calculate if round fell - change next round factor 
         });
 
         // const totalScore = this.state.gameData[`totalScore${player}`] + rowScore;
@@ -413,6 +411,25 @@ class GameTab extends Component {
 
       row.segment = currentTotalBid !== null ? currentTotalBid - 13 : null;
       row.check = allWonInput && currentTotalWon === 13;
+
+      // calculate if round fell - change next round factor 
+      if (row.round < 11 && row.check) {
+        let didRoundFell = true;
+
+        for (let i = 0; i < 3; i++) {
+          if (typeof row[`bid${i}`] !== 'number' || typeof row[`won${i}`] !== 'number') {
+            didRoundFell = false;
+            break;
+          } else if (row[`bid${i}`] === row[`won${i}`]) {
+            didRoundFell = false;
+            break;
+          }
+        }
+
+        if (didRoundFell) {
+          newData[row.round].factor = row.factor * 2;
+        }
+      }
 
       if (row.round === 13 && row.check) {
         stateToUpdate.status = GAME_STATUS.FINISHED;
