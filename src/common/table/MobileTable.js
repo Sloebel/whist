@@ -22,14 +22,18 @@ const MobileTable = (props) => {
         </ReactDragListView>
       </Row>
 
-      {Array(13).fill(1).map((_, i) => (
+      {rounds.map((round, i) => (
         <Row
           gutter={1}
-          className={`table-row ${currentRound - 1 === i ? 'current-round' : ''}`}
+          className={`table-row ${currentRound - 1 === i ? 'current-round' : ''} ${round.fell ? 'round-fell' : ''}`}
           key={i}
         >
-          <Col span={4}><div className="table-cell">{i + 1}</div></Col>
-          {getRoundCol(players, rounds[i])}
+          <Col span={4}>
+            <div className="table-cell">
+              {i + 1} {round.factor > 1 && (<span className="round-factor">{`x${round.factor}`}</span>)}
+            </div>
+          </Col>
+          {getRoundCol(players, round)}
         </Row>
       ))}
 
@@ -53,11 +57,11 @@ export default MobileTable;
 ///////////////////////////
 
 
-const getTableHeaders = (players) => players.map(({ index: playerIndex, playerName }) => (<Col key={playerIndex} span={5}><div className="table-cell">{playerName}</div></Col>));
+export const getTableHeaders = (players) => players.map(({ index: playerIndex, playerName }) => (<Col key={playerIndex} span={5}><div className="table-cell">{playerName}</div></Col>));
 
 const getRoundCol = (players, roundData) => players.map(({ index: playerIndex }) => (
   <Col span={5} key={playerIndex}>
-    <div className={`table-cell ${roundData[`bid${playerIndex}`] !== roundData[`won${playerIndex}`] ? 'fell' : ''} ${playerIndex === roundData.highestBidder ? 'highest-bidder' : ''}`}>
+    <div className={`table-cell score-cell ${roundData[`bid${playerIndex}`] !== roundData[`won${playerIndex}`] ? 'fell' : ''} ${playerIndex === roundData.highestBidder ? 'highest-bidder' : ''}`}>
       {roundData[`aggregateScore${playerIndex}`]}
       {playerIndex === roundData.highestBidder && (<span className="trump">{cardsRenderer(roundData.trump).children}</span>)}
     </div>

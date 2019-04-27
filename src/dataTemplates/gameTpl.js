@@ -10,6 +10,7 @@ export default function gameDataTpl(players) {
       trump: '',
       check: false,
       factor: 1,
+      fell: false,
       highestBidder: '',
       inputMode: INPUT_MODE.BID,
       score0: '',

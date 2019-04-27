@@ -179,27 +179,23 @@ class GamePad extends Component {
 
   // getAfterPlayers = (selectedPlayer) => [1, 2, 3].map(afterPlayer => selectedPlayer + afterPlayer > 4 ? selectedPlayer + afterPlayer - 4 : selectedPlayer + afterPlayer);
 
-  getPlayerAggregateScore = (playerIndex) => {
-    const { isMobile, allRounds, currentRound } = this.props;
-    const currentRoundData = allRounds.length && allRounds[currentRound - 1];
-    const roundBeforeData = currentRound > 1 ? allRounds.length && allRounds[currentRound - 2] : undefined;
+  getPlayerAggregateScore = (roundsData, roundIndex, playerIndex) => {
+    const roundData = roundsData[roundIndex];
 
-    if (isMobile) {
-      if (currentRoundData[`aggregateScore${playerIndex}`]) {
-        return currentRoundData[`aggregateScore${playerIndex}`];
-      }
-      if (roundBeforeData) {
-        return roundBeforeData[`aggregateScore${playerIndex}`];
-      }
-
+    if (!roundData) {
       return 0;
     }
 
-    return undefined;
+    // if round.fell == true, look for round before
+    if (roundData[`aggregateScore${playerIndex}`] && !roundData.fell) {
+      return roundData[`aggregateScore${playerIndex}`];
+    }
+
+    return this.getPlayerAggregateScore(roundsData, roundIndex - 1, playerIndex);
   }
 
   getPlayersButtons = () => {
-    const { allRounds, currentRound, players } = this.props;
+    const { allRounds, currentRound, players, isMobile } = this.props;
     const currentRoundData = allRounds.length && allRounds[currentRound - 1];
     const highestBidder = currentRoundData.highestBidder;
 
@@ -211,7 +207,9 @@ class GamePad extends Component {
               name={playerName}
               bid={currentRoundData[`bid${playerIndex}`]}
               won={currentRoundData[`won${playerIndex}`]}
-              score={this.getPlayerAggregateScore(playerIndex)}
+              score={isMobile ?
+                this.getPlayerAggregateScore(allRounds, currentRound - 1, playerIndex)
+                : undefined}
             />
           </Radio.Button>
         </Badge>

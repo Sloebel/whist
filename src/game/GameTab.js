@@ -19,38 +19,6 @@ class GameTab extends Component {
   constructor(props) {
     super(props);
 
-    // const rounds = []
-
-    // for (let i = 0; i < 13; i++) {
-    // 	rounds.push({
-    // 		round: i + 1,
-    // 		segment: null,
-    // 		trump: null,
-    // 		check: false,
-    // 		factor: 1,
-    // 		highestBidder: undefined,
-    // 		inputMode: INPUT_MODE.BID,
-    // 		score0: null,
-    // 		aggregateScore0: null,
-    // 		bid0: null,
-    // 		won0: null,
-    // 		score1: null,
-    // 		aggregateScore1: null,
-    // 		bid1: null,
-    // 		won1: null,
-    // 		score2: null,
-    // 		aggregateScore2: null,
-    // 		bid2: null,
-    // 		won2: null,
-    // 		score3: null,
-    // 		aggregateScore3: null,
-    // 		bid3: null,
-    // 		won3: null
-    // 	});
-    // }
-
-    // this.currentSlide = 0;
-
     // this.columns = [
     // 	{
     // 		player: 1,
@@ -303,10 +271,8 @@ class GameTab extends Component {
       });
 
       this.gameSummaryRef.on('value', snap => {
-        console.log(snap.val());
         this.setState({
           gameSummary: {
-            // ...this.state.gameSummary,
             ...snap.val()
           }
         });
@@ -342,7 +308,7 @@ class GameTab extends Component {
       ...row,
     });
 
-    //reference to the new Data relevent row to update with score and segment
+    // reference to the new Data relevant row to update with score and segment
     row = newData[index];
 
     if (typeof player === 'number') {
@@ -368,27 +334,21 @@ class GameTab extends Component {
           }
         }
 
+        rowScore *= row.factor;
+
         row[`score${player}`] = rowScore;
 
         //calculate aggregate score
-        if (index === 0) {
-          row[`aggregateScore${player}`] = rowScore;
-        } else {
-          row[`aggregateScore${player}`] = newData[index - 1][`aggregateScore${player}`] + rowScore;
-        }
-
-        let totalScore = 0;
+        let aggregateScore = 0;
         newData.forEach((round, i) => {
-          totalScore += round[`score${player}`];
+          if (typeof round[`score${player}`] === 'number' && !round.fell) {
+            aggregateScore += round[`score${player}`];
+          }
         });
+        row[`aggregateScore${player}`] = aggregateScore;
 
-        // const totalScore = this.state.gameData[`totalScore${player}`] + rowScore;
-
-        stateToUpdate[`totalScore${player}`] = totalScore;
+        stateToUpdate[`totalScore${player}`] = row[`aggregateScore${player}`];
       }
-      // else {
-      // 	rowScore = 0;
-      // }
 
       //update O/U
       let currentTotalBid = null;
@@ -413,7 +373,7 @@ class GameTab extends Component {
       row.check = allWonInput && currentTotalWon === 13;
 
       // calculate if round fell - change next round factor 
-      if (row.round < 11 && row.check) {
+      if (row.check) {
         let didRoundFell = true;
 
         for (let i = 0; i < 3; i++) {
@@ -427,8 +387,16 @@ class GameTab extends Component {
         }
 
         if (didRoundFell) {
-          newData[row.round].factor = row.factor * 2;
+          row.fell = true;
+
+          if (row.round < 11) {
+            // because metaData index is zero based row.round value is next round index
+            newData[row.round].factor = row.factor * 2;
+          } else if (row.factor > 1) {
+            newData[row.round].factor = row.factor
+          }
         }
+
       }
 
       if (row.round === 13 && row.check) {
@@ -436,8 +404,6 @@ class GameTab extends Component {
         const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state.gameData;
         const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
         scores[`totalScore${player}`] = stateToUpdate[`totalScore${player}`];
-
-        // this.calculateLeagueScores(scores, stateToUpdate);
 
         this.gameSummaryRef.update(this.calculateLeagueScores(scores));
         this.updateGameStatus(GAME_STATUS.FINISHED);
@@ -456,8 +422,6 @@ class GameTab extends Component {
     const leagueScores = {};
 
     sortedScores.forEach((scoreIndex, i) => {
-      console.log('i: ' + i);
-      console.log('scoreIndex: ' + scoreIndex);
       const score = scores[scoreIndex];
       let leagueScore = GAME_DEFAULT_SCORES[i];
 
