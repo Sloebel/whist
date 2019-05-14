@@ -3,6 +3,7 @@ import { fire, auth } from '../firebase';
 import withAuthorization from '../authentication/withAuthorization';
 import MainMenu from './MainMenu';
 import * as routes from './../constants/routes';
+import { Dialogs } from './../constants/dialogs';
 
 class Main extends Component {
   // Dialogs visible states controling if the Dialog should be instansiated or not
@@ -84,7 +85,7 @@ class Main extends Component {
           {
             text: 'Resume League',
             onClick: this.showResumeLeagueDialog.bind(this),
-            dialog: 'resumeLeague',
+            dialog: Dialogs.RESUME_LEAGUE,
             disabled: this.state.activeLeagues.length === 0,
             dialogProps: {
               afterClose: this.closeResumeLeagueDialog.bind(this),
@@ -94,7 +95,7 @@ class Main extends Component {
           }, {
             text: 'Create League',
             onClick: this.showNewLeagueDialog.bind(this),
-            dialog: 'newLeague',
+            dialog: Dialogs.NEW_LEAGUE,
             dialogProps: {
               afterClose: this.closeNewLeagueDialog.bind(this),
               visible: this.state.newLeague

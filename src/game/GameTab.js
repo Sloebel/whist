@@ -12,6 +12,7 @@ import CssUp from '../common/transition/CssUp.js';
 import Loader from '../common/loader/Loader';
 import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
+import { reorder } from '../common/dragPad/DragPad';
 
 const { Header, Content, Sider } = Layout;
 
@@ -239,6 +240,7 @@ class GameTab extends Component {
     this.selectActiveRound = this.selectActiveRound.bind(this);
     this.setCurrentViewState = this.setCurrentViewState.bind(this);
     this.selectActiveRound = this.selectActiveRound.bind(this);
+    this.handleReorderPlayers = this.handleReorderPlayers.bind(this);
   }
 
   fetch() {
@@ -246,19 +248,32 @@ class GameTab extends Component {
     const { params } = match;
     const { leagueID, gameID } = params;
 
-    const dbRef = fire.database().ref();
+    const db = fire.database();
 
     if (this.gameRef) {
       this.gameRef.off('value');
     }
 
-    this.leagueGamesRef = dbRef.child(`leagueGames/_${leagueID * 1}`).orderByChild('gameID').equalTo(gameID * 1);
+    this.leagueGamesRef = db.ref(`leagueGames/_${leagueID * 1}`).orderByChild('gameID').equalTo(gameID * 1);
 
     this.leagueGamesRef.once('value', snapshot => {
+      const gameData = Object.values(snapshot.val())[0];
       const gameKey = Object.keys(snapshot.val())[0];
       this.gameKey = gameKey;
-      this.gameRef = fire.database().ref(`games/${gameKey}`);
-      this.gameSummaryRef = fire.database().ref(`leagueGamesSummary/_${leagueID * 1}/${gameKey}/players`);
+      this.gameRef = db.ref(`games/${gameKey}`);
+      this.gameSummaryRef = db.ref(`leagueGamesSummary/_${leagueID * 1}/${gameKey}/players`);
+
+      if (gameData.playersOrder) {
+        this.setState({
+          players: gameData.playersOrder,
+          columns: this.initColumns(gameData.playersOrder)
+        });
+      } else {
+        this.setState({
+          players: this.props.players,
+          columns: this.initColumns(this.props.players)
+        });
+      }
 
       this.gameRef.on('value', snap => {
         this.setState({
@@ -417,7 +432,7 @@ class GameTab extends Component {
   }
 
   calculateLeagueScores = (scores, stateToUpdate) => {
-    const players = this.props.players;
+    const players = this.state.players;
     const sortedScores = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
     const leagueScores = {};
 
@@ -505,8 +520,20 @@ class GameTab extends Component {
     });
   };
 
+  handleReorderPlayers(from, to) {
+    const { players } = this.state;
+    const newPlayers = reorder(players, from, to);
+    this.setState({
+      players: newPlayers,
+      columns: this.initColumns(newPlayers),
+    });
+    const { params } = this.props.match;
+    const { leagueID } = params;
+    fire.database().ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`).update({ playersOrder: newPlayers });
+  }
+
   getLeagueScores = () => {
-    const players = this.props.players;
+    const players = this.state.players;
     const { gameSummary } = this.state;
 
     if (Object.keys(gameSummary).length === 0) {
@@ -528,8 +555,9 @@ class GameTab extends Component {
     const { columns, currentView, gameData, gameSummary } = this.state;
     const { rounds, currentRound } = gameData;
     // const { leagueScore0, leagueScore1, leagueScore2, leagueScore3 } = gameSummary;
-    const { screenSize, isMobile, loading } = this.props;
-
+    const { screenSize, isMobile, loading, match } = this.props;
+    const { params } = match;
+    const { gameID } = params;
     const columns1 = this.columns1;
     const playersColumns = columns.slice(0, 4);
     const components = {
@@ -556,6 +584,7 @@ class GameTab extends Component {
     if (isMobile) {
       return (
         <GameMobileView
+          gameID={gameID}
           currentView={currentView}
           rounds={rounds}
           playersColumns={playersColumns}
@@ -564,6 +593,7 @@ class GameTab extends Component {
           onCurrentViewChange={this.setCurrentViewState}
           goToRound={this.selectActiveRound}
           leagueScores={this.getLeagueScores()}
+          reorderPlayers={this.handleReorderPlayers}
         // leagueScores={{ leagueScore0, leagueScore1, leagueScore2, leagueScore3 }}
         />
       );

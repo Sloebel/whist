@@ -69,12 +69,14 @@ export default class GameMobileView extends Component {
 
   render() {
     const {
+      gameID,
       currentView,
       rounds,
       playersColumns,
       currentRound,
       handleSave,
       leagueScores,
+      reorderPlayers,
     } = this.props;
 
     return (
@@ -90,6 +92,7 @@ export default class GameMobileView extends Component {
                 leagueScores={leagueScores}
                 players={playersColumns}
                 currentRound={currentRound}
+                gameID={gameID}
               />
             </div>
             <div className="my-carousel-slide">
@@ -99,6 +102,7 @@ export default class GameMobileView extends Component {
                 allRounds={rounds}
                 players={playersColumns}
                 onChange={handleSave}
+                handleReorderPlayers={reorderPlayers}
               />
             </div>
           </div>

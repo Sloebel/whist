@@ -4,7 +4,7 @@ import ReactDragListView from "react-drag-listview";
 import { cardsRenderer } from './renderers';
 
 const MobileTable = (props) => {
-  const { dataSource: rounds, players, currentRound, leagueScores } = props;
+  const { dataSource: rounds, players, currentRound, leagueScores, gameID } = props;
 
   const onDragEnd = (fromIndex, toIndex) => {
     console.log('onDragEnd');
@@ -12,14 +12,10 @@ const MobileTable = (props) => {
 
   return (
     <div className="game-table">
+      <h3 className="game-header">Game {gameID}</h3>
       <Row gutter={1} className="table-header" style={{ marginBottom: 1 }}>
         <Col span={4}><div className="table-cell">round</div></Col>
-        <ReactDragListView
-          onDragEnd={onDragEnd}
-          nodeSelector="div"
-        >
-          {getTableHeaders(players)}
-        </ReactDragListView>
+        {getTableHeaders(players)}
       </Row>
 
       {rounds.map((round, i) => (
