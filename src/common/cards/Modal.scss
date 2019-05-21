@@ -1,4 +1,10 @@
 .cards-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cards-modal-dialog {
   .ant-modal-body {
     display: flex;
     justify-content: space-between;

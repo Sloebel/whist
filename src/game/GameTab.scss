@@ -124,7 +124,12 @@
 .mobile {
   .game-table {
     text-align:  center;
+    padding-top: 8px;
 
+    .game-header {
+        text-align: left;
+        padding-left: 6px;
+    }
     .table-row {
       &:not(:last-child) {
         .table-cell {                

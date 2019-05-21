@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import { Select, Icon, Button, Modal } from 'antd';
+import { Icon, Button, Modal } from 'antd';
 import { Spade, Hart, Diamond, Club } from './Icons';
 import './Modal.css';
-
-const Option = Select.Option;
 
 class CardsModal extends Component {
   state = { visible: false }
@@ -39,7 +37,8 @@ class CardsModal extends Component {
     const { trump, disabled } = this.props;
 
     return (
-      <div>
+      <div className="cards-modal">
+        trump
         <Button ghost className="card-btn" onClick={this.showModal} disabled={disabled}>
           {trump ? trump === 'NT' ? 'NT' : <Icon component={this.trumpIconMap[trump]} /> : <Icon type="question" />}
         </Button>
@@ -47,7 +46,7 @@ class CardsModal extends Component {
           footer={null}
           visible={this.state.visible}
           onCancel={this.handleCancel}
-          className="cards-modal"
+          className="cards-modal-dialog"
         >
           <Button className="card-btn" onClick={this.onTrumpSelect.bind(this, 'SPADE')}><Icon component={Spade} /></Button>
           <Button className="card-btn" onClick={this.onTrumpSelect.bind(this, 'HART')}><Icon component={Hart} /></Button>

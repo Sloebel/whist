@@ -69,6 +69,7 @@ export default class GameMobileView extends Component {
 
   render() {
     const {
+      gameID,
       currentView,
       rounds,
       playersColumns,
@@ -90,6 +91,7 @@ export default class GameMobileView extends Component {
                 leagueScores={leagueScores}
                 players={playersColumns}
                 currentRound={currentRound}
+                gameID={gameID}
               />
             </div>
             <div className="my-carousel-slide">

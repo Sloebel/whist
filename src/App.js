@@ -11,6 +11,7 @@ import Login from './authentication/Login';
 import SignUp from './authentication/SignUp';
 import Main from './main/Main';
 import League from './league/League.js';
+import { addListener } from './utils/Utils';
 
 class App extends Component {
   constructor(props) {
@@ -41,11 +42,7 @@ class App extends Component {
 
   // init window resize listener
   listenToWinResize(callback) {
-    window.addEventListener('resize', callback);
-
-    return () => {
-      window.removeEventListener('resize', callback);
-    };
+    return addListener(window, 'resize', callback);
   }
 
   componentWillMount() {

@@ -1,16 +1,12 @@
-import React, { Component } from 'react';
-import NewLeagueDialog from './NewLeague';
-import ResumeLeagueDialog from './ResumeLeague';
+import React from 'react';
+import { DialogsMapping } from '../constants/dialogs';
 
 const Dialog = ({
     dialog,
     dialogProps
 }) => {
-    const dialogs = {
-        newLeague: NewLeagueDialog,
-        resumeLeague: ResumeLeagueDialog
-    };
-    const DialogEl = dialogs[dialog];
+
+    const DialogEl = DialogsMapping[dialog];
 
     return <DialogEl {...dialogProps} />;
 }

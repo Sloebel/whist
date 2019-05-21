@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
-import { Radio, Switch, Badge, Row, Col, Modal, message } from 'antd';
+import { Radio, Switch, Badge, Row, Col, Modal, message, Button, Icon } from 'antd';
 import CardsPad from '../cards/Pad';
 import CardsModal from '../cards/Modal';
+import { ChangePlayers } from '../cards/Icons';
 import NumbersPad from '../numbers/Pad';
 import PlayerPad from '../player/Pad';
 import { INPUT_MODE } from '../../constants/states';
+import './Pad.css';
+import Dialog from '../../dialogs/Dialog';
+import { Dialogs } from '../../constants/dialogs';
+import { PlayersContext } from '../../game/GameTab';
 
 const confirm = Modal.confirm;
 message.config({
@@ -17,7 +22,8 @@ class GamePad extends Component {
     super(props);
 
     this.state = {
-      selectedPlayer: undefined
+      selectedPlayer: undefined,
+      reorderPlayersDialogVisible: false,
     };
 
     this.handleSwitchMode = this.handleSwitchMode.bind(this);
@@ -25,6 +31,8 @@ class GamePad extends Component {
     this.handleNumberSelect = this.handleNumberSelect.bind(this);
     this.setSelectedPlayer = this.setSelectedPlayer.bind(this);
     this.showChangeHighestBidderConfirm = this.showChangeHighestBidderConfirm.bind(this);
+    this.showChangePlayerDialog = this.showChangePlayerDialog.bind(this);
+    this.handleReorderPlayersAfterClose = this.handleReorderPlayersAfterClose.bind(this);
   }
 
   handleSwitchMode(checked) {
@@ -221,7 +229,7 @@ class GamePad extends Component {
     const { isMobile, allRounds, currentRound, players } = this.props;
     const currentRoundData = allRounds.length && allRounds[currentRound - 1];
     const { round, check, trump, segment, inputMode } = currentRoundData;
-    const { selectedPlayer } = this.state;
+    const { selectedPlayer, reorderPlayersDialogVisible } = this.state;
     const highestBidder = currentRoundData.highestBidder;
 
     const playersButtons = this.getPlayersButtons(players, currentRoundData, highestBidder);
@@ -264,11 +272,35 @@ class GamePad extends Component {
               {playersButtons[1]}
             </Col>
           </Row>
-          <Row type="flex" justify="center">
+          <Row type="flex" justify="center" style={{ position: 'relative' }}>
             <Col className="item item8">
               {playersButtons[2]}
             </Col>
-
+            {round === 1
+              && inputMode === INPUT_MODE.BID &&
+              <div>
+                <Button
+                  type="dashed"
+                  shape="circle"
+                  className="change-players-btn"
+                  onClick={this.showChangePlayerDialog}
+                >
+                  <Icon component={ChangePlayers} />
+                </Button>
+                {reorderPlayersDialogVisible &&
+                  <PlayersContext.Consumer>
+                    {({ players, reorderPlayers }) => (<Dialog
+                      dialog={Dialogs.REORDER_PLAYERS}
+                      dialogProps={{
+                        onOk: reorderPlayers,
+                        onAfterClose: this.handleReorderPlayersAfterClose,
+                        visible: reorderPlayersDialogVisible,
+                        players
+                      }}
+                    />)}
+                  </PlayersContext.Consumer>}
+              </div>
+            }
           </Row>
         </Radio.Group>
       );
@@ -304,6 +336,18 @@ class GamePad extends Component {
         {playersButtons[2]}
       </div>
     </Radio.Group>);
+  }
+
+  showChangePlayerDialog() {
+    this.setState({
+      reorderPlayersDialogVisible: true
+    });
+  }
+
+  handleReorderPlayersAfterClose() {
+    this.setState({
+      reorderPlayersDialogVisible: false
+    });
   }
 };
 
