@@ -3,8 +3,6 @@ import { Modal } from 'antd';
 import DragPad from '../common/dragPad/DragPad';
 
 export default class ReorderPlayers extends Component {
-  okToReorder = false;
-
   constructor(props) {
     super(props);
 
@@ -26,19 +24,22 @@ export default class ReorderPlayers extends Component {
   }
 
   handleOnOk() {
-    this.okToReorder = true;
-
     this.setState({
       showDialog: false
     });
+
+    const { onOk } = this.props;
+    if (typeof onOk === 'function') {
+      const { order } = this.state;
+      onOk(order);
+    }
   }
 
   afterClose() {
     const { onAfterClose } = this.props;
 
     if (typeof onAfterClose === 'function') {
-      const { from, to } = this.state;
-      onAfterClose(this.okToReorder && { from, to });
+      onAfterClose();
     }
   }
 
@@ -61,7 +62,6 @@ export default class ReorderPlayers extends Component {
         destroyOnClose={true}
         maskClosable={false}
         width="600px"
-        // footer={null} 
         onOk={this.handleOnOk}
         onCancel={this.handleOnCancel}
         afterClose={this.afterClose}

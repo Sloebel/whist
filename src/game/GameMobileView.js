@@ -76,7 +76,6 @@ export default class GameMobileView extends Component {
       currentRound,
       handleSave,
       leagueScores,
-      reorderPlayers,
     } = this.props;
 
     return (
@@ -102,7 +101,6 @@ export default class GameMobileView extends Component {
                 allRounds={rounds}
                 players={playersColumns}
                 onChange={handleSave}
-                handleReorderPlayers={reorderPlayers}
               />
             </div>
           </div>

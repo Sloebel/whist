@@ -14,6 +14,8 @@ import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
 import { reorder } from '../common/dragPad/DragPad';
 
+export const PlayersContext = React.createContext();
+
 const { Header, Content, Sider } = Layout;
 
 class GameTab extends Component {
@@ -520,16 +522,14 @@ class GameTab extends Component {
     });
   };
 
-  handleReorderPlayers(from, to) {
-    const { players } = this.state;
-    const newPlayers = reorder(players, from, to);
+  handleReorderPlayers(newOrder) {
     this.setState({
-      players: newPlayers,
-      columns: this.initColumns(newPlayers),
+      players: newOrder,
+      columns: this.initColumns(newOrder),
     });
     const { params } = this.props.match;
     const { leagueID } = params;
-    fire.database().ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`).update({ playersOrder: newPlayers });
+    fire.database().ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`).update({ playersOrder: newOrder });
   }
 
   getLeagueScores = () => {
@@ -552,9 +552,8 @@ class GameTab extends Component {
   }
 
   render() {
-    const { columns, currentView, gameData, gameSummary } = this.state;
+    const { columns, currentView, gameData, players } = this.state;
     const { rounds, currentRound } = gameData;
-    // const { leagueScore0, leagueScore1, leagueScore2, leagueScore3 } = gameSummary;
     const { screenSize, isMobile, loading, match } = this.props;
     const { params } = match;
     const { gameID } = params;
@@ -583,19 +582,19 @@ class GameTab extends Component {
 
     if (isMobile) {
       return (
-        <GameMobileView
-          gameID={gameID}
-          currentView={currentView}
-          rounds={rounds}
-          playersColumns={playersColumns}
-          currentRound={currentRound}
-          handleSave={this.handleSave}
-          onCurrentViewChange={this.setCurrentViewState}
-          goToRound={this.selectActiveRound}
-          leagueScores={this.getLeagueScores()}
-          reorderPlayers={this.handleReorderPlayers}
-        // leagueScores={{ leagueScore0, leagueScore1, leagueScore2, leagueScore3 }}
-        />
+        <PlayersContext.Provider value={{ players, reorderPlayers: this.handleReorderPlayers }}>
+          <GameMobileView
+            gameID={gameID}
+            currentView={currentView}
+            rounds={rounds}
+            playersColumns={playersColumns}
+            currentRound={currentRound}
+            handleSave={this.handleSave}
+            onCurrentViewChange={this.setCurrentViewState}
+            goToRound={this.selectActiveRound}
+            leagueScores={this.getLeagueScores()}
+          />
+        </PlayersContext.Provider>
       );
     }
 
@@ -608,7 +607,6 @@ class GameTab extends Component {
           <Menu
             defaultSelectedKeys={['1']}
             mode="inline"
-            // style={{ transform: `translate(${currentView === 'table' ? translate : 0}px)` }}
             style={{ left: `${currentView === 'table' ? 0 : translate / 2 * -1}px` }}
             onSelect={(item) => this.selectActiveRound(item.key)}
             selectedKeys={[`${currentRound}`]}

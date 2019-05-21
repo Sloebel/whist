@@ -32,8 +32,7 @@ function clamp(n, min, max) {
 }
 
 const allColors = [
-  '#EF767A', '#9acaff', '#49BEAA', '#49DCB1', '#EEB868', '#EF767A', '#456990',
-  '#49BEAA', '#49DCB1', '#EEB868', '#EF767A',
+  '#EF767A', '#9acaff', '#49BEAA', '#49DCB1'
 ];
 const [count, width, height] = [4, 80, 80];
 
@@ -56,6 +55,7 @@ export default class DragPad extends React.Component {
   unListenTouchend;
   unListenMousemove;
   unListenMouseup;
+  colors;
 
   constructor(props) {
     super(props);
@@ -69,6 +69,12 @@ export default class DragPad extends React.Component {
       from: null,
       to: null
     };
+
+    this.colors = props.players.reduce((colorObj, player, i) => {
+      colorObj[player.key] = allColors[i];
+
+      return colorObj;
+    }, {});
   }
 
   componentDidMount() {
@@ -120,7 +126,7 @@ export default class DragPad extends React.Component {
         to = 3;
       }
 
-      const from = order.findIndex(p => p.index === lastPress);
+      const from = order.findIndex(p => p.key === lastPress);
 
       const newOrder = typeof to === 'number' && to !== from && reorder(order, from, to);
 
@@ -153,6 +159,7 @@ export default class DragPad extends React.Component {
 
   render() {
     const { order, lastPress, isPressed, mouseXY } = this.state;
+
     return (
       <div className="drag-pad">
         <div className="drag-pad-content">
@@ -160,9 +167,9 @@ export default class DragPad extends React.Component {
             let style;
             let x;
             let y;
-            const visualPosition = order.findIndex(p => p.index === player.index);
+            const visualPosition = order.findIndex(p => p.key === player.key);
             // const visualPosition = order.indexOf(player.index);
-            if (player.index === lastPress && isPressed) {
+            if (player.key === lastPress && isPressed) {
               [x, y] = mouseXY;
               style = {
                 translateX: x,
@@ -180,22 +187,22 @@ export default class DragPad extends React.Component {
               };
             }
             return (
-              <Motion key={player.index} style={style}>
+              <Motion key={player.key} style={style}>
                 {({ translateX, translateY, scale, boxShadow }) =>
                   <div
-                    onMouseDown={this.handleMouseDown.bind(null, player.index, [x, y])}
-                    onTouchStart={this.handleTouchStart.bind(null, player.index, [x, y])}
+                    onMouseDown={this.handleMouseDown.bind(null, player.key, [x, y])}
+                    onTouchStart={this.handleTouchStart.bind(null, player.key, [x, y])}
                     className="player-icon"
                     style={{
-                      backgroundColor: allColors[player.index],
+                      backgroundColor: this.colors[player.key],
                       WebkitTransform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
                       transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
-                      zIndex: player.index === lastPress ? 99 : visualPosition,
+                      zIndex: player.key === lastPress ? 99 : visualPosition,
                       boxShadow: `${boxShadow}px 5px 5px rgba(0,0,0,0.5)`,
                     }}
                   >
                     <Icon type="user" />
-                    <span>{player.playerName}</span>
+                    <span>{player.nickname}</span>
                   </div>
                 }
               </Motion>

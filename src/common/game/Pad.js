@@ -9,6 +9,7 @@ import { INPUT_MODE } from '../../constants/states';
 import './Pad.css';
 import Dialog from '../../dialogs/Dialog';
 import { Dialogs } from '../../constants/dialogs';
+import { PlayersContext } from '../../game/GameTab';
 
 const confirm = Modal.confirm;
 message.config({
@@ -22,7 +23,7 @@ class GamePad extends Component {
 
     this.state = {
       selectedPlayer: undefined,
-      reorderPlayers: false,
+      reorderPlayersDialogVisible: false,
     };
 
     this.handleSwitchMode = this.handleSwitchMode.bind(this);
@@ -31,7 +32,7 @@ class GamePad extends Component {
     this.setSelectedPlayer = this.setSelectedPlayer.bind(this);
     this.showChangeHighestBidderConfirm = this.showChangeHighestBidderConfirm.bind(this);
     this.showChangePlayerDialog = this.showChangePlayerDialog.bind(this);
-    this.onReorderPlayers = this.onReorderPlayers.bind(this);
+    this.handleReorderPlayersAfterClose = this.handleReorderPlayersAfterClose.bind(this);
   }
 
   handleSwitchMode(checked) {
@@ -228,7 +229,7 @@ class GamePad extends Component {
     const { isMobile, allRounds, currentRound, players } = this.props;
     const currentRoundData = allRounds.length && allRounds[currentRound - 1];
     const { round, check, trump, segment, inputMode } = currentRoundData;
-    const { selectedPlayer, reorderPlayers } = this.state;
+    const { selectedPlayer, reorderPlayersDialogVisible } = this.state;
     const highestBidder = currentRoundData.highestBidder;
 
     const playersButtons = this.getPlayersButtons(players, currentRoundData, highestBidder);
@@ -286,15 +287,18 @@ class GamePad extends Component {
                 >
                   <Icon component={ChangePlayers} />
                 </Button>
-                {reorderPlayers
-                  && <Dialog
-                    dialog={Dialogs.REORDER_PLAYERS}
-                    dialogProps={{
-                      onAfterClose: this.onReorderPlayers,
-                      visible: reorderPlayers,
-                      players
-                    }}
-                  />}
+                {reorderPlayersDialogVisible &&
+                  <PlayersContext.Consumer>
+                    {({ players, reorderPlayers }) => (<Dialog
+                      dialog={Dialogs.REORDER_PLAYERS}
+                      dialogProps={{
+                        onOk: reorderPlayers,
+                        onAfterClose: this.handleReorderPlayersAfterClose,
+                        visible: reorderPlayersDialogVisible,
+                        players
+                      }}
+                    />)}
+                  </PlayersContext.Consumer>}
               </div>
             }
           </Row>
@@ -336,20 +340,14 @@ class GamePad extends Component {
 
   showChangePlayerDialog() {
     this.setState({
-      reorderPlayers: true
+      reorderPlayersDialogVisible: true
     });
   }
 
-  onReorderPlayers({ from, to }) {
+  handleReorderPlayersAfterClose() {
     this.setState({
-      reorderPlayers: false
+      reorderPlayersDialogVisible: false
     });
-
-    if (typeof to === 'number') {
-      if (typeof this.props.handleReorderPlayers === 'function') {
-        this.props.handleReorderPlayers(from, to);
-      }
-    }
   }
 };
 
