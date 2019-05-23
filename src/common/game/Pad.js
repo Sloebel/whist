@@ -194,9 +194,10 @@ class GamePad extends Component {
       return 0;
     }
 
+    const aggregateScore = roundData[`aggregateScore${playerIndex}`];
     // if round.fell == true, look for round before
-    if (roundData[`aggregateScore${playerIndex}`] && !roundData.fell) {
-      return roundData[`aggregateScore${playerIndex}`];
+    if (typeof aggregateScore === 'number' && !roundData.fell) {
+      return aggregateScore;
     }
 
     return this.getPlayerAggregateScore(roundsData, roundIndex - 1, playerIndex);

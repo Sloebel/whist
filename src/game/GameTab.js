@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
 import { fire } from './../firebase';
-import { Layout, Menu, Tabs, Table, Card, Button, message } from 'antd';
+import { Layout, Menu, Table, Card, Button, message } from 'antd';
 import ReactDragListView from "react-drag-listview";
 import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js';
 import './GameTab.css';
 import GamePad from './../common/game/Pad';
-import { hasTouch } from '../utils/Utils.js';
 import { GAME_STATUS } from '../constants/states';
 import { cardsRenderer } from '../common/table/renderers.js';
 import CssUp from '../common/transition/CssUp.js';
 import Loader from '../common/loader/Loader';
 import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
-import { reorder } from '../common/dragPad/DragPad';
 
 export const PlayersContext = React.createContext();
 
@@ -315,7 +313,6 @@ class GameTab extends Component {
   handleSave = (row, player) => {
     const stateToUpdate = {};
     const newData = [...this.state.gameData.rounds];
-    console.log(row);
     const index = newData.findIndex(item => row.round === item.round);
 
     const item = newData[index];
@@ -357,11 +354,13 @@ class GameTab extends Component {
 
         //calculate aggregate score
         let aggregateScore = 0;
-        newData.forEach((round, i) => {
+        for (let i = 0; i <= index; i++) {
+          const round = newData[i];
+
           if (typeof round[`score${player}`] === 'number' && !round.fell) {
             aggregateScore += round[`score${player}`];
           }
-        });
+        }
         row[`aggregateScore${player}`] = aggregateScore;
 
         stateToUpdate[`totalScore${player}`] = row[`aggregateScore${player}`];
