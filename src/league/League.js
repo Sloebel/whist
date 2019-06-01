@@ -103,6 +103,7 @@ class League extends Component {
     const lastGame = leagueGames[leagueGames.length - 1];
 
     if (!lastGame || lastGame.status === GAME_STATUS.FINISHED) {
+      const { history, match } = this.props;
       const newGameId = leagueGames.length + 1;
 
       const newGameKey = fire.database().ref().child('games').push().key;
@@ -114,9 +115,15 @@ class League extends Component {
       updates[`/leagueGames/_${leagueID}/${newGameKey}`] = { gameID: newGameId, status: GAME_STATUS.ACTIVE };
       updates[`/leagueGamesSummary/_${leagueID}/${newGameKey}`] = { ...gameTpl.gameSummary };
 
-      fire.database().ref().update(updates);
+      fire.database().ref().update(updates, (error) => {
+        if (!error) {
+          this.setState({ menuSelected: `${newGameId}` });
+          history.push(`${match.url}${routes.GAME}/${newGameId}`);
+          setTimeout(this.toggleDrawer, 400);
+        }
+      });
     } else {
-      setTimeout(this.toggleDrawer, 300);
+      setTimeout(this.toggleDrawer, 200);
       message.warning('Last Game is not finished yet!!');
     }
   }
@@ -130,7 +137,7 @@ class League extends Component {
 
     if (key !== "main_menu" && key !== this.state.menuSelected) {
       this.setState({ menuSelected: key });
-      setTimeout(this.toggleDrawer, 500);
+      setTimeout(this.toggleDrawer, 400);
       this.setLoaderState(true);
     }
   }
