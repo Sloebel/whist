@@ -7,7 +7,7 @@ import './GameTab.css';
 import GamePad from './../common/game/Pad';
 import { GAME_STATUS } from '../constants/states';
 import { cardsRenderer } from '../common/table/renderers.js';
-import CssUp from '../common/transition/CssUp.js';
+import Css, { CSS_TRANSITIONS } from '../common/transition/Css.js';
 import Loader from '../common/loader/Loader';
 import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
@@ -629,9 +629,9 @@ class GameTab extends Component {
                   className="card"
                   style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
                 >
-                  <CssUp>
+                  <Css type={CSS_TRANSITIONS.SLIDE_UP}>
                     {gameData[`totalScore${playerIndex}`]}
-                  </CssUp>
+                  </Css>
                 </Card>
               ))}
             </ReactDragListView>

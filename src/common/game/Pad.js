@@ -10,6 +10,8 @@ import './Pad.css';
 import Dialog from '../../dialogs/Dialog';
 import { Dialogs } from '../../constants/dialogs';
 import { PlayersContext } from '../../game/GameTab';
+import Css, { CSS_TRANSITIONS } from '../transition/Css';
+import TwoWayArrow, { TWO_WAY_ARROW_DIRECTION } from '../twoWayArrow/TwoWayArrow';
 
 const confirm = Modal.confirm;
 message.config({
@@ -44,7 +46,7 @@ class GamePad extends Component {
       return message.warning('Total Bids are 13?!?!');
     }
 
-    const everyoneBid = Array(4).fill(1).every((_, i) => typeof roundData[`bid${i}`] === 'number');
+    const everyoneBid = this.isAllBids(roundData);
 
     if (trump && everyoneBid) {
       this.setState({
@@ -227,13 +229,12 @@ class GamePad extends Component {
   };
 
   render() {
-    const { isMobile, allRounds, currentRound, players } = this.props;
+    const { isMobile, allRounds, currentRound } = this.props;
     const currentRoundData = allRounds.length && allRounds[currentRound - 1];
     const { round, check, trump, segment, inputMode } = currentRoundData;
     const { selectedPlayer, reorderPlayersDialogVisible } = this.state;
-    const highestBidder = currentRoundData.highestBidder;
-
-    const playersButtons = this.getPlayersButtons(players, currentRoundData, highestBidder);
+    const isAllBids = this.isAllBids(currentRoundData);
+    const playersButtons = this.getPlayersButtons();
 
     if (isMobile) {
       return (
@@ -252,7 +253,14 @@ class GamePad extends Component {
                 unCheckedChildren=" Bid "
                 checked={inputMode === INPUT_MODE.WON}
               />
-              <div>Bids: {segment}</div>
+              <div className="segment">
+                Bids: <Css type={CSS_TRANSITIONS.FADE_IN}>
+                  {!isAllBids ? `${segment && (13 + segment)}` : segment}
+                </Css>
+                <TwoWayArrow
+                  direction={isAllBids && (segment > 0 ? TWO_WAY_ARROW_DIRECTION.TOP : TWO_WAY_ARROW_DIRECTION.BOTTOM)}
+                />
+              </div>
               <div>Check: {check ? 'yes' : 'no'}</div>
             </Col>
             <Col className="item item2">
@@ -350,6 +358,9 @@ class GamePad extends Component {
       reorderPlayersDialogVisible: false
     });
   }
+
+  // TODO: memoize it
+  isAllBids = (roundData) => Array(4).fill(1).every((_, i) => typeof roundData[`bid${i}`] === 'number');
 };
 
 export default GamePad;

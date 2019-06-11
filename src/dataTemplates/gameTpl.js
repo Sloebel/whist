@@ -7,6 +7,7 @@ export default function gameDataTpl(players) {
     rounds.push({
       round: i + 1,
       segment: '',
+      totalBids: '',
       trump: '',
       check: false,
       factor: 1,
