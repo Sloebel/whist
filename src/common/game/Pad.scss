@@ -9,3 +9,15 @@
   line-height: 40px;
   background: none;
 }
+
+.game-pad-container {
+  .segment {
+    div {
+      display: inline-block;
+    }
+
+    .arrow-indicator {
+      top: 3px;
+    }
+  }
+}

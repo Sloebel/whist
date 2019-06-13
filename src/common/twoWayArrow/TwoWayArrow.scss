@@ -1,0 +1,79 @@
+$size: 16px;
+$thickness: 2px;
+$angle: 40deg;
+
+@mixin arrowTransform( $angle, $x: 0, $y: 0 ) {
+  i:first-child {
+    transform: translate( -$x, $y ) rotate( $angle );
+    height: $size/2;
+  }
+
+  i:last-child {
+    transform: translate( $x, $y ) rotate( -$angle );   
+    height: $size/2;
+  }
+}
+
+.arrow-indicator {
+  position: relative;
+  text-align: center;
+  width: $size;
+  height: $size;
+  transform: translate3d(0,0,0); // fixes flicker in webkit
+  opacity: 0.3;
+  
+  i {
+    position: absolute;
+    // top: 40%;
+    // left: $size/2;
+    width: $thickness;
+    height: $size;
+    border-radius: $thickness / 2;
+    background: #fff;
+
+    transition: all 0.15s ease;
+  }
+  
+  span {
+    i {
+      height: $size/2;
+    }
+  }
+  
+  span:first-child {
+    i {
+      transform-origin: 50% 0%;      
+    }
+  }
+  
+  &.top,
+  &.bottom {
+    opacity: 1;
+  }
+  
+  &.top {
+    span:first-child {
+      @include arrowTransform( $angle, -0.5px, 0px );
+    }
+  }
+  
+  span:last-child {
+    position: absolute;
+    bottom: 0px;
+    
+    i {
+      transform-origin: 50% 100%;    
+      top: -$size/2;
+    }
+  }
+  
+  &.bottom {
+    span:last-child {
+      @include arrowTransform( $angle, 0.5px, 0px );
+    }
+  }
+  
+  &[data-state=disabled] {
+    opacity: 0.3;
+  }
+}

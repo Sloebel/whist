@@ -1,6 +1,6 @@
 import React from 'react';
 import './Pad.css';
-import CssUp from '../transition/CssUp';
+import Css, { CSS_TRANSITIONS } from '../transition/Css';
 
 const PlayerPad = (props) => {
   const { name, bid, won, score } = props;
@@ -11,7 +11,7 @@ const PlayerPad = (props) => {
         {name}&nbsp;
         {score !== undefined &&
           <span className="pad-score">
-            [<CssUp>{score}</CssUp>]
+            [<Css type={CSS_TRANSITIONS.SLIDE_UP}>{score}</Css>]
         </span>}
       </div>
 
