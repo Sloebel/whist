@@ -7,6 +7,9 @@ export const TWO_WAY_ARROW_DIRECTION = {
 };
 
 // TODO: add option for horizontal arrow 
+// https://codepen.io/hakimel/pen/gfIsk 
+// https://codepen.io/Sloebel/pen/MdLKdY
+
 const TwoWayArrow = (props) => {
   return (
     <div className={`arrow-indicator ${props.direction || ''}`}>
