@@ -342,7 +342,7 @@ class GameTab extends Component {
           const diff = Math.abs(won - bid);
 
           if ((bid * 1) === 0) {
-            rowScore = -50 + (diff - 1) * 10;
+            rowScore = -(row.segment > 0 ? 25 : 50) + (diff - 1) * 10;
           } else {
             rowScore = diff * -10;
           }
