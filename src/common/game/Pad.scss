@@ -20,4 +20,15 @@
       top: 3px;
     }
   }
+
+  .factor-indicator,
+  .fell-indicator {
+    line-height: 20px;
+    background: #fff;
+    border-radius: 15px;
+    text-align: center;
+    padding: 0 6px;
+    margin-top: 2px;
+    color: red;
+  }  
 }

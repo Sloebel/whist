@@ -326,45 +326,8 @@ class GameTab extends Component {
     row = newData[index];
 
     if (typeof player === 'number') {
-      let rowScore;
       // calculate score
-      const bid = row[`bid${player}`];
-      const won = row[`won${player}`];
-
-      if (won !== '' && bid !== '') {
-        if (won === bid) {
-          if ((won * 1) === 0) {
-            rowScore = row.segment > 0 ? 25 : 50;
-          } else {
-            rowScore = (Math.pow(won, 2) + 10);
-          }
-        } else {
-          const diff = Math.abs(won - bid);
-
-          if ((bid * 1) === 0) {
-            rowScore = -(row.segment > 0 ? 25 : 50) + (diff - 1) * 10;
-          } else {
-            rowScore = diff * -10;
-          }
-        }
-
-        rowScore *= row.factor;
-
-        row[`score${player}`] = rowScore;
-
-        //calculate aggregate score
-        let aggregateScore = 0;
-        for (let i = 0; i <= index; i++) {
-          const round = newData[i];
-
-          if (typeof round[`score${player}`] === 'number' && !round.fell) {
-            aggregateScore += round[`score${player}`];
-          }
-        }
-        row[`aggregateScore${player}`] = aggregateScore;
-
-        stateToUpdate[`totalScore${player}`] = row[`aggregateScore${player}`];
-      }
+      this.calculatePlayerscore(row, player, newData, index, stateToUpdate);
 
       //update O/U
       let currentTotalBid = null;
@@ -392,7 +355,7 @@ class GameTab extends Component {
       if (row.check) {
         let didRoundFell = true;
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 4; i++) {
           if (typeof row[`bid${i}`] !== 'number' || typeof row[`won${i}`] !== 'number') {
             didRoundFell = false;
             break;
@@ -411,11 +374,19 @@ class GameTab extends Component {
           } else if (row.factor > 1) {
             newData[row.round].factor = row.factor
           }
-        }
+        } else if (row.fell) {
+          row.fell = false;
+          if (newData[row.round]) {
+            newData[row.round].factor = row.factor > 1 ? row.factor / 2 : row.factor;
+          }
 
+          for (let i = 0; i < 4; i++) {
+            this.calculatePlayerscore(row, i, newData, index, stateToUpdate);
+          }
+        }
       }
 
-      if (row.round === 13 && row.check) {
+      if (row.round === 13 && row.check && !row.fell) {
         stateToUpdate.status = GAME_STATUS.FINISHED;
         const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state.gameData;
         const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
@@ -430,6 +401,47 @@ class GameTab extends Component {
 
     // this.setState(stateToUpdate);
     this.gameRef.update(stateToUpdate);
+  }
+
+  calculatePlayerscore = (round, player, roundsData, currentRound, stateToUpdate) => {
+    let rowScore;
+
+    const bid = round[`bid${player}`];
+    const won = round[`won${player}`];
+
+    if (won !== '' && bid !== '') {
+      if (won === bid) {
+        if ((won * 1) === 0) {
+          rowScore = round.segment > 0 ? 25 : 50;
+        } else {
+          rowScore = (Math.pow(won, 2) + 10);
+        }
+      } else {
+        const diff = Math.abs(won - bid);
+
+        if ((bid * 1) === 0) {
+          rowScore = -(round.segment > 0 ? 25 : 50) + (diff - 1) * 10;
+        } else {
+          rowScore = diff * -10;
+        }
+      }
+
+      rowScore *= round.factor;
+
+      round[`score${player}`] = rowScore;
+
+      //calculate aggregate score
+      let aggregateScore = 0;
+      for (let i = 0; i <= currentRound; i++) {
+        const round = roundsData[i];
+
+        if (typeof round[`score${player}`] === 'number' && !round.fell) {
+          aggregateScore += round[`score${player}`];
+        }
+      }
+      round[`aggregateScore${player}`] = aggregateScore;
+      stateToUpdate[`totalScore${player}`] = round[`aggregateScore${player}`];
+    }
   }
 
   calculateLeagueScores = (scores, stateToUpdate) => {
