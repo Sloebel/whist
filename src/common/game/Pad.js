@@ -231,7 +231,7 @@ class GamePad extends Component {
   render() {
     const { isMobile, allRounds, currentRound } = this.props;
     const currentRoundData = allRounds.length && allRounds[currentRound - 1];
-    const { round, check, trump, segment, inputMode } = currentRoundData;
+    const { round, check, trump, segment, inputMode, fell, factor } = currentRoundData;
     const { selectedPlayer, reorderPlayersDialogVisible } = this.state;
     const isAllBids = this.isAllBids(currentRoundData);
     const playersButtons = this.getPlayersButtons();
@@ -240,7 +240,7 @@ class GamePad extends Component {
       return (
         <Radio.Group
           buttonStyle="solid"
-          className="game-pad-container"
+          className={`game-pad-container ${fell ? 'round-fell' : ''}`}
           onChange={this.setSelectedPlayer}
           value={selectedPlayer}
         >
@@ -262,6 +262,11 @@ class GamePad extends Component {
                 />
               </div>
               <div>Check: {check ? 'yes' : 'no'}</div>
+              <Css type={CSS_TRANSITIONS.FADE_IN}>
+                {fell ? <div className="fell-indicator">round fell</div> : ''}
+              </Css>
+              {(!fell && factor > 1) && <div className="factor-indicator">{`x${factor}`}</div>}
+
             </Col>
             <Col className="item item2">
               {playersButtons[0]}
