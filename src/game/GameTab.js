@@ -304,7 +304,7 @@ class GameTab extends Component {
     this.gameSummaryRef.off('value');
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.gameID !== this.props.match.params.gameID) {
       this.fetch();
     }
@@ -312,6 +312,7 @@ class GameTab extends Component {
 
   handleSave = (row, player) => {
     const stateToUpdate = {};
+    let summaryToUpdate;
     const newData = [...this.state.gameData.rounds];
     const index = newData.findIndex(item => row.round === item.round);
 
@@ -384,16 +385,22 @@ class GameTab extends Component {
             this.calculatePlayerscore(row, i, newData, index, stateToUpdate);
           }
         }
-      }
 
-      if (row.round === 13 && row.check && !row.fell) {
-        stateToUpdate.status = GAME_STATUS.FINISHED;
-        const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state.gameData;
-        const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
-        scores[`totalScore${player}`] = stateToUpdate[`totalScore${player}`];
+        // calculate round summary stats
+        summaryToUpdate = this.calculateSummary(newData, index);
 
-        this.gameSummaryRef.update(this.calculateLeagueScores(scores));
-        this.updateGameStatus(GAME_STATUS.FINISHED);
+        if (row.round === 13 && !row.fell) {
+          stateToUpdate.status = GAME_STATUS.FINISHED;
+          this.updateGameStatus(GAME_STATUS.FINISHED);
+
+          // round summary league scores
+          const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state.gameData;
+          const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
+          scores[`totalScore${player}`] = stateToUpdate[`totalScore${player}`];
+          summaryToUpdate = this.calculateLeagueScores(scores, summaryToUpdate);
+        }
+
+        this.gameSummaryRef.update(this.mapToPlayersObj(summaryToUpdate));
       }
     }
 
@@ -444,10 +451,8 @@ class GameTab extends Component {
     }
   }
 
-  calculateLeagueScores = (scores, stateToUpdate) => {
-    const players = this.state.players;
+  calculateLeagueScores = (scores, summaryToUpdate) => {
     const sortedScores = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
-    const leagueScores = {};
 
     sortedScores.forEach((scoreIndex, i) => {
       const score = scores[scoreIndex];
@@ -473,12 +478,100 @@ class GameTab extends Component {
         leagueScore -= 3;
       }
 
-      leagueScores[players[`${scoreIndex.slice(-1)}`].key] = { leagueScore };
-      // leagueScores[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
-      // stateToUpdate[`leagueScore${scoreIndex.slice(-1)}`] = leagueScore;
+      summaryToUpdate[`${scoreIndex.slice(-1)}`].leagueScore = leagueScore;
     });
 
-    return leagueScores;
+    return summaryToUpdate;
+  }
+
+  calculateSummary = (roundsData, currentRoundIndex) => {
+    const currentRound = currentRoundIndex + 1;
+    const playersSummary = {};
+
+    for (let pIndex = 0; pIndex < 4; pIndex++) {
+      playersSummary[pIndex] = {};
+      let stood = 0;
+      let totalRounds = 0;
+      let totalHBrounds = 0;
+      let stoodWhileHB = 0;
+      let stoodInOver = 0;
+      let totalOverRounds = 0;
+      let stoodInUnder = 0;
+      let totalNTrounds = 0;
+      let stoodInNT = 0;
+      let stoodWhenLastBidder = 0;
+      let totalStoodWhenLastBidder = 0;
+
+      for (let rIndex = 0; rIndex < currentRound; rIndex++) {
+        const round = roundsData[rIndex];
+        if (!round.fell) {
+          totalRounds++;
+          const highestBidder = round.highestBidder === pIndex;
+          const lastBidder = !highestBidder && (pIndex + 1 > 3 ? 0 : pIndex + 1) === round.highestBidder;
+
+          if (highestBidder) {
+            totalHBrounds++;
+          } else if (lastBidder) {
+            totalStoodWhenLastBidder++;
+          }
+
+          if (round.segment > 0) {
+            totalOverRounds++;
+          }
+
+          if (round.trump === 'NT') {
+            totalNTrounds++;
+          }
+
+          if (round[`bid${pIndex}`] === round[`won${pIndex}`]) {
+            stood++;
+
+            if (highestBidder) {
+              stoodWhileHB++;
+            } else if (lastBidder) {
+              stoodWhenLastBidder++;
+            }
+
+            if (round.trump === 'NT') {
+              stoodInNT++;
+            }
+
+            round.segment > 0 ? stoodInOver++ : stoodInUnder++;
+          }
+        }
+      }
+
+      const successRate = { wins: stood, total: totalRounds };
+      const successRateHB = { wins: stoodWhileHB, total: totalHBrounds };
+      const successRateOver = { wins: stoodInOver, total: totalOverRounds };
+      const successRateUnder = { wins: stoodInUnder, total: (totalRounds - totalOverRounds) };
+      const successRateNT = { wins: stoodInNT, total: totalNTrounds };
+      const successRateLastBidder = { wins: stoodWhenLastBidder, total: totalStoodWhenLastBidder };
+
+      playersSummary[pIndex] = {
+        successRate: Number.isNaN(successRate) ? '' : successRate,
+        successRateHB,
+        successRateOver,
+        successRateUnder,
+        successRateNT,
+        successRateLastBidder,
+      };
+    }
+
+    return playersSummary;
+  }
+
+  mapToPlayersObj = (summaryToUpdate) => {
+    const { players, gameSummary } = this.state;
+
+    return players.reduce((obj, player, index) => {
+      obj[player.key] = {
+        ...gameSummary[player.key],
+        ...summaryToUpdate[index]
+      };
+
+      return obj;
+    }, {});
   }
 
   updateGameStatus = (status) => {
@@ -502,9 +595,9 @@ class GameTab extends Component {
     const { gameData, currentView } = this.state;
     const { rounds, currentRound } = gameData;
 
-    if (parseInt(newRound) < parseInt(currentRound) || rounds[currentRound - 1].check) {
+    if (Number(newRound) < Number(currentRound) || rounds[currentRound - 1].check) {
       this.gameRef.update({
-        currentRound: parseInt(newRound)
+        currentRound: Number(newRound)
       });
 
       const { isMobile } = this.props;
@@ -568,7 +661,7 @@ class GameTab extends Component {
     const { screenSize, isMobile, loading, match } = this.props;
     const { params } = match;
     const { gameID } = params;
-    const columns1 = this.columns1;
+    // const columns1 = this.columns1;
     const playersColumns = columns.slice(0, 4);
     const components = {
       body: {
