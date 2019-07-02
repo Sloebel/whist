@@ -46,7 +46,12 @@ export default function gameDataTpl(players) {
     gameSummary: {
       players: players.reduce((summaryObj, player) => {
         summaryObj[player.key] = {
-          leagueScore: ''
+          leagueScore: '',
+          successRate: '',
+          successRateHB: '',
+          successRateOver: '',
+          successRateUnder: '',
+          successRateNT: ''
         };
 
         return summaryObj;

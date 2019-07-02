@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Icon, Button } from 'antd';
 import MobileTable from "../common/table/MobileTable";
 import GamePad from "../common/game/Pad";
-import { hasTouch } from '../utils/Utils';
+import { hasTouch, addListener } from '../utils/Utils';
 
 export default class GameMobileView extends Component {
   constructor(props) {
@@ -15,15 +15,15 @@ export default class GameMobileView extends Component {
 
   componentDidMount() {
     if (hasTouch()) {
-      this.carouselEl.addEventListener("swiped-left", this.carouselSwipedLeft);
-      this.carouselEl.addEventListener("swiped-right", this.carouselSwipedRight);
+      this.unListenSwipedLeft = addListener(this.carouselEl, 'swiped-left', this.carouselSwipedLeft);
+      this.unListenSwipedRight = addListener(this.carouselEl, 'swiped-right', this.carouselSwipedRight);
     }
   }
 
   componentWillUnmount() {
     if (hasTouch()) {
-      this.carouselEl.removeEventListener("swiped-left", this.carouselSwipedLeft);
-      this.carouselEl.removeEventListener("swiped-right", this.carouselSwipedRight);
+      this.unListenSwipedLeft();
+      this.unListenSwipedRight();
     }
   }
 
@@ -114,7 +114,7 @@ export default class GameMobileView extends Component {
 
           {currentRound !== 13 &&
             <Button type="primary" ghost onClick={this.nextRound}>
-              {`Round ${parseInt(currentRound) + 1}`}<Icon type="right" />
+              {`Round ${Number(currentRound) + 1}`}<Icon type="right" />
             </Button>
           }
         </div>
