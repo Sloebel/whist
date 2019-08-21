@@ -369,7 +369,7 @@ class GameTab extends Component {
         if (didRoundFell) {
           row.fell = true;
 
-          if (row.round < 11) {
+          if (row.round < 12) {
             // because metaData index is zero based row.round value is next round index
             newData[row.round].factor = row.factor * 2;
           } else if (row.factor > 1) {
