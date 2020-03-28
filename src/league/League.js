@@ -1,18 +1,24 @@
-import React, { Component } from 'react';
-import { fire } from '../firebase';
+import React, { Component } from "react";
+import { fire } from "../firebase";
 import { Route, Link } from "react-router-dom";
-import withAuthorization from '../authentication/withAuthorization';
-import { Menu, Icon, Layout, message } from 'antd';
-import './League.css';
-import GameTab from './../game/GameTab';
-import Arrow from '../common/arrowButton/arrow/Arrow';
-import * as routes from './../constants/routes';
-import gameDataTpl from './../dataTemplates/gameTpl';
-import RcDrawer from 'rc-drawer';
-import 'rc-drawer/assets/index.css';
-import Loader from '../common/loader/Loader';
-import { GAME_STATUS } from '../constants/states';
-import LeagueSummary from '../leagueSummary/LeagueSummary';
+import withAuthorization from "../authentication/withAuthorization";
+import { Menu, Layout, message } from "antd";
+import {
+  DashboardOutlined,
+  GoldOutlined,
+  ExportOutlined,
+  PlusOutlined
+} from "@ant-design/icons";
+import "./League.css";
+import GameTab from "./../game/GameTab";
+import Arrow from "../common/arrowButton/arrow/Arrow";
+import * as routes from "./../constants/routes";
+import gameDataTpl from "./../dataTemplates/gameTpl";
+import RcDrawer from "rc-drawer";
+import "rc-drawer/assets/index.css";
+import Loader from "../common/loader/Loader";
+import { GAME_STATUS } from "../constants/states";
+import LeagueSummary from "../leagueSummary/LeagueSummary";
 
 const { Content, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -25,13 +31,13 @@ class League extends Component {
     const { leagueID } = match.params;
 
     const matchGame = location.pathname.match(/game\/[1-9]/g) || [];
-    const gameID = matchGame.length ? matchGame[0].split('/')[1] : false;
+    const gameID = matchGame.length ? matchGame[0].split("/")[1] : false;
 
     this.state = {
       loading: true,
       siderCollapse: false,
-      menuSelected: gameID || 'dashboard',
-      league: { title: '', players: [] },
+      menuSelected: gameID || "dashboard",
+      league: { title: "", players: [] },
       leagueGames: [],
       drawerVisible: false
       // activeGame: `0`
@@ -46,7 +52,7 @@ class League extends Component {
   }
 
   fetch() {
-    this.leagueRef.on('value', snapshot => {
+    this.leagueRef.on("value", snapshot => {
       console.log(snapshot.val());
       const leagueData = snapshot.val();
 
@@ -54,23 +60,25 @@ class League extends Component {
         this.setState({
           league: {
             ...this.state.league,
-            ...leagueData,
+            ...leagueData
           }
           // activeGame: `${leagueData.games.length}`
         });
       }
     });
 
-    this.leagueGamesRef.on('child_added', snapshot => {
+    this.leagueGamesRef.on("child_added", snapshot => {
       this.setState(prevState => {
         return { leagueGames: [...prevState.leagueGames, snapshot.val()] };
       });
     });
 
-    this.leagueGamesRef.on('child_changed', snapshot => {
+    this.leagueGamesRef.on("child_changed", snapshot => {
       this.setState(prevState => {
         const leagueGames = prevState.leagueGames;
-        const changedIndex = leagueGames.findIndex(game => game.gameID === snapshot.val().gameID);
+        const changedIndex = leagueGames.findIndex(
+          game => game.gameID === snapshot.val().gameID
+        );
 
         return {
           leagueGames: [
@@ -90,7 +98,7 @@ class League extends Component {
   }
 
   componentWillUnmount() {
-    this.leagueRef.off('value');
+    this.leagueRef.off("value");
   }
 
   // onTabChange = (activeGame) => {
@@ -106,32 +114,47 @@ class League extends Component {
       const { history, match } = this.props;
       const newGameId = leagueGames.length + 1;
 
-      const newGameKey = fire.database().ref().child('games').push().key;
+      const newGameKey = fire
+        .database()
+        .ref()
+        .child("games")
+        .push().key;
 
       const gameTpl = gameDataTpl(players);
       const updates = {};
 
-      updates[`/games/${newGameKey}`] = { gameID: newGameId, ...gameTpl.gameData };
-      updates[`/leagueGames/_${leagueID}/${newGameKey}`] = { gameID: newGameId, status: GAME_STATUS.ACTIVE };
-      updates[`/leagueGamesSummary/_${leagueID}/${newGameKey}`] = { ...gameTpl.gameSummary };
+      updates[`/games/${newGameKey}`] = {
+        gameID: newGameId,
+        ...gameTpl.gameData
+      };
+      updates[`/leagueGames/_${leagueID}/${newGameKey}`] = {
+        gameID: newGameId,
+        status: GAME_STATUS.ACTIVE
+      };
+      updates[`/leagueGamesSummary/_${leagueID}/${newGameKey}`] = {
+        ...gameTpl.gameSummary
+      };
 
-      fire.database().ref().update(updates, (error) => {
-        if (!error) {
-          this.setState({ menuSelected: `${newGameId}` });
-          history.push(`${match.url}${routes.GAME}/${newGameId}`);
-          setTimeout(this.toggleDrawer, 400);
-        }
-      });
+      fire
+        .database()
+        .ref()
+        .update(updates, error => {
+          if (!error) {
+            this.setState({ menuSelected: `${newGameId}` });
+            history.push(`${match.url}${routes.GAME}/${newGameId}`);
+            setTimeout(this.toggleDrawer, 400);
+          }
+        });
     } else {
       setTimeout(this.toggleDrawer, 200);
-      message.warning('Last Game is not finished yet!!');
+      message.warning("Last Game is not finished yet!!");
     }
-  }
+  };
 
-  handleMenuItemClick = (item) => {
+  handleMenuItemClick = item => {
     const key = item.key;
 
-    if (key === 'new_game') {
+    if (key === "new_game") {
       return this.addGame();
     }
 
@@ -140,7 +163,7 @@ class League extends Component {
       setTimeout(this.toggleDrawer, 400);
       this.setLoaderState(true);
     }
-  }
+  };
 
   setLoaderState(loading) {
     this.setState({ loading });
@@ -148,13 +171,13 @@ class League extends Component {
 
   toggleSider = () => {
     this.setState({
-      siderCollapse: !this.state.siderCollapse,
+      siderCollapse: !this.state.siderCollapse
     });
-  }
+  };
 
   toggleDrawer = () => {
     this.setState({
-      drawerVisible: !this.state.drawerVisible,
+      drawerVisible: !this.state.drawerVisible
     });
   };
 
@@ -162,36 +185,47 @@ class League extends Component {
     const { match } = this.props;
     const { leagueGames, menuSelected } = this.state;
 
-    return (<Menu
-      mode="inline"
-      selectedKeys={[menuSelected]}
-      defaultOpenKeys={['gamesSub']}
-      onClick={this.handleMenuItemClick}
-      className="league-menu"
-    >
-      <Menu.Item key="dashboard">
-        <Icon type="dashboard" />
-        <Link to={`${match.url}`}>League Summary</Link>
-      </Menu.Item>
-      <SubMenu
-        key="gamesSub"
-        title={<span><Icon type="gold" /><span>Games</span></span>}
+    return (
+      <Menu
+        mode="inline"
+        selectedKeys={[menuSelected]}
+        defaultOpenKeys={["gamesSub"]}
+        onClick={this.handleMenuItemClick}
+        className="league-menu"
       >
-        {leagueGames.map((game, i) => (
-          <Menu.Item key={game.gameID.toString()}><Link to={`${match.url}${routes.GAME}/${game.gameID}`}>Game {game.gameID}</Link></Menu.Item>
-        ))}
-
-        <Menu.Item key="new_game">
-          <Icon type="plus" />
-          <span>New Game</span>
+        <Menu.Item key="dashboard">
+          <DashboardOutlined />
+          <Link to={`${match.url}`}>League Summary</Link>
         </Menu.Item>
-      </SubMenu>
+        <SubMenu
+          key="gamesSub"
+          title={
+            <span>
+              <GoldOutlined />
+              <span>Games</span>
+            </span>
+          }
+        >
+          {leagueGames.map((game, i) => (
+            <Menu.Item key={game.gameID.toString()}>
+              <Link to={`${match.url}${routes.GAME}/${game.gameID}`}>
+                Game {game.gameID}
+              </Link>
+            </Menu.Item>
+          ))}
 
-      <Menu.Item key="main_menu">
-        <Icon type="export" className={'rotate-180'} />
-        <Link to={`/`}>To Main Menu</Link>
-      </Menu.Item>
-    </Menu>);
+          <Menu.Item key="new_game">
+            <PlusOutlined />
+            <span>New Game</span>
+          </Menu.Item>
+        </SubMenu>
+
+        <Menu.Item key="main_menu">
+          <ExportOutlined className={"rotate-180"} />
+          <Link to={`/`}>To Main Menu</Link>
+        </Menu.Item>
+      </Menu>
+    );
   }
 
   render() {
@@ -207,41 +241,63 @@ class League extends Component {
             width="250px"
             open={drawerVisible}
             onHandleClick={this.toggleDrawer}
-            onMaskClick={this.toggleDrawer}
+            onClose={this.toggleDrawer}
           >
             <div className="drawer-title">{league.title}</div>
             {this.getMenu()}
           </RcDrawer>
-        )
-          : <Sider
+        ) : (
+          <Sider
             trigger={null}
             collapsible
             collapsed={siderCollapse}
-            style={{ background: '#fff' }}
+            style={{ background: "#fff" }}
           >
-            <Arrow direction={'left'} onClick={this.toggleSider} />
+            <Arrow direction={"left"} onClick={this.toggleSider} />
             {this.getMenu()}
-          </Sider>}
+          </Sider>
+        )}
         <Layout>
           <Content
           // style={{
           // 	margin: '24px 16px', padding: 24, minHeight: 280,
           // }}
           >
-            <Route path={`${routes.LEAGUE}/:leagueID/game/:gameID`} render={(props) => !!leagueID ? <GameTab {...props} isMobile={isMobile} screenSize={screenSize} players={players} loading={loading} loaderStateCb={this.setLoaderState} /> : <Loader />} />
+            <Route
+              path={`${routes.LEAGUE}/:leagueID/game/:gameID`}
+              render={props =>
+                !!leagueID ? (
+                  <GameTab
+                    {...props}
+                    isMobile={isMobile}
+                    screenSize={screenSize}
+                    players={players}
+                    loading={loading}
+                    loaderStateCb={this.setLoaderState}
+                  />
+                ) : (
+                  <Loader />
+                )
+              }
+            />
             <Route
               exact
               path={match.url}
-              render={(props) => !!leagueID ? <LeagueSummary {...props} league={league} /> : <Loader />}
+              render={props =>
+                !!leagueID ? (
+                  <LeagueSummary {...props} league={league} />
+                ) : (
+                  <Loader />
+                )
+              }
             />
           </Content>
-
         </Layout>
       </Layout>
     );
   }
 }
 
-const authCondition = (authUser) => !!authUser;
+const authCondition = authUser => !!authUser;
 
 export default withAuthorization(authCondition)(League);

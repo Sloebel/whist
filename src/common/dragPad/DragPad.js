@@ -1,9 +1,8 @@
-import React from 'react';
-import { Motion, spring } from 'react-motion';
-import { addListener } from '../../utils/Utils';
-import './DragPad.css';
-import { Icon } from 'antd';
-
+import React from "react";
+import { Motion, spring } from "react-motion";
+import { addListener } from "../../utils/Utils";
+import { UserOutlined } from "@ant-design/icons";
+import "./DragPad.scss";
 
 const springSetting1 = { stiffness: 180, damping: 10 };
 const springSetting2 = { stiffness: 120, damping: 17 };
@@ -31,9 +30,7 @@ function clamp(n, min, max) {
   return Math.max(Math.min(n, max), min);
 }
 
-const allColors = [
-  '#EF767A', '#9acaff', '#49BEAA', '#49DCB1'
-];
+const allColors = ["#EF767A", "#9acaff", "#49BEAA", "#49DCB1"];
 const [count, width, height] = [4, 80, 80];
 
 // indexed by visual position
@@ -78,11 +75,19 @@ export default class DragPad extends React.Component {
   }
 
   componentDidMount() {
-    this.unListenTouchmove = addListener(window, 'touchmove', this.handleTouchMove);
-    this.unListenTouchend = addListener(window, 'touchend', this.handleMouseUp);
-    this.unListenMousemove = addListener(window, 'mousemove', this.handleMouseMove);
-    this.unListenMouseup = addListener(window, 'mouseup', this.handleMouseUp);
-  };
+    this.unListenTouchmove = addListener(
+      window,
+      "touchmove",
+      this.handleTouchMove
+    );
+    this.unListenTouchend = addListener(window, "touchend", this.handleMouseUp);
+    this.unListenMousemove = addListener(
+      window,
+      "mousemove",
+      this.handleMouseMove
+    );
+    this.unListenMouseup = addListener(window, "mouseup", this.handleMouseUp);
+  }
 
   componentWillUnmount() {
     this.unListenTouchmove();
@@ -95,19 +100,28 @@ export default class DragPad extends React.Component {
     this.handleMouseDown(key, pressLocation, e.touches[0]);
   };
 
-  handleTouchMove = (e) => {
+  handleTouchMove = e => {
     e.preventDefault();
     this.handleMouseMove(e.touches[0]);
   };
 
   handleMouseMove = ({ pageX, pageY }) => {
-    const { order, lastPress, isPressed, mouseCircleDelta: [dx, dy] } = this.state;
+    const {
+      order,
+      lastPress,
+      isPressed,
+      mouseCircleDelta: [dx, dy]
+    } = this.state;
 
     if (isPressed) {
       const mouseXY = [pageX - dx, pageY - dy];
 
       const col = clamp(Math.round(mouseXY[0] / width), 0, 2);
-      const row = clamp(Math.round(mouseXY[1] / height), 0, Math.floor(count / 2));
+      const row = clamp(
+        Math.round(mouseXY[1] / height),
+        0,
+        Math.floor(count / 2)
+      );
 
       // if col === 1 && row === 0 => index = 0;
       // if col === 2 && row === 1 => index = 1;
@@ -128,7 +142,8 @@ export default class DragPad extends React.Component {
 
       const from = order.findIndex(p => p.key === lastPress);
 
-      const newOrder = typeof to === 'number' && to !== from && reorder(order, from, to);
+      const newOrder =
+        typeof to === "number" && to !== from && reorder(order, from, to);
 
       this.setState({
         mouseXY,
@@ -144,14 +159,14 @@ export default class DragPad extends React.Component {
       lastPress: key,
       isPressed: true,
       mouseCircleDelta: [pageX - pressX, pageY - pressY],
-      mouseXY: [pressX, pressY],
+      mouseXY: [pressX, pressY]
     });
   };
 
   handleMouseUp = () => {
     this.setState({ isPressed: false, mouseCircleDelta: [0, 0] });
 
-    if (typeof this.props.onChange === 'function') {
+    if (typeof this.props.onChange === "function") {
       const { order, from, to } = this.state;
       this.props.onChange(order, from, to);
     }
@@ -175,7 +190,10 @@ export default class DragPad extends React.Component {
                 translateX: x,
                 translateY: y,
                 scale: spring(1.2, springSetting1),
-                boxShadow: spring((x - (3 * width - 50) / 2) / 15, springSetting1),
+                boxShadow: spring(
+                  (x - (3 * width - 50) / 2) / 15,
+                  springSetting1
+                )
               };
             } else {
               [x, y] = layout[visualPosition];
@@ -183,33 +201,42 @@ export default class DragPad extends React.Component {
                 translateX: spring(x, springSetting2),
                 translateY: spring(y, springSetting2),
                 scale: spring(1, springSetting1),
-                boxShadow: spring((x - (3 * width - 50) / 2) / 15, springSetting1),
+                boxShadow: spring(
+                  (x - (3 * width - 50) / 2) / 15,
+                  springSetting1
+                )
               };
             }
             return (
               <Motion key={player.key} style={style}>
-                {({ translateX, translateY, scale, boxShadow }) =>
+                {({ translateX, translateY, scale, boxShadow }) => (
                   <div
-                    onMouseDown={this.handleMouseDown.bind(null, player.key, [x, y])}
-                    onTouchStart={this.handleTouchStart.bind(null, player.key, [x, y])}
+                    onMouseDown={this.handleMouseDown.bind(null, player.key, [
+                      x,
+                      y
+                    ])}
+                    onTouchStart={this.handleTouchStart.bind(null, player.key, [
+                      x,
+                      y
+                    ])}
                     className="player-icon"
                     style={{
                       backgroundColor: this.colors[player.key],
                       WebkitTransform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
                       transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
                       zIndex: player.key === lastPress ? 99 : visualPosition,
-                      boxShadow: `${boxShadow}px 5px 5px rgba(0,0,0,0.5)`,
+                      boxShadow: `${boxShadow}px 5px 5px rgba(0,0,0,0.5)`
                     }}
                   >
-                    <Icon type="user" />
+                    <UserOutlined />
                     <span>{player.nickname}</span>
                   </div>
-                }
+                )}
               </Motion>
             );
           })}
         </div>
       </div>
     );
-  };
+  }
 }

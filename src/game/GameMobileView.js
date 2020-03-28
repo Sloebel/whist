@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
-import { Icon, Button } from 'antd';
+import React, { Component } from "react";
+import { Button } from "antd";
+import { RightOutlined, LeftOutlined } from "@ant-design/icons";
 import MobileTable from "../common/table/MobileTable";
 import GamePad from "../common/game/Pad";
-import { hasTouch, addListener } from '../utils/Utils';
+import { hasTouch, addListener } from "../utils/Utils";
 
 export default class GameMobileView extends Component {
   constructor(props) {
@@ -15,8 +16,16 @@ export default class GameMobileView extends Component {
 
   componentDidMount() {
     if (hasTouch()) {
-      this.unListenSwipedLeft = addListener(this.carouselEl, 'swiped-left', this.carouselSwipedLeft);
-      this.unListenSwipedRight = addListener(this.carouselEl, 'swiped-right', this.carouselSwipedRight);
+      this.unListenSwipedLeft = addListener(
+        this.carouselEl,
+        "swiped-left",
+        this.carouselSwipedLeft
+      );
+      this.unListenSwipedRight = addListener(
+        this.carouselEl,
+        "swiped-right",
+        this.carouselSwipedRight
+      );
     }
   }
 
@@ -30,22 +39,22 @@ export default class GameMobileView extends Component {
   carouselSwipedLeft = () => {
     const { currentView, onCurrentViewChange } = this.props;
 
-    if (currentView !== 'panel') {
-      onCurrentViewChange('panel');
+    if (currentView !== "panel") {
+      onCurrentViewChange("panel");
     } else {
-      this.carouselEl.classList.add('bounce-left');
-      setTimeout(() => this.carouselEl.classList.remove('bounce-left'), 400);
+      this.carouselEl.classList.add("bounce-left");
+      setTimeout(() => this.carouselEl.classList.remove("bounce-left"), 400);
     }
-  }
+  };
 
   carouselSwipedRight() {
     const { currentView, onCurrentViewChange } = this.props;
 
-    if (currentView !== 'table') {
-      onCurrentViewChange('table');
+    if (currentView !== "table") {
+      onCurrentViewChange("table");
     } else {
-      this.carouselEl.classList.add('bounce-right');
-      setTimeout(() => this.carouselEl.classList.remove('bounce-right'), 400);
+      this.carouselEl.classList.add("bounce-right");
+      setTimeout(() => this.carouselEl.classList.remove("bounce-right"), 400);
     }
   }
 
@@ -56,7 +65,7 @@ export default class GameMobileView extends Component {
     if (round < 13) {
       goToRound && goToRound(round + 1);
     }
-  }
+  };
 
   toRoundBefore = () => {
     const { goToRound, currentRound } = this.props;
@@ -65,7 +74,7 @@ export default class GameMobileView extends Component {
     if (round !== 1) {
       goToRound && goToRound(round - 1);
     }
-  }
+  };
 
   render() {
     const {
@@ -75,15 +84,12 @@ export default class GameMobileView extends Component {
       playersColumns,
       currentRound,
       handleSave,
-      leagueScores,
+      leagueScores
     } = this.props;
 
     return (
       <div className="game-mobile-view">
-        <div
-          className="my-carousel"
-          ref={el => (this.carouselEl = el)}
-        >
+        <div className="my-carousel" ref={el => (this.carouselEl = el)}>
           <div className={`my-carousel-slides-container ${currentView}`}>
             <div className="my-carousel-slide">
               <MobileTable
@@ -106,17 +112,24 @@ export default class GameMobileView extends Component {
           </div>
         </div>
         <div className="round-navigation">
-          {currentRound !== 1 &&
-            <Button type="primary" className="left" ghost onClick={this.toRoundBefore}>
-              <Icon type="left" />{`Round ${currentRound - 1}`}
+          {currentRound !== 1 && (
+            <Button
+              type="primary"
+              className="left"
+              ghost
+              onClick={this.toRoundBefore}
+            >
+              <LeftOutlined />
+              {`Round ${currentRound - 1}`}
             </Button>
-          }
+          )}
 
-          {currentRound !== 13 &&
+          {currentRound !== 13 && (
             <Button type="primary" ghost onClick={this.nextRound}>
-              {`Round ${Number(currentRound) + 1}`}<Icon type="right" />
+              {`Round ${Number(currentRound) + 1}`}
+              <RightOutlined />
             </Button>
-          }
+          )}
         </div>
       </div>
     );
