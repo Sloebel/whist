@@ -1,22 +1,25 @@
-import React, { Component } from 'react';
-import { Radio, Switch, Badge, Row, Col, Modal, message, Button, Icon } from 'antd';
-import CardsPad from '../cards/Pad';
-import CardsModal from '../cards/Modal';
-import { ChangePlayers } from '../cards/Icons';
-import NumbersPad from '../numbers/Pad';
-import PlayerPad from '../player/Pad';
-import { INPUT_MODE } from '../../constants/states';
-import './Pad.css';
-import Dialog from '../../dialogs/Dialog';
-import { Dialogs } from '../../constants/dialogs';
-import { PlayersContext } from '../../game/GameTab';
-import Css, { CSS_TRANSITIONS } from '../transition/Css';
-import TwoWayArrow, { TWO_WAY_ARROW_DIRECTION } from '../twoWayArrow/TwoWayArrow';
+import React, { Component } from "react";
+import { Radio, Switch, Badge, Row, Col, Modal, message, Button } from "antd";
+import Icon from "@ant-design/icons";
+import CardsPad from "../cards/Pad";
+import CardsModal from "../cards/Modal";
+import { ChangePlayers } from "../cards/Icons";
+import NumbersPad from "../numbers/Pad";
+import PlayerPad from "../player/Pad";
+import { INPUT_MODE } from "../../constants/states";
+import "./Pad.css";
+import Dialog from "../../dialogs/Dialog";
+import { Dialogs } from "../../constants/dialogs";
+import { PlayersContext } from "../../game/GameTab";
+import Css, { CSS_TRANSITIONS } from "../transition/Css";
+import TwoWayArrow, {
+  TWO_WAY_ARROW_DIRECTION
+} from "../twoWayArrow/TwoWayArrow";
 
 const confirm = Modal.confirm;
 message.config({
   top: 100,
-  maxCount: 3,
+  maxCount: 3
 });
 
 class GamePad extends Component {
@@ -25,16 +28,20 @@ class GamePad extends Component {
 
     this.state = {
       selectedPlayer: undefined,
-      reorderPlayersDialogVisible: false,
+      reorderPlayersDialogVisible: false
     };
 
     this.handleSwitchMode = this.handleSwitchMode.bind(this);
     this.handleCardsPadChange = this.handleCardsPadChange.bind(this);
     this.handleNumberSelect = this.handleNumberSelect.bind(this);
     this.setSelectedPlayer = this.setSelectedPlayer.bind(this);
-    this.showChangeHighestBidderConfirm = this.showChangeHighestBidderConfirm.bind(this);
+    this.showChangeHighestBidderConfirm = this.showChangeHighestBidderConfirm.bind(
+      this
+    );
     this.showChangePlayerDialog = this.showChangePlayerDialog.bind(this);
-    this.handleReorderPlayersAfterClose = this.handleReorderPlayersAfterClose.bind(this);
+    this.handleReorderPlayersAfterClose = this.handleReorderPlayersAfterClose.bind(
+      this
+    );
   }
 
   handleSwitchMode(checked) {
@@ -43,7 +50,7 @@ class GamePad extends Component {
     const { trump, segment } = roundData;
 
     if (segment === 0) {
-      return message.warning('Total Bids are 13?!?!');
+      return message.warning("Total Bids are 13?!?!");
     }
 
     const everyoneBid = this.isAllBids(roundData);
@@ -52,14 +59,17 @@ class GamePad extends Component {
       this.setState({
         selectedPlayer: undefined
       });
-      onChange({ ...roundData, inputMode: checked ? INPUT_MODE.WON : INPUT_MODE.BID });
+      onChange({
+        ...roundData,
+        inputMode: checked ? INPUT_MODE.WON : INPUT_MODE.BID
+      });
     } else {
-      message.warning('Bids are not completed');
+      message.warning("Bids are not completed");
     }
   }
 
   setSelectedPlayer(e) {
-    if (e.target.type === 'radio') {
+    if (e.target.type === "radio") {
       this.setState({
         selectedPlayer: e.target.value
       });
@@ -81,34 +91,56 @@ class GamePad extends Component {
     const roundData = allRounds.length && allRounds[currentRound - 1];
     const { inputMode, highestBidder } = roundData;
     const { selectedPlayer } = this.state;
-    const mode = inputMode === INPUT_MODE.BID ? 'bid' : 'won';
+    const mode = inputMode === INPUT_MODE.BID ? "bid" : "won";
     const prop = mode + selectedPlayer;
 
     const newRoundData = {};
 
     if (inputMode === INPUT_MODE.BID) {
       if (currentRound === 13) {
-        if (num >= 5 && !roundData[`bid${highestBidder}`] || roundData[`bid${highestBidder}`] < num) {
+        if (
+          (num >= 5 && !roundData[`bid${highestBidder}`]) ||
+          roundData[`bid${highestBidder}`] < num
+        ) {
           newRoundData.highestBidder = selectedPlayer;
         }
       } else {
         const nextPlayer = this.getNextPlayer(selectedPlayer, players);
 
-        if (roundData[`bid${nextPlayer}`] === '' || nextPlayer === highestBidder) {
+        if (
+          roundData[`bid${nextPlayer}`] === "" ||
+          nextPlayer === highestBidder
+        ) {
           // validate first bid is more then 5
-          if ((!highestBidder && highestBidder !== 0) || highestBidder === selectedPlayer) {
+          if (
+            (!highestBidder && highestBidder !== 0) ||
+            highestBidder === selectedPlayer
+          ) {
             if (num < 5) {
-              return message.warning('First Bid should be more then 5');
+              return message.warning("First Bid should be more then 5");
             } else {
               newRoundData.highestBidder = selectedPlayer;
             }
           } else if (num >= 5) {
-            this.showChangeHighestBidderConfirm(onChange, roundData, prop, num, selectedPlayer, players);
-          } else if (!Number.isInteger(roundData[`bid${this.getBeforePlayer(selectedPlayer, players)}`])) {
-            return message.warning('The Bids are not in the right order!!');
+            this.showChangeHighestBidderConfirm(
+              onChange,
+              roundData,
+              prop,
+              num,
+              selectedPlayer,
+              players
+            );
+          } else if (
+            !Number.isInteger(
+              roundData[`bid${this.getBeforePlayer(selectedPlayer, players)}`]
+            )
+          ) {
+            return message.warning("The Bids are not in the right order!!");
           }
         } else {
-          return message.warning('The Next Player already Bid, Can not change bid');
+          return message.warning(
+            "The Next Player already Bid, Can not change bid"
+          );
         }
       }
     }
@@ -123,11 +155,12 @@ class GamePad extends Component {
     const { highestBidder, inputMode } = roundData;
     const { selectedPlayer } = this.state;
 
-    if (typeof selectedPlayer !== 'number') return undefined;
+    if (typeof selectedPlayer !== "number") return undefined;
 
     if (inputMode !== INPUT_MODE.BID) return undefined;
 
-    if (this.getNextPlayer(selectedPlayer, players) !== highestBidder) return undefined;
+    if (this.getNextPlayer(selectedPlayer, players) !== highestBidder)
+      return undefined;
 
     // get the list of players bided before
     const beforePlayers = this.getBeforePlayers(selectedPlayer, players);
@@ -147,24 +180,42 @@ class GamePad extends Component {
     return 13 - bids;
   }
 
-  showChangeHighestBidderConfirm(onChange, roundData, prop, num, selectedPlayer, players) {
+  showChangeHighestBidderConfirm(
+    onChange,
+    roundData,
+    prop,
+    num,
+    selectedPlayer,
+    players
+  ) {
     const getBeforePlayer = this.getBeforePlayer;
 
     confirm({
-      title: 'Change Highest Bidder?',
-      content: '(will reset the rest of the bids)',
-      okType: 'danger',
+      title: "Change Highest Bidder?",
+      content: "(will reset the rest of the bids)",
+      okType: "danger",
       onOk() {
-        onChange({ ...roundData, bid0: null, bid1: null, bid2: null, bid3: null, [prop]: num, highestBidder: selectedPlayer }, selectedPlayer);
+        onChange(
+          {
+            ...roundData,
+            bid0: null,
+            bid1: null,
+            bid2: null,
+            bid3: null,
+            [prop]: num,
+            highestBidder: selectedPlayer
+          },
+          selectedPlayer
+        );
       },
       onCancel() {
         if (!roundData[`bid${getBeforePlayer(selectedPlayer, players)}`]) {
-          message.warning('The Bids are not in the right order!!');
+          message.warning("The Bids are not in the right order!!");
           onChange({ ...roundData }, selectedPlayer);
         } else {
           onChange({ ...roundData, [prop]: num }, selectedPlayer);
         }
-      },
+      }
     });
   }
 
@@ -184,7 +235,9 @@ class GamePad extends Component {
 
   getBeforePlayers = (selectedPlayer, players) => {
     const index = players.findIndex(player => player.index === selectedPlayer);
-    return players.filter(player => index !== player.index).map(player => player.index);
+    return players
+      .filter(player => index !== player.index)
+      .map(player => player.index);
   };
 
   // getAfterPlayers = (selectedPlayer) => [1, 2, 3].map(afterPlayer => selectedPlayer + afterPlayer > 4 ? selectedPlayer + afterPlayer - 4 : selectedPlayer + afterPlayer);
@@ -198,12 +251,16 @@ class GamePad extends Component {
 
     const aggregateScore = roundData[`aggregateScore${playerIndex}`];
     // if round.fell == true, look for round before
-    if (typeof aggregateScore === 'number' && !roundData.fell) {
+    if (typeof aggregateScore === "number" && !roundData.fell) {
       return aggregateScore;
     }
 
-    return this.getPlayerAggregateScore(roundsData, roundIndex - 1, playerIndex);
-  }
+    return this.getPlayerAggregateScore(
+      roundsData,
+      roundIndex - 1,
+      playerIndex
+    );
+  };
 
   getPlayersButtons = () => {
     const { allRounds, currentRound, players, isMobile } = this.props;
@@ -218,9 +275,15 @@ class GamePad extends Component {
               name={playerName}
               bid={currentRoundData[`bid${playerIndex}`]}
               won={currentRoundData[`won${playerIndex}`]}
-              score={isMobile ?
-                this.getPlayerAggregateScore(allRounds, currentRound - 1, playerIndex)
-                : undefined}
+              score={
+                isMobile
+                  ? this.getPlayerAggregateScore(
+                      allRounds,
+                      currentRound - 1,
+                      playerIndex
+                    )
+                  : undefined
+              }
             />
           </Radio.Button>
         </Badge>
@@ -231,7 +294,15 @@ class GamePad extends Component {
   render() {
     const { isMobile, allRounds, currentRound } = this.props;
     const currentRoundData = allRounds.length && allRounds[currentRound - 1];
-    const { round, check, trump, segment, inputMode, fell, factor } = currentRoundData;
+    const {
+      round,
+      check,
+      trump,
+      segment,
+      inputMode,
+      fell,
+      factor
+    } = currentRoundData;
     const { selectedPlayer, reorderPlayersDialogVisible } = this.state;
     const isAllBids = this.isAllBids(currentRoundData);
     const playersButtons = this.getPlayersButtons();
@@ -240,7 +311,7 @@ class GamePad extends Component {
       return (
         <Radio.Group
           buttonStyle="solid"
-          className={`game-pad-container ${fell ? 'round-fell' : ''}`}
+          className={`game-pad-container ${fell ? "round-fell" : ""}`}
           onChange={this.setSelectedPlayer}
           value={selectedPlayer}
         >
@@ -254,44 +325,51 @@ class GamePad extends Component {
                 checked={inputMode === INPUT_MODE.WON}
               />
               <div className="segment">
-                Bids: <Css type={CSS_TRANSITIONS.FADE_IN}>
-                  {!isAllBids ? `${segment && (13 + segment)}` : segment}
+                Bids:{" "}
+                <Css type={CSS_TRANSITIONS.FADE_IN}>
+                  {!isAllBids ? `${segment && 13 + segment}` : segment}
                 </Css>
                 <TwoWayArrow
-                  direction={isAllBids && (segment > 0 ? TWO_WAY_ARROW_DIRECTION.TOP : TWO_WAY_ARROW_DIRECTION.BOTTOM)}
+                  direction={
+                    isAllBids &&
+                    (segment > 0
+                      ? TWO_WAY_ARROW_DIRECTION.TOP
+                      : TWO_WAY_ARROW_DIRECTION.BOTTOM)
+                  }
                 />
               </div>
-              <div>Check: {check ? 'yes' : 'no'}</div>
+              <div>Check: {check ? "yes" : "no"}</div>
               <Css type={CSS_TRANSITIONS.FADE_IN}>
-                {fell ? <div className="fell-indicator">round fell</div> : ''}
+                {fell ? <div className="fell-indicator">round fell</div> : ""}
               </Css>
-              {(!fell && factor > 1) && <div className="factor-indicator">{`x${factor}`}</div>}
-
+              {!fell && factor > 1 && (
+                <div className="factor-indicator">{`x${factor}`}</div>
+              )}
             </Col>
-            <Col className="item item2">
-              {playersButtons[0]}
-            </Col>
+            <Col className="item item2">{playersButtons[0]}</Col>
             <Col>
-              <CardsModal trump={trump} onChange={this.handleCardsPadChange} disabled={inputMode === INPUT_MODE.WON} />
+              <CardsModal
+                trump={trump}
+                onChange={this.handleCardsPadChange}
+                disabled={inputMode === INPUT_MODE.WON}
+              />
             </Col>
           </Row>
           <Row type="flex" justify="space-around">
-            <Col className="item item4">
-              {playersButtons[3]}
-            </Col>
+            <Col className="item item4">{playersButtons[3]}</Col>
             <Col>
-              <NumbersPad isMobile={isMobile} disabledNumber={this.calculateDisableNum()} onSelect={this.handleNumberSelect} disabled={selectedPlayer === undefined} />
+              <NumbersPad
+                isMobile={isMobile}
+                disabledNumber={this.calculateDisableNum()}
+                onSelect={this.handleNumberSelect}
+                disabled={selectedPlayer === undefined}
+              />
             </Col>
-            <Col className="item item6">
-              {playersButtons[1]}
-            </Col>
+            <Col className="item item6">{playersButtons[1]}</Col>
           </Row>
-          <Row type="flex" justify="center" style={{ position: 'relative' }}>
-            <Col className="item item8">
-              {playersButtons[2]}
-            </Col>
-            {round === 1
-              && inputMode === INPUT_MODE.BID &&
+          <Row type="flex" justify="center" style={{ position: "relative" }}>
+            <Col className="item item8">{playersButtons[2]}</Col>
+            {round === 1 && inputMode === INPUT_MODE.BID && (
               <div>
                 <Button
                   type="dashed"
@@ -301,55 +379,65 @@ class GamePad extends Component {
                 >
                   <Icon component={ChangePlayers} />
                 </Button>
-                {reorderPlayersDialogVisible &&
+                {reorderPlayersDialogVisible && (
                   <PlayersContext.Consumer>
-                    {({ players, reorderPlayers }) => (<Dialog
-                      dialog={Dialogs.REORDER_PLAYERS}
-                      dialogProps={{
-                        onOk: reorderPlayers,
-                        onAfterClose: this.handleReorderPlayersAfterClose,
-                        visible: reorderPlayersDialogVisible,
-                        players
-                      }}
-                    />)}
-                  </PlayersContext.Consumer>}
+                    {({ players, reorderPlayers }) => (
+                      <Dialog
+                        dialog={Dialogs.REORDER_PLAYERS}
+                        dialogProps={{
+                          onOk: reorderPlayers,
+                          onAfterClose: this.handleReorderPlayersAfterClose,
+                          visible: reorderPlayersDialogVisible,
+                          players
+                        }}
+                      />
+                    )}
+                  </PlayersContext.Consumer>
+                )}
               </div>
-            }
+            )}
           </Row>
         </Radio.Group>
       );
     }
 
-    return (<Radio.Group
-      buttonStyle="solid"
-      className="game-pad-container"
-      onChange={this.setSelectedPlayer}
-      value={selectedPlayer}
-    >
-      <div className="item item1">
-        <Switch onChange={this.handleSwitchMode} checkedChildren=" Won " unCheckedChildren=" Bid " checked={inputMode === INPUT_MODE.WON} />
-        <div>Bids: {segment}</div>
-        <div>Check: {check ? 'yes' : 'no'}</div>
-      </div>
-      <div className="item item2">
-        {playersButtons[0]}
-      </div>
+    return (
+      <Radio.Group
+        buttonStyle="solid"
+        className="game-pad-container"
+        onChange={this.setSelectedPlayer}
+        value={selectedPlayer}
+      >
+        <div className="item item1">
+          <Switch
+            onChange={this.handleSwitchMode}
+            checkedChildren=" Won "
+            unCheckedChildren=" Bid "
+            checked={inputMode === INPUT_MODE.WON}
+          />
+          <div>Bids: {segment}</div>
+          <div>Check: {check ? "yes" : "no"}</div>
+        </div>
+        <div className="item item2">{playersButtons[0]}</div>
 
+        <CardsPad
+          isMobile={isMobile}
+          trump={trump}
+          onChange={this.handleCardsPadChange}
+        />
+        <div className="item item4">{playersButtons[3]}</div>
 
-      <CardsPad isMobile={isMobile} trump={trump} onChange={this.handleCardsPadChange} />
-      <div className="item item4">
-        {playersButtons[3]}
-      </div>
+        <NumbersPad
+          isMobile={isMobile}
+          disabledNumber={this.calculateDisableNum()}
+          onSelect={this.handleNumberSelect}
+          disabled={selectedPlayer === undefined}
+        />
+        <div className="item item6">{playersButtons[1]}</div>
 
-      <NumbersPad isMobile={isMobile} disabledNumber={this.calculateDisableNum()} onSelect={this.handleNumberSelect} disabled={selectedPlayer === undefined} />
-      <div className="item item6">
-        {playersButtons[1]}
-      </div>
-
-      <div className="item item8">
-        {playersButtons[2]}
-      </div>
-    </Radio.Group>);
+        <div className="item item8">{playersButtons[2]}</div>
+      </Radio.Group>
+    );
   }
 
   showChangePlayerDialog() {
@@ -365,7 +453,10 @@ class GamePad extends Component {
   }
 
   // TODO: memoize it
-  isAllBids = (roundData) => Array(4).fill(1).every((_, i) => typeof roundData[`bid${i}`] === 'number');
-};
+  isAllBids = roundData =>
+    Array(4)
+      .fill(1)
+      .every((_, i) => typeof roundData[`bid${i}`] === "number");
+}
 
 export default GamePad;

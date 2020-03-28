@@ -1,9 +1,9 @@
-import React from 'react';
-import { Spade, Hart, Diamond, Club } from '../cards/Icons';
-import { Icon } from 'antd';
-import { CARDS } from '../../constants/cards';
+import React from "react";
+import Icon from "@ant-design/icons";
+import { Spade, Hart, Diamond, Club } from "../cards/Icons";
+import { CARDS } from "../../constants/cards";
 
-export const cardsRenderer = (text) => {
+export const cardsRenderer = text => {
   let card;
   switch (text) {
     case CARDS.SPADE:
@@ -19,10 +19,10 @@ export const cardsRenderer = (text) => {
       card = <Icon component={Club} />;
       break;
     case CARDS.NT:
-      card = 'NT';
+      card = "NT";
       break;
   }
   return {
-    children: card,
+    children: card
   };
-}
+};

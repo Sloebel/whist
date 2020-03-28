@@ -1,17 +1,18 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import { withRouter, Route, Redirect } from "react-router-dom";
-import cards from './cards.png';
-import { Spin } from 'antd';
-import * as routes from './constants/routes';
-import { fire } from './firebase';
-import withAuthentication from './authentication/withAuthentication';
-import './App.css';
+import cards from "./cards.png";
+import { Spin } from "antd";
+import * as routes from "./constants/routes";
+import { fire } from "./firebase";
+import withAuthentication from "./authentication/withAuthentication";
+import "./App.scss";
+import "antd/dist/antd.css";
 
-import Login from './authentication/Login';
-import SignUp from './authentication/SignUp';
-import Main from './main/Main';
-import League from './league/League.js';
-import { addListener } from './utils/Utils';
+import Login from "./authentication/Login";
+import SignUp from "./authentication/SignUp";
+import Main from "./main/Main";
+import League from "./league/League.js";
+import { addListener } from "./utils/Utils";
 
 class App extends Component {
   constructor(props) {
@@ -35,28 +36,33 @@ class App extends Component {
     });
   }
 
-  // set if view is mobile size 
+  // set if view is mobile size
   handleWindowSizeChange() {
-    this.setState({ isMobile: window.innerWidth < 1095, screenSize: window.innerWidth });
-  };
+    this.setState({
+      isMobile: window.innerWidth < 1095,
+      screenSize: window.innerWidth
+    });
+  }
 
   // init window resize listener
   listenToWinResize(callback) {
-    return addListener(window, 'resize', callback);
+    return addListener(window, "resize", callback);
   }
 
   componentWillMount() {
     const { pathname } = this.props.location;
     // set initial header state
-    this.toggleHeaderInline(pathname !== '/');
+    this.toggleHeaderInline(pathname !== "/");
 
     // listen to routing changes
     this.unistenHistory = this.props.history.listen((location, action) => {
       const { pathname } = location;
-      this.toggleHeaderInline(pathname !== '/' && pathname !== '/login');
+      this.toggleHeaderInline(pathname !== "/" && pathname !== "/login");
     });
 
-    this.unlistenWinResize = this.listenToWinResize(this.handleWindowSizeChange);
+    this.unlistenWinResize = this.listenToWinResize(
+      this.handleWindowSizeChange
+    );
   }
 
   componentWillUnmount() {
@@ -68,7 +74,11 @@ class App extends Component {
     const { inlineHeader, isMobile, screenSize } = this.state;
 
     return (
-      <div className={`app ${isMobile ? 'mobile' : ''} ${inlineHeader ? 'inline-header' : ''}`}>
+      <div
+        className={`app ${isMobile ? "mobile" : ""} ${
+          inlineHeader ? "inline-header" : ""
+        }`}
+      >
         <header id="app-header">
           <img src={cards} className="app-logo" alt="logo" />
           <h1 className="app-title">Sub Whist</h1>
@@ -78,9 +88,14 @@ class App extends Component {
           <Route exact path="/" component={Main} />
           <Route exact path={routes.SIGN_IN} component={Login} />
           <Route exact path={routes.SIGN_UP} component={SignUp} />
-          <Route path={`${routes.LEAGUE}/:leagueID`} render={(props) => <League {...props} isMobile={isMobile} screenSize={screenSize} />} />
+          <Route
+            path={`${routes.LEAGUE}/:leagueID`}
+            render={props => (
+              <League {...props} isMobile={isMobile} screenSize={screenSize} />
+            )}
+          />
         </div>
-      </div >
+      </div>
     );
   }
 }
