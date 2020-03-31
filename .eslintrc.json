@@ -1,0 +1,12 @@
+{
+  "extends": ["react-app"],
+  "rules": {},
+  "overrides": [
+    {
+      "files": ["**/*.ts?(x)"],
+      "rules": {
+        "no-unused-vars": "error"
+      }
+    }
+  ]
+}
