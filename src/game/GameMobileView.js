@@ -1,9 +1,9 @@
-import React, { Component } from "react";
-import { Button } from "antd";
-import { RightOutlined, LeftOutlined } from "@ant-design/icons";
-import MobileTable from "../common/table/MobileTable";
-import GamePad from "../common/game/Pad";
-import { hasTouch, addListener } from "../utils/Utils";
+import React, { Component } from 'react';
+import { Button } from 'antd';
+import { RightOutlined, LeftOutlined } from '@ant-design/icons';
+import MobileTable from '../common/table/MobileTable';
+import GamePad from '../common/game/Pad';
+import { hasTouch, addListener } from '../utils/Utils';
 
 export default class GameMobileView extends Component {
   constructor(props) {
@@ -18,12 +18,12 @@ export default class GameMobileView extends Component {
     if (hasTouch()) {
       this.unListenSwipedLeft = addListener(
         this.carouselEl,
-        "swiped-left",
+        'swiped-left',
         this.carouselSwipedLeft
       );
       this.unListenSwipedRight = addListener(
         this.carouselEl,
-        "swiped-right",
+        'swiped-right',
         this.carouselSwipedRight
       );
     }
@@ -39,22 +39,22 @@ export default class GameMobileView extends Component {
   carouselSwipedLeft = () => {
     const { currentView, onCurrentViewChange } = this.props;
 
-    if (currentView !== "panel") {
-      onCurrentViewChange("panel");
+    if (currentView !== 'panel') {
+      onCurrentViewChange('panel');
     } else {
-      this.carouselEl.classList.add("bounce-left");
-      setTimeout(() => this.carouselEl.classList.remove("bounce-left"), 400);
+      this.carouselEl.classList.add('bounce-left');
+      setTimeout(() => this.carouselEl.classList.remove('bounce-left'), 400);
     }
   };
 
   carouselSwipedRight() {
     const { currentView, onCurrentViewChange } = this.props;
 
-    if (currentView !== "table") {
-      onCurrentViewChange("table");
+    if (currentView !== 'table') {
+      onCurrentViewChange('table');
     } else {
-      this.carouselEl.classList.add("bounce-right");
-      setTimeout(() => this.carouselEl.classList.remove("bounce-right"), 400);
+      this.carouselEl.classList.add('bounce-right');
+      setTimeout(() => this.carouselEl.classList.remove('bounce-right'), 400);
     }
   }
 
@@ -84,7 +84,7 @@ export default class GameMobileView extends Component {
       playersColumns,
       currentRound,
       handleSave,
-      leagueScores
+      leagueScores,
     } = this.props;
 
     return (
@@ -102,7 +102,6 @@ export default class GameMobileView extends Component {
             </div>
             <div className="my-carousel-slide">
               <GamePad
-                isMobile={true}
                 currentRound={currentRound}
                 allRounds={rounds}
                 players={playersColumns}

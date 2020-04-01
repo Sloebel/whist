@@ -6,7 +6,7 @@
   left: 0px;
 }
 
-#root {  
+#root {
   @include full-view();
   overflow: auto;
   background: rgb(52, 223, 52);
@@ -16,34 +16,60 @@
   @include full-view();
 }
 
-ul.app-menu{
-  list-style:none;
-  display: inline-block; 
+ul.app-menu {
+  list-style: none;
+  display: inline-block;
   padding: 0px;
   margin: 0px;
   width: 250px;
 }
 
-ul.app-menu li{
+ul.app-menu li {
   display: block;
   margin-top: 20px;
-  /* padding: 10px 20px;
-  cursor:pointer;
-  background-color: #e2e2e2;
-  color:#505050;  
-  transition:0.3s; */
 }
 
-/* ul li:hover{
-  background-color:#a1a1a1;
-  color: #222;
-} */
 $inline-header-height: 90px;
 
-.app {
+.app-wrapper {
+  display: flex;
+  justify-content: center;
   height: 100%;
+  position: relative;
+
+  > img {
+    display: none;
+  }
+
+  &.desktop-mode {
+    > img {
+      display: block;
+      height: 926px;
+      width: 493px;
+    }
+
+    .app {
+      position: absolute;
+      top: 77px;
+      width: 442px;
+      height: 744px;
+    }
+  }
+
+  &.mobile-mode {
+    .app {
+      @include full-view();
+    }
+  }
+
+  .drawer {
+    position: absolute;
+  }
+}
+
+.app {
   overflow: hidden;
-  
+
   & header,
   & .app-main,
   & .league-stats {
@@ -59,23 +85,22 @@ $inline-header-height: 90px;
 
 #app-header {
   background-color: #222;
-  
+
   .app-title {
     /* font-size: 1.5em; */
     color: white;
     display: inline-block;
     vertical-align: middle;
     margin-bottom: 0px;
-    transform: translate(-84px,62px);
+    transform: translate(-63px, 43px);
     transition: all 0.5s;
   }
-    
+
   .app-logo {
-    /* animation: App-logo-spin infinite 20s linear; */
-    height: 150px;
+    height: 120px;
     padding-bottom: 30px;
     transform: translate(60px);
-    transition: all 0.5s;   
+    transition: all 0.5s;
   }
 
   .inline-header & {
@@ -86,7 +111,7 @@ $inline-header-height: 90px;
     }
     .app-title {
       transform: translate(0px);
-    }    
+    }
   }
 
   .mobile:not(.inline-header) & {
@@ -99,11 +124,11 @@ $inline-header-height: 90px;
     }
   }
 
-  .mobile.inline-header & {
+  .inline-header & {
     .app-logo {
       height: 60px;
     }
-  }  
+  }
 }
 
 .app-content {
@@ -119,7 +144,7 @@ $inline-header-height: 90px;
   .ant-menu-vertical {
     border-right: none;
   }
-  
+
   &-left {
     .ant-menu-inline .ant-menu-item:after,
     .ant-menu-vertical .ant-menu-item:after {
@@ -127,7 +152,7 @@ $inline-header-height: 90px;
       right: auto;
     }
   }
-  
+
   &-title {
     height: 60px;
     display: flex;
@@ -143,7 +168,7 @@ $inline-header-height: 90px;
       top: 10px;
       box-shadow: none;
       background: transparent;
-      transition: all 0.3s;   
+      transition: all 0.3s;
     }
 
     .drawer-handle-icon {
@@ -170,6 +195,10 @@ $inline-header-height: 90px;
 }
 
 @keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

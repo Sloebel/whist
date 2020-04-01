@@ -1,131 +1,20 @@
 import React, { Component } from 'react';
+import { createPortal } from 'react-dom';
 import { fire } from './../firebase';
-import { Layout, Menu, Table, Card, Button, message } from 'antd';
-import ReactDragListView from "react-drag-listview";
-import { EditableFormRow, EditableCell } from './../common/table/EditableCell.js';
-import './GameTab.css';
-import GamePad from './../common/game/Pad';
+import { Button, message } from 'antd';
+import { TableOutlined, BorderOuterOutlined } from '@ant-design/icons';
+import './GameTab.scss';
 import { GAME_STATUS } from '../constants/states';
 import { cardsRenderer } from '../common/table/renderers.js';
-import Css, { CSS_TRANSITIONS } from '../common/transition/Css.js';
 import Loader from '../common/loader/Loader';
 import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
 
 export const PlayersContext = React.createContext();
 
-const { Header, Content, Sider } = Layout;
-
 class GameTab extends Component {
   constructor(props) {
     super(props);
-
-    // this.columns = [
-    // 	{
-    // 		player: 1,
-    // 		children: [{
-    // 			title: 'Bid',
-    // 			dataIndex: 'bid1',
-    // 			width: 100,
-    // 		}, {
-    // 			title: 'Won',
-    // 			dataIndex: 'won1',
-    // 			width: 100,
-    // 		}]
-    // 	},
-    // 	//  {
-    // 	// 	title: 'Bid',
-    // 	// 	dataIndex: 'bid1',
-    // 	// 	width: 100,
-    // 	// }, {
-    // 	// 	title: 'Won',
-    // 	// 	dataIndex: 'won1',
-    // 	// 	width: 100,
-    // 	// }, 
-    // 	{
-    // 		player: 2,
-    // 		children: [{
-    // 			title: 'Bid',
-    // 			dataIndex: 'bid2',
-    // 			width: 100,
-    // 		}, {
-    // 			title: 'Won',
-    // 			dataIndex: 'won2',
-    // 			width: 100,
-    // 		}]
-    // 	},
-    // 	// {
-    // 	// 	title: 'Bid',
-    // 	// 	dataIndex: 'bid2',
-    // 	// 	width: 100,
-    // 	// }, {
-    // 	// 	title: 'Won',
-    // 	// 	dataIndex: 'won2',
-    // 	// 	width: 100,
-    // 	// }, 
-    // 	{
-    // 		player: 3,
-    // 		children: [{
-    // 			title: 'Bid',
-    // 			dataIndex: 'bid3',
-    // 			width: 100,
-    // 		}, {
-    // 			title: 'Won',
-    // 			dataIndex: 'won3',
-    // 			width: 100,
-    // 		}]
-    // 	},
-    // 	// {
-    // 	// 	title: 'Bid',
-    // 	// 	dataIndex: 'bid3',
-    // 	// 	width: 100,
-    // 	// }, {
-    // 	// 	title: 'Won',
-    // 	// 	dataIndex: 'won3',
-    // 	// 	width: 100,
-    // 	// }, 
-    // 	{
-    // 		player: 4,
-    // 		children: [{
-    // 			title: 'Bid',
-    // 			dataIndex: 'bid4',
-    // 			width: 100,
-    // 		}, {
-    // 			title: 'Won',	
-    // 			dataIndex: 'won4',
-    // 			width: 100,
-    // 		}]
-    // 	},
-    // 	// {
-    // 	// 	title: 'Bid',
-    // 	// 	dataIndex: 'bid4',
-    // 	// 	width: 100,
-    // 	// }, {
-    // 	// 	title: 'Won',
-    // 	// 	dataIndex: 'won4',
-    // 	// 	width: 100,
-    // 	// },
-    // 	{
-    // 		children: [{
-    // 			title: 'Trump',
-    // 			dataIndex: 'trump',
-    // 			width: 75,
-    // 			render: cardsRenderer,
-    // 		}, {
-    // 			title: 'O/U',
-    // 			dataIndex: 'segment',
-    // 			width: 55,
-    // 			render: (text, record) => {
-    // 				return {
-    // 					props: {
-    // 						className: text === 0 ? 'failed-check' : '',
-    // 					},
-    // 					children: text,
-    // 				};
-    // 			},
-    // 		}]
-    // 	}
-    // ];
 
     this.state = {
       players: props.players,
@@ -145,97 +34,8 @@ class GameTab extends Component {
         // leagueScore1: '',
         // leagueScore2: '',
         // leagueScore3: '',
-      }
-    }
-
-    const columns = [
-      {
-        children: [{
-          title: 'Score',
-          children: [{
-            title: 'round',
-            dataIndex: 'round',
-            width: 75,
-          }]
-        }]
-      }, {
-        title: 'player 1',
-        player: 1,
-        children: [{
-          children: [{
-            title: 'Bid',
-            dataIndex: 'bid1',
-          }, {
-            title: 'Won',
-            dataIndex: 'won1',
-          }]
-        }],
-      }, {
-        title: 'player 2',
-        player: 2,
-        children: [{
-          children: [{
-            title: 'Bid',
-            dataIndex: 'bid2',
-          }, {
-            title: 'Won',
-            dataIndex: 'won2',
-          }]
-        }],
-      }, {
-        title: 'player 3',
-        player: 3,
-        children: [{
-          children: [{
-            title: 'Bid',
-            dataIndex: 'bid3',
-          }, {
-            title: 'Won',
-            dataIndex: 'won3',
-          }]
-        }],
-      }, {
-        title: 'player 4',
-        player: 4,
-        children: [{
-          children: [{
-            title: 'Bid',
-            dataIndex: 'bid4',
-          }, {
-            title: 'Won',
-            dataIndex: 'won4',
-          }]
-        }],
-      }, {
-        editable: true,
-        children: [{
-          children: [{
-            title: 'Trump',
-            dataIndex: 'trump',
-            width: 75,
-            render: cardsRenderer,
-          }]
-        }]
-      }, {
-        children: [{
-          children: [{
-            title: 'O/U',
-            dataIndex: 'segment',
-            width: 55,
-            render: (text, record) => {
-              return {
-                props: {
-                  className: text === 0 ? 'failed-check' : '',
-                },
-                children: text,
-              };
-            },
-          }]
-        }]
-      }
-    ];
-
-    this.columns1 = this.initColumns1(columns);
+      },
+    };
 
     this.selectActiveRound = this.selectActiveRound.bind(this);
     this.setCurrentViewState = this.setCurrentViewState.bind(this);
@@ -254,24 +54,29 @@ class GameTab extends Component {
       this.gameRef.off('value');
     }
 
-    this.leagueGamesRef = db.ref(`leagueGames/_${leagueID * 1}`).orderByChild('gameID').equalTo(gameID * 1);
+    this.leagueGamesRef = db
+      .ref(`leagueGames/_${leagueID * 1}`)
+      .orderByChild('gameID')
+      .equalTo(gameID * 1);
 
     this.leagueGamesRef.once('value', snapshot => {
       const gameData = Object.values(snapshot.val())[0];
       const gameKey = Object.keys(snapshot.val())[0];
       this.gameKey = gameKey;
       this.gameRef = db.ref(`games/${gameKey}`);
-      this.gameSummaryRef = db.ref(`leagueGamesSummary/_${leagueID * 1}/${gameKey}/players`);
+      this.gameSummaryRef = db.ref(
+        `leagueGamesSummary/_${leagueID * 1}/${gameKey}/players`
+      );
 
       if (gameData.playersOrder) {
         this.setState({
           players: gameData.playersOrder,
-          columns: this.initColumns(gameData.playersOrder)
+          columns: this.initColumns(gameData.playersOrder),
         });
       } else {
         this.setState({
           players: this.props.players,
-          columns: this.initColumns(this.props.players)
+          columns: this.initColumns(this.props.players),
         });
       }
 
@@ -279,8 +84,8 @@ class GameTab extends Component {
         this.setState({
           gameData: {
             ...this.state.gameData,
-            ...snap.val()
-          }
+            ...snap.val(),
+          },
         });
         this.props.loaderStateCb(false);
       });
@@ -288,10 +93,10 @@ class GameTab extends Component {
       this.gameSummaryRef.on('value', snap => {
         this.setState({
           gameSummary: {
-            ...snap.val()
-          }
+            ...snap.val(),
+          },
         });
-      })
+      });
     });
   }
 
@@ -337,12 +142,12 @@ class GameTab extends Component {
 
       for (const [key, value] of Object.entries(row)) {
         if (key.indexOf('bid') > -1 && value !== null && value !== '') {
-          currentTotalBid += (value * 1);
+          currentTotalBid += value * 1;
         }
 
         if (key.indexOf('won') > -1) {
           if (value !== null && value !== '') {
-            currentTotalWon += (value * 1);
+            currentTotalWon += value * 1;
           } else {
             allWonInput = false;
           }
@@ -352,12 +157,15 @@ class GameTab extends Component {
       row.segment = currentTotalBid !== null ? currentTotalBid - 13 : null;
       row.check = allWonInput && currentTotalWon === 13;
 
-      // calculate if round fell - change next round factor 
+      // calculate if round fell - change next round factor
       if (row.check) {
         let didRoundFell = true;
 
         for (let i = 0; i < 4; i++) {
-          if (typeof row[`bid${i}`] !== 'number' || typeof row[`won${i}`] !== 'number') {
+          if (
+            typeof row[`bid${i}`] !== 'number' ||
+            typeof row[`won${i}`] !== 'number'
+          ) {
             didRoundFell = false;
             break;
           } else if (row[`bid${i}`] === row[`won${i}`]) {
@@ -373,12 +181,13 @@ class GameTab extends Component {
             // because metaData index is zero based row.round value is next round index
             newData[row.round].factor = row.factor * 2;
           } else if (row.factor > 1) {
-            newData[row.round].factor = row.factor
+            newData[row.round].factor = row.factor;
           }
         } else if (row.fell) {
           row.fell = false;
           if (newData[row.round]) {
-            newData[row.round].factor = row.factor > 1 ? row.factor / 2 : row.factor;
+            newData[row.round].factor =
+              row.factor > 1 ? row.factor / 2 : row.factor;
           }
 
           for (let i = 0; i < 4; i++) {
@@ -394,7 +203,12 @@ class GameTab extends Component {
           this.updateGameStatus(GAME_STATUS.FINISHED);
 
           // round summary league scores
-          const { totalScore0, totalScore1, totalScore2, totalScore3 } = this.state.gameData;
+          const {
+            totalScore0,
+            totalScore1,
+            totalScore2,
+            totalScore3,
+          } = this.state.gameData;
           const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
           scores[`totalScore${player}`] = stateToUpdate[`totalScore${player}`];
           summaryToUpdate = this.calculateLeagueScores(scores, summaryToUpdate);
@@ -408,9 +222,15 @@ class GameTab extends Component {
 
     // this.setState(stateToUpdate);
     this.gameRef.update(stateToUpdate);
-  }
+  };
 
-  calculatePlayerscore = (round, player, roundsData, currentRound, stateToUpdate) => {
+  calculatePlayerscore = (
+    round,
+    player,
+    roundsData,
+    currentRound,
+    stateToUpdate
+  ) => {
     let rowScore;
 
     const bid = round[`bid${player}`];
@@ -418,15 +238,15 @@ class GameTab extends Component {
 
     if (won !== '' && bid !== '') {
       if (won === bid) {
-        if ((won * 1) === 0) {
+        if (won * 1 === 0) {
           rowScore = round.segment > 0 ? 25 : 50;
         } else {
-          rowScore = (Math.pow(won, 2) + 10);
+          rowScore = Math.pow(won, 2) + 10;
         }
       } else {
         const diff = Math.abs(won - bid);
 
-        if ((bid * 1) === 0) {
+        if (bid * 1 === 0) {
           rowScore = -(round.segment > 0 ? 25 : 50) + (diff - 1) * 10;
         } else {
           rowScore = diff * -10;
@@ -449,10 +269,12 @@ class GameTab extends Component {
       round[`aggregateScore${player}`] = aggregateScore;
       stateToUpdate[`totalScore${player}`] = round[`aggregateScore${player}`];
     }
-  }
+  };
 
   calculateLeagueScores = (scores, summaryToUpdate) => {
-    const sortedScores = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+    const sortedScores = Object.keys(scores).sort(
+      (a, b) => scores[b] - scores[a]
+    );
 
     sortedScores.forEach((scoreIndex, i) => {
       const score = scores[scoreIndex];
@@ -482,7 +304,7 @@ class GameTab extends Component {
     });
 
     return summaryToUpdate;
-  }
+  };
 
   calculateSummary = (roundsData, currentRoundIndex) => {
     const currentRound = currentRoundIndex + 1;
@@ -507,7 +329,9 @@ class GameTab extends Component {
         if (!round.fell) {
           totalRounds++;
           const highestBidder = round.highestBidder === pIndex;
-          const lastBidder = !highestBidder && (pIndex + 1 > 3 ? 0 : pIndex + 1) === round.highestBidder;
+          const lastBidder =
+            !highestBidder &&
+            (pIndex + 1 > 3 ? 0 : pIndex + 1) === round.highestBidder;
 
           if (highestBidder) {
             totalHBrounds++;
@@ -544,9 +368,15 @@ class GameTab extends Component {
       const successRate = { wins: stood, total: totalRounds };
       const successRateHB = { wins: stoodWhileHB, total: totalHBrounds };
       const successRateOver = { wins: stoodInOver, total: totalOverRounds };
-      const successRateUnder = { wins: stoodInUnder, total: (totalRounds - totalOverRounds) };
+      const successRateUnder = {
+        wins: stoodInUnder,
+        total: totalRounds - totalOverRounds,
+      };
       const successRateNT = { wins: stoodInNT, total: totalNTrounds };
-      const successRateLastBidder = { wins: stoodWhenLastBidder, total: totalStoodWhenLastBidder };
+      const successRateLastBidder = {
+        wins: stoodWhenLastBidder,
+        total: totalStoodWhenLastBidder,
+      };
 
       playersSummary[pIndex] = {
         successRate: Number.isNaN(successRate) ? '' : successRate,
@@ -559,33 +389,36 @@ class GameTab extends Component {
     }
 
     return playersSummary;
-  }
+  };
 
-  mapToPlayersObj = (summaryToUpdate) => {
+  mapToPlayersObj = summaryToUpdate => {
     const { players, gameSummary } = this.state;
 
     return players.reduce((obj, player, index) => {
       obj[player.key] = {
         ...gameSummary[player.key],
-        ...summaryToUpdate[index]
+        ...summaryToUpdate[index],
       };
 
       return obj;
     }, {});
-  }
+  };
 
-  updateGameStatus = (status) => {
+  updateGameStatus = status => {
     const { match } = this.props;
     const { params } = match;
     const { leagueID } = params;
 
-    fire.database().ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`).update({ status });
-  }
+    fire
+      .database()
+      .ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`)
+      .update({ status });
+  };
 
   toggleSlide = () => {
     const currentView = this.state.currentView === 'panel' ? 'table' : 'panel';
     this.setCurrentViewState(currentView);
-  }
+  };
 
   setCurrentViewState(currentView) {
     this.setState({ currentView });
@@ -595,13 +428,15 @@ class GameTab extends Component {
     const { gameData, currentView } = this.state;
     const { rounds, currentRound } = gameData;
 
-    if (Number(newRound) < Number(currentRound) || rounds[currentRound - 1].check) {
+    if (
+      Number(newRound) < Number(currentRound) ||
+      rounds[currentRound - 1].check
+    ) {
       this.gameRef.update({
-        currentRound: Number(newRound)
+        currentRound: Number(newRound),
       });
 
-      const { isMobile } = this.props;
-      if (isMobile && currentView === 'table') {
+      if (currentView === 'table') {
         this.toggleSlide();
       }
     } else {
@@ -622,7 +457,7 @@ class GameTab extends Component {
 
     this.setState({
       columns: columnsCopy,
-      players: playersCopy
+      players: playersCopy,
     });
   };
 
@@ -633,7 +468,10 @@ class GameTab extends Component {
     });
     const { params } = this.props.match;
     const { leagueID } = params;
-    fire.database().ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`).update({ playersOrder: newOrder });
+    fire
+      .database()
+      .ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`)
+      .update({ playersOrder: newOrder });
   }
 
   getLeagueScores = () => {
@@ -653,249 +491,103 @@ class GameTab extends Component {
       summaryObj[`leagueScore${i}`] = gameSummary[player.key].leagueScore;
       return summaryObj;
     }, {});
-  }
+  };
 
   render() {
     const { columns, currentView, gameData, players } = this.state;
     const { rounds, currentRound } = gameData;
-    const { screenSize, isMobile, loading, match } = this.props;
+    const { loading, match } = this.props;
     const { params } = match;
     const { gameID } = params;
-    // const columns1 = this.columns1;
     const playersColumns = columns.slice(0, 4);
-    const components = {
-      body: {
-        row: EditableFormRow,
-        cell: EditableCell,
-      },
-    };
-    //table width = 930px
-    // const siderWidth = (screenSize - 930) / 2;
-    // 200 is league layout sider width
-    const siderWidth = (screenSize - 200 - 930) / 2;
-    let translate;
-    if (siderWidth < 130) {
-      translate = siderWidth - 65;
-    } else {
-      translate = siderWidth / 2;
-    }
 
     if (loading) {
-      return <Loader />
-    }
-
-    if (isMobile) {
-      return (
-        <PlayersContext.Provider value={{ players, reorderPlayers: this.handleReorderPlayers }}>
-          <GameMobileView
-            gameID={gameID}
-            currentView={currentView}
-            rounds={rounds}
-            playersColumns={playersColumns}
-            currentRound={currentRound}
-            handleSave={this.handleSave}
-            onCurrentViewChange={this.setCurrentViewState}
-            goToRound={this.selectActiveRound}
-            leagueScores={this.getLeagueScores()}
-          />
-        </PlayersContext.Provider>
-      );
+      return <Loader />;
     }
 
     return (
-      <Layout className="game-layout">
-        <Sider width={siderWidth} style={{ background: 'transparent' }} >
-          <div style={{ height: 119 }}>
-            <Button icon="table" onClick={this.toggleSlide} />
-          </div>
-          <Menu
-            defaultSelectedKeys={['1']}
-            mode="inline"
-            style={{ left: `${currentView === 'table' ? 0 : translate / 2 * -1}px` }}
-            onSelect={(item) => this.selectActiveRound(item.key)}
-            selectedKeys={[`${currentRound}`]}
-          >
-            {Array(13).fill(1).map((_, i) => <Menu.Item key={i + 1} style={{ textAlign: 'center' }}>
-              <span className="round-text" style={{ display: siderWidth < 200 ? 'none' : '' }}>Round</span> {i + 1}
-            </Menu.Item>)}
+      <PlayersContext.Provider
+        value={{ players, reorderPlayers: this.handleReorderPlayers }}
+      >
+        {createPortal(
+          <Button
+            className="toggle-view-btn"
+            type="link"
+            onClick={this.toggleSlide}
+            icon={
+              currentView === 'table' ? (
+                <BorderOuterOutlined />
+              ) : (
+                <TableOutlined />
+              )
+            }
+          />,
+          document.querySelector('#app-header') || document.body
+        )}
 
-          </Menu>
-        </Sider>
-        <Layout className={currentView === 'table' ? 'game-table' : 'game-panel'}>
-          <Header style={{ background: 'transparent', padding: '0 0px', height: 80, }}>
-            <ReactDragListView
-              onDragEnd={this.onDragEnd}
-              nodeSelector="div.card"
-            >
-              {playersColumns.map(({ index: playerIndex, playerName }, i) => (
-                <Card
-                  key={i}
-                  title={playerName}
-                  className="card"
-                  style={{ transform: `translate(${currentView === 'table' ? 0 : (60 + i * 20)}px)` }}
-                >
-                  <Css type={CSS_TRANSITIONS.SLIDE_UP}>
-                    {gameData[`totalScore${playerIndex}`]}
-                  </Css>
-                </Card>
-              ))}
-            </ReactDragListView>
-          </Header>
-          <Content>
-            {/* <Carousel
-									ref={node => this.carousel = node}
-									dots={false}
-									afterChange={(current) => this.currentSlide = current}
-								>
-									<div>
-										<Table
-											className='game-table'
-											components={components}
-											columns={this.columns}
-											rowKey='round'
-											dataSource={rounds}
-											size='small'
-											bordered
-											pagination={false}
-											// scroll={{ y: 520 }}
-											rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
-											style={{ display: 'inline-block' }}
-										/>
-									</div>
-									{console.log('before gamepad')}
-									<GamePad
-										isMobile={false}
-										roundData={rounds[currentRound]}
-										onChange={this.handleSave}
-									/>
-
-								</Carousel> */}
-            <div className="my-carousel">
-              <div className={`my-carousel-slides-container ${currentView}`}>
-                <div className="my-carousel-slide">
-                  <Table
-                    className='game-table'
-                    components={components}
-                    columns={columns}
-                    rowKey='round'
-                    dataSource={rounds}
-                    size='small'
-                    bordered
-                    pagination={false}
-                    //TODO: give class to active row when row===currentRound
-                    //TODO: find a way to validate a row other then row.check
-                    // rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
-                    style={{ display: 'inline-block' }}
-                  />
-                </div>
-                <div className="my-carousel-slide">
-                  <GamePad
-                    isMobile={false}
-                    currentRound={currentRound}
-                    allRounds={rounds}
-                    players={playersColumns}
-                    onChange={this.handleSave}
-                  />
-                </div>
-              </div>
-            </div>
-
-
-          </Content>
-
-        </Layout>
-      </Layout>
+        <GameMobileView
+          gameID={gameID}
+          currentView={currentView}
+          rounds={rounds}
+          playersColumns={playersColumns}
+          currentRound={currentRound}
+          handleSave={this.handleSave}
+          onCurrentViewChange={this.setCurrentViewState}
+          goToRound={this.selectActiveRound}
+          leagueScores={this.getLeagueScores()}
+        />
+      </PlayersContext.Provider>
     );
   }
 
-  initColumns = (players) => {
+  initColumns = players => {
     const playersColumn = players.map(({ nickname }, i) => {
       return {
         playerName: nickname,
         index: i,
-        children: [{
-          title: 'Bid',
-          dataIndex: `bid${i}`,
-          width: 100,
-        }, {
-          title: 'Won',
-          dataIndex: `won${i}`,
-          width: 100,
-        }]
+        children: [
+          {
+            title: 'Bid',
+            dataIndex: `bid${i}`,
+            width: 100,
+          },
+          {
+            title: 'Won',
+            dataIndex: `won${i}`,
+            width: 100,
+          },
+        ],
       };
     });
 
-    const columns = playersColumn.concat([{
-      children: [{
-        title: 'Trump',
-        dataIndex: 'trump',
-        width: 75,
-        render: cardsRenderer,
-      }, {
-        title: 'O/U',
-        dataIndex: 'segment',
-        width: 55,
-        render: (text, record) => {
-          return {
-            props: {
-              className: text === 0 ? 'failed-check' : '',
+    const columns = playersColumn.concat([
+      {
+        children: [
+          {
+            title: 'Trump',
+            dataIndex: 'trump',
+            width: 75,
+            render: cardsRenderer,
+          },
+          {
+            title: 'O/U',
+            dataIndex: 'segment',
+            width: 55,
+            render: (text, record) => {
+              return {
+                props: {
+                  className: text === 0 ? 'failed-check' : '',
+                },
+                children: text,
+              };
             },
-            children: text,
-          };
-        },
-      }]
-    }]);
+          },
+        ],
+      },
+    ]);
 
     return columns;
   };
-
-  initColumns1 = (columns) => columns.map((col) => {
-    if (!col.editable && !col.player) {
-      return col;
-    }
-    const playerScore = this.state.gameData[`totalScore${col.player}`];
-
-    return {
-      ...col,
-      children: col.children.map((child) => {
-        return {
-          ...child,
-          title: playerScore,
-          children: child.children.map((subChild) => {
-            return {
-              ...subChild,
-              width: 100,
-              onCell: record => ({
-                record,
-                editable: true,
-                editorType: subChild.dataIndex === 'trump' ? 'trump' : 'bidWin',
-                dataIndex: subChild.dataIndex,
-                player: col.player,
-                handleSave: this.handleSave,
-              }),
-            }
-          })
-        }
-      })
-    };
-  });
 }
 
 export default GameTab;
-
-
-
-
-/** editable table */
-/* <Table
-			className='game-table'
-			components={components}
-			columns={columns1}
-			rowKey='round'
-			dataSource={rounds}
-			size='small'
-			bordered
-			pagination={false}
-			scroll={{ y: 520 }}
-			rowClassName={row => !row.check || row.segment === 0 ? 'failed-check' : ''}
-		/> */
