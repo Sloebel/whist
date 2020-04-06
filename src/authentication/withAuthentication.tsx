@@ -2,15 +2,11 @@ import React from 'react';
 import { fire } from '../firebase';
 import AuthUserContext from './AuthUserContext';
 
-const withAuthentication = (Component) => {
+const withAuthentication = (Component: React.ComponentType) => {
   class WithAuthentication extends React.Component {
-    constructor(props) {
-      super(props);
-
-      this.state = {
-        authUser: null,
-      };
-    }
+    public state = {
+      authUser: null,
+    };
 
     componentDidMount() {
       fire.auth().onAuthStateChanged(authUser => {
@@ -32,6 +28,6 @@ const withAuthentication = (Component) => {
   }
 
   return WithAuthentication;
-}
+};
 
 export default withAuthentication;
