@@ -1,16 +1,16 @@
-import React from "react";
-import { withRouter, RouteComponentProps } from "react-router-dom";
-import { Form, Input, Button } from "antd";
+import React from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { Form, Input, Button } from 'antd';
 import {
   SmileOutlined,
   UserOutlined,
   MailOutlined,
-  LockOutlined
-} from "@ant-design/icons";
-import { auth, db } from "../firebase";
-import "./Login.scss";
-import { IFormValues } from "../models/common/BasicTypes";
-import { FormInstance } from "antd/lib/form";
+  LockOutlined,
+} from '@ant-design/icons';
+import { auth, db } from '../firebase';
+import './Login.scss';
+import { IFormValues } from '../models/common/BasicTypes';
+import { FormInstance } from 'antd/lib/form';
 
 const FormItem = Form.Item;
 
@@ -29,7 +29,7 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
 
     this.state = {
       confirmDirty: false,
-      isLoading: false
+      isLoading: false,
     };
   }
 
@@ -41,8 +41,8 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
   private compareToFirstPassword = (rule: any, value: any, callback: any) => {
     const form = this.formRef.current;
 
-    if (form && value && value !== form.getFieldValue("password")) {
-      callback("Two passwords that you enter is inconsistent!");
+    if (form && value && value !== form.getFieldValue('password')) {
+      callback('Two passwords that you enter is inconsistent!');
     } else {
       callback();
     }
@@ -52,7 +52,7 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
     const form = this.formRef.current;
 
     if (value && this.state.confirmDirty) {
-      form && form.validateFields(["confirm"]);
+      form && form.validateFields(['confirm']);
     }
     callback();
   };
@@ -70,7 +70,7 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
           db
             .doCreateUser(authUser.user.uid, { name, nickname, email })
             .then(() => {
-              this.props.history.push("/");
+              this.props.history.push('/');
             })
             .catch(error => {
               // Handle Errors here.
@@ -102,10 +102,10 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
       >
         <FormItem
           name="name"
-          rules={[{ required: true, message: "Please input your name!" }]}
+          rules={[{ required: true, message: 'Please input your name!' }]}
         >
           <Input
-            prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+            prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
             placeholder="Name"
             size="large"
           />
@@ -115,12 +115,12 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
           rules={[
             {
               required: true,
-              message: "Please input your Nickname!"
-            }
+              message: 'Please input your Nickname!',
+            },
           ]}
         >
           <Input
-            prefix={<SmileOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+            prefix={<SmileOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
             placeholder="Nickname"
             size="large"
           />
@@ -129,17 +129,17 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
           name="email"
           rules={[
             {
-              type: "email",
-              message: "The input is not valid E-mail!"
+              type: 'email',
+              message: 'The input is not valid E-mail!',
             },
             {
               required: true,
-              message: "Please input your email!"
-            }
+              message: 'Please input your email!',
+            },
           ]}
         >
           <Input
-            prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+            prefix={<MailOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
             placeholder="Email"
             size="large"
           />
@@ -149,15 +149,15 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
           rules={[
             {
               required: true,
-              message: "Please input your Password!"
+              message: 'Please input your Password!',
             },
             {
-              validator: this.validateToNextPassword
-            }
+              validator: this.validateToNextPassword,
+            },
           ]}
         >
           <Input
-            prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+            prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
             type="password"
             placeholder="Password"
             size="large"
@@ -168,15 +168,15 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
           rules={[
             {
               required: true,
-              message: "Please confirm your password!"
+              message: 'Please confirm your password!',
             },
             {
-              validator: this.compareToFirstPassword
-            }
+              validator: this.compareToFirstPassword,
+            },
           ]}
         >
           <Input
-            prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+            prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
             type="password"
             placeholder="Confirm password"
             onBlur={this.handleConfirmBlur}
