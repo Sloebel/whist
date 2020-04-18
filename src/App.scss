@@ -1,10 +1,4 @@
-@mixin full-view {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  right: 0px;
-  left: 0px;
-}
+@import 'style/mixin.scss';
 
 #root {
   @include full-view();
@@ -29,7 +23,7 @@ ul.app-menu li {
   margin-top: 20px;
 }
 
-$inline-header-height: 90px;
+$inline-header-height: 60px;
 
 .app-wrapper {
   display: flex;
@@ -80,6 +74,15 @@ $inline-header-height: 90px;
     .ant-spin-dot i {
       background-color: #000;
     }
+
+    &.with-mask {
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+
+      .ant-spin-dot i {
+        background-color: red;
+      }
+    }
   }
 }
 
@@ -114,7 +117,7 @@ $inline-header-height: 90px;
     }
   }
 
-  .mobile:not(.inline-header) & {
+  &:not(.inline-header) & {
     .app-logo {
       height: 120px;
     }
@@ -123,19 +126,13 @@ $inline-header-height: 90px;
       transform: translate(-63px, 43px);
     }
   }
-
-  .inline-header & {
-    .app-logo {
-      height: 60px;
-    }
-  }
 }
 
 .app-content {
-  height: calc(100% - #{$inline-header-height});
+  height: calc(100% - 120px);
 
-  .mobile & {
-    height: calc(100% - 60px);
+  .inline-header & {
+    height: calc(100% - #{$inline-header-height});
   }
 }
 

@@ -7,10 +7,7 @@
   height: 50px;
   width: 40px;
   border-radius: 5px;
-
-  .mobile & {
-    font-size: 18px;
-  }  
+  font-size: 18px;
 
   &:before {
     content: none;
@@ -27,7 +24,8 @@
     background: transparent;
     border-radius: 5px;
   }
-  .anticon, .NT {
+  .anticon,
+  .NT {
     font-size: 14px;
     font-weight: bold;
     color: #333;
@@ -42,7 +40,7 @@
     grid-column-start: 1;
     grid-column-end: 2;
     grid-row-start: row2-start;
-    grid-row-end: 2;  
+    grid-row-end: 2;
   }
 
   .diamond {

@@ -11,25 +11,29 @@ class Main extends Component {
   state = {
     activeLeagues: [],
     newLeague: false,
-    resumeLeague: false
+    resumeLeague: false,
   };
 
   /* Create reference to activeLeagues in Firebase Database */
-  activeLeagues = fire.database().ref('leagues/list').orderByChild("active").equalTo(true);
+  activeLeagues = fire
+    .database()
+    .ref('leagues/list')
+    .orderByChild('active')
+    .equalTo(true);
 
   fetch() {
-    this.activeLeagues.on('value', snapshot => {
+    this.activeLeagues.on('value', (snapshot) => {
       if (snapshot.val()) {
         const userId = fire.auth().currentUser.uid;
 
         // filtering leagues data by userId,
         // TODO: check if possible to fix the data differently in the database for better queries
-        // TODO: fix the loader functionality    
+        // TODO: fix the loader functionality
         this.setState({
-          activeLeagues: Object.values(snapshot.val())
-            .filter(({ players }) => Object.values(players)
-              .some(({ key }) => key === userId)),
-          loading: false
+          activeLeagues: Object.values(snapshot.val()).filter(({ players }) =>
+            Object.values(players).some(({ key }) => key === userId)
+          ),
+          loading: false,
         });
       }
     });
@@ -43,16 +47,15 @@ class Main extends Component {
     this.activeLeagues.off('value');
   }
 
-
   showResumeLeagueDialog() {
     this.setState({
-      resumeLeague: true
+      resumeLeague: true,
     });
   }
 
   closeResumeLeagueDialog(leagueID) {
     this.setState({
-      resumeLeague: false
+      resumeLeague: false,
     });
 
     this.navigateToLeague(leagueID);
@@ -60,13 +63,13 @@ class Main extends Component {
 
   showNewLeagueDialog() {
     this.setState({
-      newLeague: true
+      newLeague: true,
     });
   }
 
   closeNewLeagueDialog(leagueID) {
     this.setState({
-      newLeague: false
+      newLeague: false,
     });
 
     this.navigateToLeague(leagueID);
@@ -74,40 +77,42 @@ class Main extends Component {
 
   navigateToLeague(leagueID) {
     if (leagueID) {
-      this.props.history.push(`${routes.LEAGUE}/` + leagueID)
+      this.props.history.push(`${routes.LEAGUE}/` + leagueID);
     }
   }
 
   render() {
     return (
       <div className="app-main">
-        <MainMenu items={[
-          {
-            text: 'Resume League',
-            onClick: this.showResumeLeagueDialog.bind(this),
-            dialog: Dialogs.RESUME_LEAGUE,
-            disabled: this.state.activeLeagues.length === 0,
-            dialogProps: {
-              afterClose: this.closeResumeLeagueDialog.bind(this),
-              visible: this.state.resumeLeague,
-              activeLeagues: this.state.activeLeagues
-            }
-          }, {
-            text: 'Create League',
-            onClick: this.showNewLeagueDialog.bind(this),
-            dialog: Dialogs.NEW_LEAGUE,
-            dialogProps: {
-              afterClose: this.closeNewLeagueDialog.bind(this),
-              visible: this.state.newLeague
-            }
-          },
-          { text: 'Settings' },
-          { text: 'Scores' },
-          {
-            text: 'Sign Out',
-            onClick: auth.signOut
-          }
-        ]}
+        <MainMenu
+          items={[
+            {
+              text: 'Resume League',
+              onClick: this.showResumeLeagueDialog.bind(this),
+              dialog: Dialogs.RESUME_LEAGUE,
+              disabled: this.state.activeLeagues.length === 0,
+              dialogProps: {
+                afterClose: this.closeResumeLeagueDialog.bind(this),
+                visible: this.state.resumeLeague,
+                activeLeagues: this.state.activeLeagues,
+              },
+            },
+            {
+              text: 'Create League',
+              onClick: this.showNewLeagueDialog.bind(this),
+              dialog: Dialogs.NEW_LEAGUE,
+              dialogProps: {
+                onAfterClose: this.closeNewLeagueDialog.bind(this),
+                visible: this.state.newLeague,
+              },
+            },
+            { text: 'Settings' },
+            { text: 'Scores' },
+            {
+              text: 'Sign Out',
+              onClick: auth.signOut,
+            },
+          ]}
         />
       </div>
     );
