@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Button } from 'antd';
 import { RightOutlined, LeftOutlined } from '@ant-design/icons';
 import MobileTable from '../common/table/MobileTable';
-import GamePad from '../common/game/Pad';
+import GamePad from './GamePad/GamePad';
 import { hasTouch, addListener } from '../utils/Utils';
 
 export default class GameMobileView extends Component {
@@ -79,17 +79,25 @@ export default class GameMobileView extends Component {
   render() {
     const {
       gameID,
+      gameMode,
+      ownCardsState,
       currentView,
       rounds,
       playersColumns,
       currentRound,
       handleSave,
       leagueScores,
+      devicePlayerIndex,
+      handleCardThrown,
     } = this.props;
 
     return (
-      <div className="game-mobile-view">
-        <div className="my-carousel" ref={el => (this.carouselEl = el)}>
+      <div
+        className={`game-mobile-view ${
+          gameMode === 'remote' ? 'mode-remote' : ''
+        }`}
+      >
+        <div className="my-carousel" ref={(el) => (this.carouselEl = el)}>
           <div className={`my-carousel-slides-container ${currentView}`}>
             <div className="my-carousel-slide">
               <MobileTable
@@ -102,34 +110,41 @@ export default class GameMobileView extends Component {
             </div>
             <div className="my-carousel-slide">
               <GamePad
+                gameMode={gameMode}
+                ownCardsState={ownCardsState}
+                onCardThrown={handleCardThrown}
                 currentRound={currentRound}
                 allRounds={rounds}
                 players={playersColumns}
+                devicePlayerIndex={devicePlayerIndex}
                 onChange={handleSave}
               />
             </div>
           </div>
         </div>
-        <div className="round-navigation">
-          {currentRound !== 1 && (
-            <Button
-              type="primary"
-              className="left"
-              ghost
-              onClick={this.toRoundBefore}
-            >
-              <LeftOutlined />
-              {`Round ${currentRound - 1}`}
-            </Button>
-          )}
+        {gameMode !== 'remote' ||
+          (((ownCardsState || []).length === 0 || currentView === 'table') && (
+            <div className="round-navigation">
+              {currentRound !== 1 && (
+                <Button
+                  type="primary"
+                  className="left"
+                  ghost
+                  onClick={this.toRoundBefore}
+                >
+                  <LeftOutlined />
+                  {`Round ${currentRound - 1}`}
+                </Button>
+              )}
 
-          {currentRound !== 13 && (
-            <Button type="primary" ghost onClick={this.nextRound}>
-              {`Round ${Number(currentRound) + 1}`}
-              <RightOutlined />
-            </Button>
-          )}
-        </div>
+              {currentRound !== 13 && (
+                <Button type="primary" ghost onClick={this.nextRound}>
+                  {`Round ${Number(currentRound) + 1}`}
+                  <RightOutlined />
+                </Button>
+              )}
+            </div>
+          ))}
       </div>
     );
   }

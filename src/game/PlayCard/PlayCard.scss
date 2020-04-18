@@ -1,0 +1,31 @@
+.play-card {
+  width: 30px;
+  height: 85px;
+  flex: 0 1 14%;
+  transform: translate3d(0px, 0px, 0px);
+  transition: all 0.36s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+  cursor: pointer;
+
+  img {
+    width: 130px;
+  }
+
+  &.pre-selected {
+    transform: translate3d(0px, -15px, 0px);
+  }
+
+  &.thrown {
+    visibility: hidden;
+  }
+
+  &.disabled {
+    &:after {
+      content: ' ';
+      position: absolute;
+      top: 0;
+      bottom: -97px;
+      width: 130px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+}

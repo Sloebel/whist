@@ -3,12 +3,20 @@ import { createPortal } from 'react-dom';
 import { fire } from './../firebase';
 import { Button, message } from 'antd';
 import { TableOutlined, BorderOuterOutlined } from '@ant-design/icons';
+import {
+  getDevicePlayerIndex,
+  dealCards,
+  nextPlayerIndex,
+  getTotalWonBid,
+  calcIfRoundFell,
+} from '../utils/game-utils';
 import './GameTab.scss';
 import { GAME_STATUS } from '../constants/states';
-import { cardsRenderer } from '../common/table/renderers.js';
-import Loader from '../common/loader/Loader';
+// import Loader from '../common/loader/Loader';
 import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
+import GameService from '../services/GameSrv';
+import { CardsType } from '../constants/cards';
 
 export const PlayersContext = React.createContext();
 
@@ -18,10 +26,12 @@ class GameTab extends Component {
 
     this.state = {
       players: props.players,
-      columns: this.initColumns(props.players),
+      devicePlayerIndex: null, //this.getDevicePlayerIndex(props.players),
+      columns: [], //this.initColumns(props.players),
       currentView: 'table',
       gameData: {
         currentRound: 1,
+        dealer: undefined,
         rounds: [],
         totalScore0: 0,
         totalScore1: 0,
@@ -39,7 +49,7 @@ class GameTab extends Component {
 
     this.selectActiveRound = this.selectActiveRound.bind(this);
     this.setCurrentViewState = this.setCurrentViewState.bind(this);
-    this.selectActiveRound = this.selectActiveRound.bind(this);
+    // this.selectActiveRound = this.selectActiveRound.bind(this);
     this.handleReorderPlayers = this.handleReorderPlayers.bind(this);
   }
 
@@ -59,7 +69,7 @@ class GameTab extends Component {
       .orderByChild('gameID')
       .equalTo(gameID * 1);
 
-    this.leagueGamesRef.once('value', snapshot => {
+    this.leagueGamesRef.once('value', (snapshot) => {
       const gameData = Object.values(snapshot.val())[0];
       const gameKey = Object.keys(snapshot.val())[0];
       this.gameKey = gameKey;
@@ -67,30 +77,33 @@ class GameTab extends Component {
       this.gameSummaryRef = db.ref(
         `leagueGamesSummary/_${leagueID * 1}/${gameKey}/players`
       );
+      const { gameMode } = gameData;
 
-      if (gameData.playersOrder) {
-        this.setState({
-          players: gameData.playersOrder,
-          columns: this.initColumns(gameData.playersOrder),
-        });
-      } else {
-        this.setState({
-          players: this.props.players,
-          columns: this.initColumns(this.props.players),
-        });
-      }
+      const players = gameData.playersOrder
+        ? gameData.playersOrder
+        : this.props.players;
 
-      this.gameRef.on('value', snap => {
+      this.setState({
+        players,
+        columns: this.initColumns(players),
+        devicePlayerIndex: getDevicePlayerIndex(players),
+      });
+
+      this.gameRef.on('value', (snap) => {
+        const gameRefData = snap.val();
+
         this.setState({
           gameData: {
             ...this.state.gameData,
-            ...snap.val(),
+            gameMode,
+            ...gameRefData,
           },
         });
+
         this.props.loaderStateCb(false);
       });
 
-      this.gameSummaryRef.on('value', snap => {
+      this.gameSummaryRef.on('value', (snap) => {
         this.setState({
           gameSummary: {
             ...snap.val(),
@@ -107,11 +120,54 @@ class GameTab extends Component {
   componentWillUnmount() {
     this.gameRef.off('value');
     this.gameSummaryRef.off('value');
+    if (this.ownCardsStateRef) {
+      this.ownCardsStateRef.off('value');
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.gameID !== this.props.match.params.gameID) {
       this.fetch();
+    }
+
+    const { gameData } = this.state;
+
+    if (
+      prevState.gameData.gameMode !== gameData.gameMode ||
+      prevState.gameData.currentRound !== gameData.currentRound
+    ) {
+      this.handleGameModeChange();
+    }
+
+    if (prevState.gameData !== gameData) {
+      const { currentRound, dealer, gameMode } = gameData;
+      const roundData = this.getRoundData(currentRound);
+
+      if (gameMode === 'remote' && roundData) {
+        const { handsState, currentHand } = roundData;
+        const currentHandState = handsState && handsState[currentHand];
+        const userId = fire.auth().currentUser?.uid;
+
+        if (
+          currentHandState &&
+          (currentHandState.thrownCards || []).length === 4 &&
+          currentHandState.status === 'ACTIVE'
+        ) {
+          setTimeout(() => {
+            if (dealer === userId) {
+              this.handleHandFinished(roundData);
+            }
+          }, 2500);
+        }
+
+        if (
+          currentHand === 13 &&
+          handsState[currentHand].status === 'FINISHED' &&
+          dealer === userId
+        ) {
+          this.calculateHandScore(roundData);
+        }
+      }
     }
   }
 
@@ -119,7 +175,7 @@ class GameTab extends Component {
     const stateToUpdate = {};
     let summaryToUpdate;
     const newData = [...this.state.gameData.rounds];
-    const index = newData.findIndex(item => row.round === item.round);
+    const index = newData.findIndex((item) => row.round === item.round);
 
     const item = newData[index];
 
@@ -133,46 +189,21 @@ class GameTab extends Component {
 
     if (typeof player === 'number') {
       // calculate score
-      this.calculatePlayerscore(row, player, newData, index, stateToUpdate);
+      this.calculatePlayerScore(row, player, newData, index, stateToUpdate);
 
       //update O/U
-      let currentTotalBid = null;
-      let currentTotalWon = null;
-      let allWonInput = true;
-
-      for (const [key, value] of Object.entries(row)) {
-        if (key.indexOf('bid') > -1 && value !== null && value !== '') {
-          currentTotalBid += value * 1;
-        }
-
-        if (key.indexOf('won') > -1) {
-          if (value !== null && value !== '') {
-            currentTotalWon += value * 1;
-          } else {
-            allWonInput = false;
-          }
-        }
-      }
+      const {
+        currentTotalBid,
+        currentTotalWon,
+        allHasWonInput,
+      } = getTotalWonBid(row);
 
       row.segment = currentTotalBid !== null ? currentTotalBid - 13 : null;
-      row.check = allWonInput && currentTotalWon === 13;
+      row.check = allHasWonInput && currentTotalWon === 13;
 
       // calculate if round fell - change next round factor
       if (row.check) {
-        let didRoundFell = true;
-
-        for (let i = 0; i < 4; i++) {
-          if (
-            typeof row[`bid${i}`] !== 'number' ||
-            typeof row[`won${i}`] !== 'number'
-          ) {
-            didRoundFell = false;
-            break;
-          } else if (row[`bid${i}`] === row[`won${i}`]) {
-            didRoundFell = false;
-            break;
-          }
-        }
+        const didRoundFell = calcIfRoundFell(row);
 
         if (didRoundFell) {
           row.fell = true;
@@ -191,7 +222,7 @@ class GameTab extends Component {
           }
 
           for (let i = 0; i < 4; i++) {
-            this.calculatePlayerscore(row, i, newData, index, stateToUpdate);
+            this.calculatePlayerScore(row, i, newData, index, stateToUpdate);
           }
         }
 
@@ -224,7 +255,30 @@ class GameTab extends Component {
     this.gameRef.update(stateToUpdate);
   };
 
-  calculatePlayerscore = (
+  handleCardThrown = (card, player, currentRound, currentHand) => {
+    const roundData = this.getRoundData(currentRound);
+    const thrownCards =
+      (roundData &&
+        roundData.handsState &&
+        roundData.handsState[currentHand].thrownCards) ||
+      [];
+    const newThrownCards = [...thrownCards, { player, card }];
+
+    const {
+      gameData: { ownCardsState },
+    } = this.state;
+
+    this.gameRef
+      .child(`rounds/${currentRound - 1}/handsState/${currentHand}`)
+      .update({
+        status: 'ACTIVE',
+        turnOf: newThrownCards.length !== 4 ? nextPlayerIndex(player) : null,
+        thrownCards: newThrownCards,
+      })
+      .then(() => this.updateOwnCardState(card, currentRound, ownCardsState));
+  };
+
+  calculatePlayerScore = (
     round,
     player,
     roundsData,
@@ -391,7 +445,7 @@ class GameTab extends Component {
     return playersSummary;
   };
 
-  mapToPlayersObj = summaryToUpdate => {
+  mapToPlayersObj = (summaryToUpdate) => {
     const { players, gameSummary } = this.state;
 
     return players.reduce((obj, player, index) => {
@@ -404,7 +458,7 @@ class GameTab extends Component {
     }, {});
   };
 
-  updateGameStatus = status => {
+  updateGameStatus = (status) => {
     const { match } = this.props;
     const { params } = match;
     const { leagueID } = params;
@@ -426,7 +480,8 @@ class GameTab extends Component {
 
   selectActiveRound(newRound) {
     const { gameData, currentView } = this.state;
-    const { rounds, currentRound } = gameData;
+    const { rounds, currentRound, gameMode, dealer } = gameData;
+    const userId = fire.auth().currentUser?.uid;
 
     if (
       Number(newRound) < Number(currentRound) ||
@@ -439,33 +494,31 @@ class GameTab extends Component {
       if (currentView === 'table') {
         this.toggleSlide();
       }
+
+      if (
+        gameMode === 'remote' &&
+        dealer === userId &&
+        !rounds[newRound - 1].handsState
+      ) {
+        // deal cards
+        const { players } = this.state;
+        const cardsByPlayer = dealCards(players);
+
+        // *** if cards already exist for this round firebase will block the update
+        GameService.setCardsToPlayers(this.gameKey, newRound, cardsByPlayer);
+      }
     } else {
       message.warning('Current round is not completed');
     }
   }
 
-  onDragEnd = (fromIndex, toIndex) => {
-    const { columns, players } = this.state;
-
-    const columnsCopy = columns.slice();
-    const column = columnsCopy.splice(fromIndex, 1)[0];
-    columnsCopy.splice(toIndex, 0, column);
-
-    const playersCopy = players.slice();
-    const player = playersCopy.splice(fromIndex, 1)[0];
-    playersCopy.splice(toIndex, 0, player);
-
-    this.setState({
-      columns: columnsCopy,
-      players: playersCopy,
-    });
-  };
-
   handleReorderPlayers(newOrder) {
     this.setState({
       players: newOrder,
+      devicePlayerIndex: getDevicePlayerIndex(newOrder),
       columns: this.initColumns(newOrder),
     });
+
     const { params } = this.props.match;
     const { leagueID } = params;
     fire
@@ -494,16 +547,18 @@ class GameTab extends Component {
   };
 
   render() {
-    const { columns, currentView, gameData, players } = this.state;
-    const { rounds, currentRound } = gameData;
-    const { loading, match } = this.props;
+    const {
+      columns,
+      currentView,
+      gameData,
+      players,
+      devicePlayerIndex,
+    } = this.state;
+    const { rounds, currentRound, gameMode, ownCardsState } = gameData;
+    const { match } = this.props;
     const { params } = match;
     const { gameID } = params;
     const playersColumns = columns.slice(0, 4);
-
-    if (loading) {
-      return <Loader />;
-    }
 
     return (
       <PlayersContext.Provider
@@ -527,9 +582,14 @@ class GameTab extends Component {
 
         <GameMobileView
           gameID={gameID}
+          gameMode={gameMode}
           currentView={currentView}
           rounds={rounds}
+          ownCardsState={ownCardsState}
+          handleCardThrown={this.handleCardThrown}
+          // handState={}
           playersColumns={playersColumns}
+          devicePlayerIndex={devicePlayerIndex}
           currentRound={currentRound}
           handleSave={this.handleSave}
           onCurrentViewChange={this.setCurrentViewState}
@@ -540,54 +600,244 @@ class GameTab extends Component {
     );
   }
 
-  initColumns = players => {
-    const playersColumn = players.map(({ nickname }, i) => {
+  initColumns = (players) => {
+    return players.map(({ nickname }, i) => {
       return {
         playerName: nickname,
         index: i,
-        children: [
-          {
-            title: 'Bid',
-            dataIndex: `bid${i}`,
-            width: 100,
-          },
-          {
-            title: 'Won',
-            dataIndex: `won${i}`,
-            width: 100,
-          },
-        ],
       };
     });
-
-    const columns = playersColumn.concat([
-      {
-        children: [
-          {
-            title: 'Trump',
-            dataIndex: 'trump',
-            width: 75,
-            render: cardsRenderer,
-          },
-          {
-            title: 'O/U',
-            dataIndex: 'segment',
-            width: 55,
-            render: (text, record) => {
-              return {
-                props: {
-                  className: text === 0 ? 'failed-check' : '',
-                },
-                children: text,
-              };
-            },
-          },
-        ],
-      },
-    ]);
-
-    return columns;
   };
+
+  getRoundData(roundIndex) {
+    return this.state.gameData.rounds.find(
+      (round) => round.round === roundIndex
+    );
+  }
+
+  handleGameModeChange() {
+    const { gameData, players } = this.state;
+    const { gameMode } = gameData;
+
+    if (gameMode === 'remote') {
+      const { currentRound, dealer } = gameData;
+      const userId = fire.auth().currentUser?.uid;
+
+      this.ownCardsStateRef = fire
+        .database()
+        .ref(
+          `cardsByGame/${this.gameKey}/round${currentRound}/cardsState/${userId}`
+        );
+
+      this.ownCardsStateRef.on('value', (snap) => {
+        console.log(snap.val());
+        this.setState((state) => {
+          return {
+            gameData: {
+              ...state.gameData,
+              ownCardsState: snap.val() || [],
+            },
+          };
+        });
+
+        const {
+          gameData: { currentRound },
+        } = this.state;
+        const roundData = this.getRoundData(currentRound);
+
+        // if current round === 1 and no handsState and gameMode === remote then deal cards
+        if (
+          !snap.val() &&
+          currentRound === 1 &&
+          !roundData.handsState &&
+          dealer === userId
+        ) {
+          const cardsByPlayer = dealCards(players);
+          GameService.setCardsToPlayers(
+            this.gameKey,
+            currentRound,
+            cardsByPlayer
+          );
+        }
+      });
+    } else if (gameData.ownCardsState) {
+      this.setState({
+        gameData: {
+          ...gameData,
+          ownCardsState: undefined,
+        },
+      });
+    }
+  }
+
+  handleHandFinished(roundData) {
+    const winner = this.calculateHandWinner(roundData);
+    const { round, handsState, currentHand } = roundData;
+
+    this.gameRef
+      .child(`rounds/${round - 1}`)
+      .update({
+        [`won${winner.player}`]: roundData[`won${winner.player}`]
+          ? roundData[`won${winner.player}`] + 1
+          : 1,
+        handsState: {
+          ...handsState,
+          [currentHand]: {
+            ...handsState[currentHand],
+            status: 'FINISHED',
+            handWinner: winner.player,
+          },
+          [currentHand + 1]: {
+            status: 'ACTIVE',
+            turnOf: winner.player,
+            thrownCards: [],
+          },
+        },
+      })
+      .then(() =>
+        setTimeout(
+          () => currentHand !== 13 && this.goToNextHand(roundData, winner),
+          200
+        )
+      );
+  }
+
+  goToNextHand(roundData, winner) {
+    const { round, handsState, currentHand } = roundData;
+
+    this.gameRef.child(`rounds/${round - 1}`).update({
+      // [`won${winner.player}`]: roundData[`won${winner.player}`]
+      //   ? roundData[`won${winner.player}`] + 1
+      //   : 1,
+      currentHand: currentHand + 1,
+      // handsState: {
+      //   // ...handsState,
+      //   [currentHand + 1]: {
+      //     status: 'ACTIVE',
+      //     turnOf: winner.player,
+      //     thrownCards: [],
+      //   },
+      // },
+    });
+  }
+
+  calculateHandScore(roundData) {
+    const gameData = { ...this.state.gameData };
+    const { rounds: allRounds, currentRound } = gameData;
+    const newRound = { ...roundData };
+    const gameToUpdate = {};
+
+    [0, 1, 2, 3].forEach((player) =>
+      this.calculatePlayerScore(
+        newRound,
+        player,
+        allRounds,
+        currentRound - 1,
+        gameToUpdate
+      )
+    );
+
+    // calc if round check
+    // update O/U
+    const { currentTotalWon, allHasWonInput } = getTotalWonBid(newRound);
+
+    newRound.check = allHasWonInput && currentTotalWon === 13;
+
+    // calculate if round fell - change next round factor
+    if (newRound.check) {
+      const didRoundFell = calcIfRoundFell(newRound);
+
+      if (didRoundFell) {
+        newRound.fell = true;
+
+        if (newRound.round < 12) {
+          // because metaData index is zero based row.round value is next round index
+          allRounds[newRound.round].factor = newRound.factor * 2;
+        } else if (newRound.factor > 1) {
+          allRounds[newRound.round].factor = newRound.factor;
+        }
+      } else if (newRound.fell) {
+        newRound.fell = false;
+        if (allRounds[newRound.round]) {
+          allRounds[newRound.round].factor =
+            newRound.factor > 1 ? newRound.factor / 2 : newRound.factor;
+        }
+
+        for (let i = 0; i < 4; i++) {
+          this.calculatePlayerScore(
+            newRound,
+            i,
+            allRounds,
+            currentRound - 1,
+            gameToUpdate
+          );
+        }
+      }
+
+      // calculate round summary stats
+      const summaryToUpdate = this.calculateSummary(
+        allRounds,
+        currentRound - 1
+      );
+
+      if (newRound.round === 13 && !newRound.fell) {
+        gameToUpdate.status = GAME_STATUS.FINISHED;
+        this.updateGameStatus(GAME_STATUS.FINISHED);
+
+        // round summary league scores
+        const {
+          totalScore0,
+          totalScore1,
+          totalScore2,
+          totalScore3,
+        } = gameToUpdate;
+        const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
+        // scores[`totalScore${player}`] = gameToUpdate[`totalScore${player}`];
+        summaryToUpdate = this.calculateLeagueScores(scores, summaryToUpdate);
+      }
+
+      this.gameSummaryRef.update(this.mapToPlayersObj(summaryToUpdate));
+    }
+
+    allRounds.splice(currentRound - 1, 1, newRound);
+
+    gameToUpdate.rounds = allRounds;
+
+    this.gameRef.update(gameToUpdate);
+  }
+
+  // TODO: move this method to game-utils once roundData is properly typed
+  calculateHandWinner(roundData) {
+    const { trump, handsState, currentHand } = roundData;
+    const currentHandState = handsState && handsState[currentHand];
+    const { thrownCards } = currentHandState;
+
+    const trumpCards = thrownCards.filter(
+      (thrown) => thrown.card.split('-')[1] === CardsType[trump]
+    );
+
+    if (trumpCards.length) {
+      const thrownSorted = trumpCards.sort(
+        (a, b) => +b.card.split('-')[0] - +a.card.split('-')[0]
+      );
+
+      return thrownSorted[0];
+    } else {
+      const handCardType = thrownCards[0].card.split('-')[1];
+      const thrownSorted = thrownCards
+        .filter((thrown) => thrown.card.split('-')[1] === handCardType)
+        .sort((a, b) => +b.card.split('-')[0] - +a.card.split('-')[0]);
+
+      return thrownSorted[0];
+    }
+  }
+
+  updateOwnCardState(thrownCard, currentRound, ownCardsState) {
+    const cardIndex = Object.keys(ownCardsState).find(
+      (index) => ownCardsState[index] === thrownCard
+    );
+    GameService.updateHandCardsState(this.gameKey, currentRound, cardIndex);
+  }
 }
 
 export default GameTab;

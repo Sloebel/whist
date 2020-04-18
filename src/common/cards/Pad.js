@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { Radio } from 'antd';
 import Icon from '@ant-design/icons';
 import { Spade, Hart, Diamond, Club } from './Icons';
-import './Pad.css';
+import './Pad.scss';
 
 class CardsPad extends Component {
-  onChange = e => this.props.onChange(e.target.value);
+  onChange = (e) => this.props.onChange(e.target.value);
 
   render() {
     const { trump } = this.props;

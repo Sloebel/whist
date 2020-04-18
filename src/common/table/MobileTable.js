@@ -1,20 +1,20 @@
-import React from "react";
-import { Row, Col } from "antd";
-import { TrophyTwoTone } from "@ant-design/icons";
-import { cardsRenderer } from "./renderers";
+import React from 'react';
+import { Row, Col } from 'antd';
+import { TrophyTwoTone } from '@ant-design/icons';
+import { cardsRenderer } from './renderers';
 
-const MobileTable = props => {
+const MobileTable = (props) => {
   const {
     dataSource: rounds,
     players,
     currentRound,
     leagueScores,
-    gameID
+    gameID,
   } = props;
 
-  const onDragEnd = (fromIndex, toIndex) => {
-    console.log("onDragEnd");
-  };
+  // const onDragEnd = (fromIndex, toIndex) => {
+  //   console.log("onDragEnd");
+  // };
 
   return (
     <div className="game-table">
@@ -30,13 +30,13 @@ const MobileTable = props => {
         <Row
           gutter={1}
           className={`table-row ${
-            currentRound - 1 === i ? "current-round" : ""
-          } ${round.fell ? "round-fell" : ""}`}
+            currentRound - 1 === i ? 'current-round' : ''
+          } ${round.fell ? 'round-fell' : ''}`}
           key={i}
         >
           <Col span={4}>
             <div className="table-cell">
-              {i + 1}{" "}
+              {i + 1}{' '}
               {round.factor > 1 && (
                 <span className="round-factor">{`x${round.factor}`}</span>
               )}
@@ -66,7 +66,7 @@ export default MobileTable;
 //
 ///////////////////////////
 
-export const getTableHeaders = players =>
+export const getTableHeaders = (players) =>
   players.map(({ index: playerIndex, playerName }) => (
     <Col key={playerIndex} span={5}>
       <div className="table-cell">{playerName}</div>
@@ -79,9 +79,9 @@ const getRoundCol = (players, roundData) =>
       <div
         className={`table-cell score-cell ${
           roundData[`bid${playerIndex}`] !== roundData[`won${playerIndex}`]
-            ? "fell"
-            : ""
-        } ${playerIndex === roundData.highestBidder ? "highest-bidder" : ""}`}
+            ? 'fell'
+            : ''
+        } ${playerIndex === roundData.highestBidder ? 'highest-bidder' : ''}`}
       >
         {roundData[`aggregateScore${playerIndex}`]}
         {playerIndex === roundData.highestBidder && (
@@ -97,9 +97,9 @@ const getLeagueScoresCol = (players, leagueScores) =>
   players.map(({ index: playerIndex }) => (
     <Col span={5} key={playerIndex}>
       <div className={`table-cell`}>
-        {leagueScores[`leagueScore${playerIndex}`] !== ""
+        {leagueScores[`leagueScore${playerIndex}`] !== ''
           ? leagueScores[`leagueScore${playerIndex}`]
-          : "-"}
+          : '-'}
       </div>
     </Col>
   ));

@@ -16,6 +16,8 @@
   display: block;
   width: 100%;
   height: 100%;
+  position: relative;
+  overflow: hidden;
 
   h3 {
     margin-bottom: 12px;
@@ -41,5 +43,25 @@
     padding: 0 6px;
     margin-top: 2px;
     color: red;
+  }
+
+  .number-pad-placement {
+    width: 148px;
+    height: 188px;
+  }
+
+  .hand-cards-container {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    // height: 100%;
+    z-index: 1;
+  }
+
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
   }
 }
