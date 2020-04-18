@@ -775,10 +775,7 @@ class GameTab extends Component {
       }
 
       // calculate round summary stats
-      const summaryToUpdate = this.calculateSummary(
-        allRounds,
-        currentRound - 1
-      );
+      let summaryToUpdate = this.calculateSummary(allRounds, currentRound - 1);
 
       if (newRound.round === 13 && !newRound.fell) {
         gameToUpdate.status = GAME_STATUS.FINISHED;
