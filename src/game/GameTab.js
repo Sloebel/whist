@@ -9,9 +9,10 @@ import {
   nextPlayerIndex,
   getTotalWonBid,
   calcIfRoundFell,
+  getTotalRemoteWonBid,
 } from '../utils/game-utils';
 import './GameTab.scss';
-import { GAME_STATUS } from '../constants/states';
+import { GAME_STATUS, INPUT_MODE } from '../constants/states';
 // import Loader from '../common/loader/Loader';
 import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
@@ -174,7 +175,8 @@ class GameTab extends Component {
   handleSave = (row, player) => {
     const stateToUpdate = {};
     let summaryToUpdate;
-    const newData = [...this.state.gameData.rounds];
+    const prevRounds = this.state.gameData.rounds;
+    const newData = [...prevRounds];
     const index = newData.findIndex((item) => row.round === item.round);
 
     const item = newData[index];
@@ -246,6 +248,23 @@ class GameTab extends Component {
         }
 
         this.gameSummaryRef.update(this.mapToPlayersObj(summaryToUpdate));
+      }
+    }
+
+    if (this.state.gameData.gameMode === 'remote') {
+      console.log(row.inputMode);
+      // prev round inputMode === BID
+      // round inputMode === WON
+      // set players with won === 0;
+      const prevRound = prevRounds[index];
+
+      if (
+        prevRound.inputMode === INPUT_MODE.BID &&
+        row.inputMode === INPUT_MODE.WON
+      ) {
+        [0, 1, 2, 3].forEach((player) => {
+          row[`won${player}`] = 0;
+        });
       }
     }
 
@@ -739,9 +758,9 @@ class GameTab extends Component {
 
     // calc if round check
     // update O/U
-    const { currentTotalWon, allHasWonInput } = getTotalWonBid(newRound);
+    const { currentTotalWon } = getTotalRemoteWonBid(newRound);
 
-    newRound.check = allHasWonInput && currentTotalWon === 13;
+    newRound.check = currentTotalWon === 13;
 
     // calculate if round fell - change next round factor
     if (newRound.check) {
