@@ -31,6 +31,18 @@ export const getTotalWonBid = (roundData: IRoundData) => {
   return { currentTotalBid, currentTotalWon, allHasWonInput };
 };
 
+export const getTotalRemoteWonBid = (roundData: IRoundData) => {
+  let currentTotalBid: number = 0;
+  let currentTotalWon: number = 0;
+
+  [0, 1, 2, 3].forEach((player) => {
+    currentTotalBid += +roundData[`bid${player}`];
+    currentTotalWon += +roundData[`won${player}`];
+  });
+
+  return { currentTotalBid, currentTotalWon };
+};
+
 export const calcIfRoundFell = (roundData: IRoundData): boolean => {
   let didRoundFell = true;
 
