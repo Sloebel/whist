@@ -22,6 +22,7 @@ import {
   getFromToCalc,
   getToWinnerCalc,
 } from '../../utils/game-utils';
+import playerTurn from '../../assets/sounds/playerTurn.mp3';
 
 const confirm = Modal.confirm;
 message.config({
@@ -30,6 +31,7 @@ message.config({
 });
 
 class GamePad extends Component {
+  audio = new Audio(playerTurn);
   constructor(props) {
     super(props);
 
@@ -92,7 +94,7 @@ class GamePad extends Component {
         } else {
           stateToUpdate.thrownCard = undefined;
         }
-        console.log(stateToUpdate.thrownCard);
+
         if (handsState) {
           const thrownCards = handsState[currentHand]['thrownCards']
             ? uniqueHand([
@@ -109,6 +111,13 @@ class GamePad extends Component {
           stateToUpdate.thrownCards = [];
           stateToUpdate.selectedPlayer = currentRoundData.highestBidder;
           stateToUpdate.handCardType = undefined;
+        }
+
+        if (
+          inputMode === INPUT_MODE.WON &&
+          stateToUpdate.selectedPlayer === devicePlayerIndex
+        ) {
+          this.playAudio();
         }
 
         this.setState(stateToUpdate);
@@ -669,6 +678,10 @@ class GamePad extends Component {
   getRoundData() {
     const { allRounds, currentRound } = this.props;
     return allRounds.length && allRounds[currentRound - 1];
+  }
+
+  playAudio() {
+    this.audio.play();
   }
 }
 
