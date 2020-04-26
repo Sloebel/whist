@@ -8,6 +8,7 @@ import {
   IRoundData,
 } from '../models/IGameModel';
 import { ThrownCardType } from '../game/ThrownCard/ThrownCard';
+import { shuffle } from './Utils';
 
 export const getTotalWonBid = (roundData: IRoundData) => {
   let currentTotalBid: number = 0;
@@ -108,16 +109,9 @@ export const dealCards = (players: IPlayer[]) => {
   return setCardsByPlayer(players, arrayOf4);
 };
 
-export const shuffleCards = (cardsArray: string[]) => {
-  const cardsList = [...cardsArray];
+export const shuffleCards = (cardsArray: string[]) => shuffle(cardsArray);
 
-  for (let i = cardsList.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [cardsList[i], cardsList[j]] = [cardsList[j], cardsList[i]];
-  }
-
-  return cardsList;
-};
+export const shufflePlayers = (players: IPlayer[]) => shuffle(players);
 
 const setCardsByPlayer = (players: IPlayer[], cardsArr: string[][]) =>
   players.reduce((obj, player, index) => {
