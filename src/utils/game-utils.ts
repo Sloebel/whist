@@ -77,8 +77,8 @@ export const cardsList: string[] = (function () {
 })();
 
 const cardsFamilyScoreMap = {
-  [CardsType.CLUB]: 0,
-  [CardsType.DIAMOND]: 1,
+  [CardsType.CLUB]: 1,
+  [CardsType.DIAMOND]: 0,
   [CardsType.HART]: 2,
   [CardsType.SPADE]: 3,
 };
@@ -141,7 +141,7 @@ const sortCards = (cards: string[]) =>
       return -1;
     }
 
-    return +cardXNum - +cardYNum;
+    return +cardYNum - +cardXNum;
   });
 
 export const uniqueHand = (hand: IPlayerHand[]) => {
