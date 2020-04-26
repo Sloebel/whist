@@ -22,3 +22,14 @@ export function isMobileBrowser(): boolean {
 }
 
 export const unique = <T>(array: T[]) => Array.from(new Set(array));
+
+export const shuffle = (array: any[]) => {
+  const arrayCopy = [...array];
+
+  for (let i = arrayCopy.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [arrayCopy[i], arrayCopy[j]] = [arrayCopy[j], arrayCopy[i]];
+  }
+
+  return arrayCopy;
+};

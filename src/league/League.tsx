@@ -25,6 +25,7 @@ import { ClickParam } from 'antd/lib/menu';
 import { GameMode } from '../models/IGameModel';
 import { UserContext } from '../authentication/AuthUserContext';
 import LeagueService from '../services/LeagueSrv';
+import { shufflePlayers } from '../utils/game-utils';
 
 const { Content } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -328,6 +329,7 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
     updates[`/leagueGames/_${leagueID}/${newGameKey}`] = {
       gameID: newGameId,
       gameMode,
+      playersOrder: this.addGamePlayers(gameMode, players),
       status: GAME_STATUS.ACTIVE,
     };
     updates[`/leagueGamesSummary/_${leagueID}/${newGameKey}`] = {
@@ -344,6 +346,10 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
         }
       });
   };
+
+  private addGamePlayers(gameMode: GameMode, players?: IPlayer[]) {
+    return players && gameMode === 'remote' ? shufflePlayers(players) : null;
+  }
 
   private isAddGameOk() {
     const { leagueGames } = this.state;
