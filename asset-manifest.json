@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/whist/static/css/main.85e568b7.chunk.css",
-    "main.js": "/whist/static/js/main.c16af109.chunk.js",
-    "main.js.map": "/whist/static/js/main.c16af109.chunk.js.map",
+    "main.js": "/whist/static/js/main.640e9863.chunk.js",
+    "main.js.map": "/whist/static/js/main.640e9863.chunk.js.map",
     "runtime-main.js": "/whist/static/js/runtime-main.aef0a735.js",
     "runtime-main.js.map": "/whist/static/js/runtime-main.aef0a735.js.map",
     "static/css/2.95a2ff14.chunk.css": "/whist/static/css/2.95a2ff14.chunk.css",
     "static/js/2.156b1985.chunk.js": "/whist/static/js/2.156b1985.chunk.js",
     "static/js/2.156b1985.chunk.js.map": "/whist/static/js/2.156b1985.chunk.js.map",
     "index.html": "/whist/index.html",
-    "precache-manifest.f656353f67fe7bf8e2b518fa91a952f0.js": "/whist/precache-manifest.f656353f67fe7bf8e2b518fa91a952f0.js",
+    "precache-manifest.6cdd8f47354eb049fe979f887935d5a8.js": "/whist/precache-manifest.6cdd8f47354eb049fe979f887935d5a8.js",
     "service-worker.js": "/whist/service-worker.js",
     "static/css/2.95a2ff14.chunk.css.map": "/whist/static/css/2.95a2ff14.chunk.css.map",
     "static/css/main.85e568b7.chunk.css.map": "/whist/static/css/main.85e568b7.chunk.css.map",
@@ -76,6 +76,6 @@
     "static/css/2.95a2ff14.chunk.css",
     "static/js/2.156b1985.chunk.js",
     "static/css/main.85e568b7.chunk.css",
-    "static/js/main.c16af109.chunk.js"
+    "static/js/main.640e9863.chunk.js"
   ]
 }
