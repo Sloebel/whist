@@ -11,6 +11,7 @@ export interface IRoundData {
   factor: number;
   fell: boolean;
   highestBidder: string | number;
+  currentBidder?: number;
   inputMode: INPUT_MODE;
   score0: string | number;
   score1: string | number;

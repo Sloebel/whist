@@ -122,30 +122,39 @@ export default class GameMobileView extends Component {
             </div>
           </div>
         </div>
-        {gameMode !== 'remote' ||
-          (((ownCardsState || []).length === 0 || currentView === 'table') && (
-            <div className="round-navigation">
-              {currentRound !== 1 && (
-                <Button
-                  type="primary"
-                  className="left"
-                  ghost
-                  onClick={this.toRoundBefore}
-                >
-                  <LeftOutlined />
-                  {`Round ${currentRound - 1}`}
-                </Button>
-              )}
+        {this.showNavigation() && (
+          <div className="round-navigation">
+            {currentRound !== 1 && (
+              <Button
+                type="primary"
+                className="left"
+                ghost
+                onClick={this.toRoundBefore}
+              >
+                <LeftOutlined />
+                {`Round ${currentRound - 1}`}
+              </Button>
+            )}
 
-              {currentRound !== 13 && (
-                <Button type="primary" ghost onClick={this.nextRound}>
-                  {`Round ${Number(currentRound) + 1}`}
-                  <RightOutlined />
-                </Button>
-              )}
-            </div>
-          ))}
+            {currentRound !== 13 && (
+              <Button type="primary" ghost onClick={this.nextRound}>
+                {`Round ${Number(currentRound) + 1}`}
+                <RightOutlined />
+              </Button>
+            )}
+          </div>
+        )}
       </div>
+    );
+  }
+
+  showNavigation() {
+    const { gameMode, ownCardsState, currentView } = this.props;
+
+    return (
+      gameMode !== 'remote' ||
+      (ownCardsState || []).length === 0 ||
+      currentView === 'table'
     );
   }
 }

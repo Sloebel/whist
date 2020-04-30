@@ -38,6 +38,7 @@ class GamePad extends Component {
     this.state = {
       selectedPlayer: undefined,
       reorderPlayersDialogVisible: false,
+      trumpModalVisible: false,
       preSelectedCard: undefined,
       thrownCard: undefined,
       thrownCards: [],
@@ -76,6 +77,19 @@ class GamePad extends Component {
       ) {
         this.setState({
           selectedPlayer: currentRoundData.highestBidder,
+        });
+
+        if (currentRoundData.highestBidder === devicePlayerIndex) {
+          this.playAudio();
+        }
+      }
+
+      if (
+        prevCurrentRoundData.currentBidder !== currentRoundData.currentBidder &&
+        inputMode === INPUT_MODE.BID
+      ) {
+        this.setState({
+          selectedPlayer: currentRoundData.currentBidder,
         });
       }
 
@@ -155,24 +169,34 @@ class GamePad extends Component {
   }
 
   setSelectedPlayer(e) {
-    const { gameMode } = this.props;
-    const roundData = this.getRoundData();
-
-    if (gameMode === 'remote' && roundData.inputMode === INPUT_MODE.WON) {
-      return;
-    }
-
-    if (e.target.type === 'radio') {
+    if (this.isAllowedToSelectPlayer() && e.target.type === 'radio') {
       this.setState({
         selectedPlayer: e.target.value,
       });
     }
   }
 
+  isAllowedToSelectPlayer() {
+    const { gameMode } = this.props;
+    const roundData = this.getRoundData();
+
+    if (gameMode === 'remote') {
+      const { inputMode, highestBidder } = roundData;
+
+      return inputMode === INPUT_MODE.WON || typeof highestBidder === 'number'
+        ? false
+        : true;
+    }
+
+    return true;
+  }
+
   handleCardsPadChange(trump) {
     const { onChange } = this.props;
     const roundData = this.getRoundData();
     const { inputMode } = roundData;
+
+    this.setState({ trumpModalVisible: false });
 
     if (inputMode !== INPUT_MODE.WON) {
       onChange({ ...roundData, trump });
@@ -183,6 +207,11 @@ class GamePad extends Component {
     const { players, currentRound, onChange } = this.props;
     const roundData = this.getRoundData();
     const { inputMode, highestBidder } = roundData;
+
+    if (inputMode === INPUT_MODE.BID && this.props.gameMode === 'remote') {
+      return this.handleRemoteBidFlow(num);
+    }
+
     const { selectedPlayer } = this.state;
     const mode = inputMode === INPUT_MODE.BID ? 'bid' : 'won';
     const prop = mode + selectedPlayer;
@@ -373,9 +402,14 @@ class GamePad extends Component {
       fell,
       factor,
     } = currentRoundData;
-    const { selectedPlayer, reorderPlayersDialogVisible } = this.state;
+    const {
+      selectedPlayer,
+      reorderPlayersDialogVisible,
+      trumpModalVisible,
+    } = this.state;
     const isAllBids = this.isAllBids(currentRoundData);
     const playersButtons = this.getPlayersButtons();
+    const isRemote = gameMode === 'remote';
 
     return (
       <Radio.Group
@@ -389,7 +423,7 @@ class GamePad extends Component {
           <Col>
             <Switch
               onChange={this.handleSwitchMode}
-              checkedChildren=" Won "
+              checkedChildren={isRemote ? ' Play ' : ' Won '}
               unCheckedChildren=" Bid "
               checked={inputMode === INPUT_MODE.WON}
             />
@@ -423,6 +457,7 @@ class GamePad extends Component {
               trump={trump}
               onChange={this.handleCardsPadChange}
               disabled={inputMode === INPUT_MODE.WON}
+              visible={trumpModalVisible}
             />
           </Col>
         </Row>
@@ -437,13 +472,13 @@ class GamePad extends Component {
             {playersButtons[nextPlayerIndex(devicePlayerIndex)]}
           </Col>
           <Col style={{ zIndex: 1 }}>
-            {gameMode === 'remote' && inputMode === INPUT_MODE.WON ? (
+            {isRemote && inputMode === INPUT_MODE.WON ? (
               <div className="number-pad-placement"></div>
             ) : (
               <NumbersPad
                 disabledNumber={this.calculateDisableNum()}
                 onSelect={this.handleNumberSelect}
-                disabled={selectedPlayer === undefined}
+                disabled={this.isNumberPadDisabled()}
               />
             )}
           </Col>
@@ -453,37 +488,35 @@ class GamePad extends Component {
         </Row>
         <Row type="flex" justify="center" style={{ position: 'relative' }}>
           <Col className="item item8">{playersButtons[devicePlayerIndex]}</Col>
-          {gameMode !== 'remote' &&
-            round === 1 &&
-            inputMode === INPUT_MODE.BID && (
-              <div>
-                <Button
-                  type="dashed"
-                  shape="circle"
-                  className="change-players-btn"
-                  onClick={this.showChangePlayerDialog}
-                >
-                  <Icon component={ChangePlayers} />
-                </Button>
-                {reorderPlayersDialogVisible && (
-                  <PlayersContext.Consumer>
-                    {({ players, reorderPlayers }) => (
-                      <Dialog
-                        dialog={Dialogs.REORDER_PLAYERS}
-                        dialogProps={{
-                          onOk: reorderPlayers,
-                          onAfterClose: this.handleReorderPlayersAfterClose,
-                          visible: reorderPlayersDialogVisible,
-                          players,
-                        }}
-                      />
-                    )}
-                  </PlayersContext.Consumer>
-                )}
-              </div>
-            )}
+          {!isRemote && round === 1 && inputMode === INPUT_MODE.BID && (
+            <div>
+              <Button
+                type="dashed"
+                shape="circle"
+                className="change-players-btn"
+                onClick={this.showChangePlayerDialog}
+              >
+                <Icon component={ChangePlayers} />
+              </Button>
+              {reorderPlayersDialogVisible && (
+                <PlayersContext.Consumer>
+                  {({ players, reorderPlayers }) => (
+                    <Dialog
+                      dialog={Dialogs.REORDER_PLAYERS}
+                      dialogProps={{
+                        onOk: reorderPlayers,
+                        onAfterClose: this.handleReorderPlayersAfterClose,
+                        visible: reorderPlayersDialogVisible,
+                        players,
+                      }}
+                    />
+                  )}
+                </PlayersContext.Consumer>
+              )}
+            </div>
+          )}
         </Row>
-        {gameMode === 'remote' && this.getThrownCardsPlacement()}
+        {isRemote && this.getThrownCardsPlacement()}
         {this.getCards()}
       </Radio.Group>
     );
@@ -524,6 +557,49 @@ class GamePad extends Component {
     this.setState({
       reorderPlayersDialogVisible: false,
     });
+  }
+
+  handleRemoteBidFlow(num) {
+    const { devicePlayerIndex, onChange } = this.props;
+    const roundData = this.getRoundData();
+    const { highestBidder } = roundData;
+    const { selectedPlayer } = this.state;
+    const stateToUpdate = {};
+
+    if (typeof highestBidder !== 'number') {
+      if (num < 5) {
+        return message.warning('First Bid should be more then 5');
+      } else {
+        stateToUpdate.highestBidder = selectedPlayer;
+        stateToUpdate[`bid${selectedPlayer}`] = num;
+        stateToUpdate.currentBidder = nextPlayerIndex(selectedPlayer);
+
+        if (!roundData.trump) {
+          setTimeout(
+            () =>
+              this.setState({
+                trumpModalVisible: true,
+              }),
+            300
+          );
+        }
+      }
+    } else if (devicePlayerIndex === selectedPlayer) {
+      stateToUpdate[`bid${selectedPlayer}`] = num;
+      const nextPlayer = nextPlayerIndex(selectedPlayer);
+
+      if (nextPlayer === highestBidder) {
+        stateToUpdate.currentBidder = '';
+
+        setTimeout(() => this.handleSwitchMode(true), 1500);
+      } else {
+        stateToUpdate.currentBidder = nextPlayerIndex(selectedPlayer);
+      }
+    }
+
+    if (Object.keys(stateToUpdate).length) {
+      onChange({ ...roundData, ...stateToUpdate }, selectedPlayer);
+    }
   }
 
   getCards() {
@@ -682,6 +758,16 @@ class GamePad extends Component {
 
   playAudio() {
     this.audio.play();
+  }
+
+  isNumberPadDisabled() {
+    const { devicePlayerIndex, gameMode } = this.props;
+    const { selectedPlayer } = this.state;
+
+    return (
+      typeof selectedPlayer !== 'number' ||
+      (gameMode === 'remote' && devicePlayerIndex !== selectedPlayer)
+    );
   }
 }
 
