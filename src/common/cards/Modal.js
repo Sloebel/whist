@@ -7,6 +7,17 @@ import './Modal.scss';
 class CardsModal extends Component {
   state = { visible: false };
 
+  componentDidUpdate(prevProp) {
+    if (
+      prevProp.visible !== this.props.visible &&
+      this.props.visible !== this.state.visible
+    ) {
+      this.setState({
+        visible: this.props.visible,
+      });
+    }
+  }
+
   showModal = () => {
     this.setState({
       visible: true,

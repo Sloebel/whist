@@ -252,7 +252,6 @@ class GameTab extends Component {
     }
 
     if (this.state.gameData.gameMode === 'remote') {
-      console.log(row.inputMode);
       // prev round inputMode === BID
       // round inputMode === WON
       // set players with won === 0;
