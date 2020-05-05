@@ -10,6 +10,12 @@
   background: none;
 }
 
+.toggle-sound-btn {
+  &:not(.is-mute) {
+    color: #0e6b11;
+  }
+}
+
 .game-pad-container {
   margin-top: 0;
   padding-top: 8px;
