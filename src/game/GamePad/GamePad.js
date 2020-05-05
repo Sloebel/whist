@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Radio, Switch, Badge, Row, Col, Modal, message, Button } from 'antd';
+import { SoundOutlined } from '@ant-design/icons';
 import Icon from '@ant-design/icons';
 import CardsModal from '../../common/cards/Modal';
 import { ChangePlayers } from '../../common/cards/Icons';
@@ -43,6 +44,7 @@ class GamePad extends Component {
       thrownCard: undefined,
       thrownCards: [],
       handCardType: undefined,
+      isMute: false,
     };
 
     this.handleSwitchMode = this.handleSwitchMode.bind(this);
@@ -406,6 +408,7 @@ class GamePad extends Component {
       selectedPlayer,
       reorderPlayersDialogVisible,
       trumpModalVisible,
+      isMute,
     } = this.state;
     const isAllBids = this.isAllBids(currentRoundData);
     const playersButtons = this.getPlayersButtons();
@@ -447,6 +450,14 @@ class GamePad extends Component {
             </Css>
             {!fell && factor > 1 && (
               <div className="factor-indicator">{`x${factor}`}</div>
+            )}
+            {isRemote && (
+              <Button
+                className={`toggle-sound-btn ${isMute ? 'is-mute' : ''}`}
+                type="link"
+                icon={<SoundOutlined />}
+                onClick={this.toggleMute}
+              />
             )}
           </Col>
           <Col className="item item2">
@@ -757,7 +768,7 @@ class GamePad extends Component {
   }
 
   playAudio() {
-    this.audio.play();
+    !this.state.isMute && this.audio.play();
   }
 
   isNumberPadDisabled() {
@@ -769,6 +780,12 @@ class GamePad extends Component {
       (gameMode === 'remote' && devicePlayerIndex !== selectedPlayer)
     );
   }
+
+  toggleMute = () => {
+    this.setState({
+      isMute: !this.state.isMute,
+    });
+  };
 }
 
 export default GamePad;
