@@ -85,9 +85,7 @@ const getRoundCol = (players, roundData) =>
       >
         {roundData[`aggregateScore${playerIndex}`]}
         {playerIndex === roundData.highestBidder && (
-          <span className="trump">
-            {cardsRenderer(roundData.trump).children}
-          </span>
+          <span className="trump">{cardsRenderer(roundData.trump)}</span>
         )}
       </div>
     </Col>

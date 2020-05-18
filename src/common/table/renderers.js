@@ -1,28 +1,19 @@
-import React from "react";
-import Icon from "@ant-design/icons";
-import { Spade, Hart, Diamond, Club } from "../cards/Icons";
-import { CARDS } from "../../constants/cards";
+import React from 'react';
+import Icon from '@ant-design/icons';
+import { Spade, Hart, Diamond, Club } from '../cards/Icons';
+import { CARDS } from '../../constants/cards';
 
-export const cardsRenderer = text => {
-  let card;
+export const cardsRenderer = (text) => {
   switch (text) {
     case CARDS.SPADE:
-      card = <Icon component={Spade} />;
-      break;
+      return <Icon component={Spade} />;
     case CARDS.HART:
-      card = <Icon component={Hart} />;
-      break;
+      return <Icon component={Hart} />;
     case CARDS.DIAMOND:
-      card = <Icon component={Diamond} />;
-      break;
+      return <Icon component={Diamond} />;
     case CARDS.CLUB:
-      card = <Icon component={Club} />;
-      break;
+      return <Icon component={Club} />;
     case CARDS.NT:
-      card = "NT";
-      break;
+      return 'NT';
   }
-  return {
-    children: card
-  };
 };
