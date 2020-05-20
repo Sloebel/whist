@@ -3,8 +3,8 @@ import { Modal, Form, Input, Select, Spin } from 'antd';
 import { fire } from '../firebase';
 import { onceGetUsers, onceGetLeagues } from '../firebase/db';
 import { IBasicDialogProps } from './Dialog';
-import { IPlayer, IRawPlayer } from '../models/ILeagueModel';
 import { FormInstance } from 'antd/lib/form/Form';
+import { IRawPlayer, IPlayer } from '../models/IPlayerModel';
 
 const FormItem = Form.Item;
 const Option = Select.Option;

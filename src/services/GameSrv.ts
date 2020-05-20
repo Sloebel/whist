@@ -1,4 +1,5 @@
 import { fire } from '../firebase';
+import { IPlayer } from '../models/IPlayerModel';
 
 export default class GameService {
   // the request to set cards by player will happen only if current user is the dealer
@@ -40,5 +41,16 @@ export default class GameService {
         .child(`cardsByGame/${gameKey}/round${round}/cardsState/${userId}`)
         .update({ [`${cardIndex}`]: null });
     }
+  }
+
+  public static savePlayersOrder(
+    leagueID: string,
+    gameKey: string,
+    playersOrder: IPlayer[]
+  ) {
+    fire
+      .database()
+      .ref(`leagueGames/_${leagueID}/${gameKey}`)
+      .update({ playersOrder });
   }
 }

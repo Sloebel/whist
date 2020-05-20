@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Modal } from 'antd';
 import DragPad from '../common/dragPad/DragPad';
 import { IBasicDialogProps } from './Dialog';
-import { IPlayer } from '../models/ILeagueModel';
+import { IPlayer } from '../models/IPlayerModel';
 
 interface IReorderPlayersState {
   showDialog: boolean;

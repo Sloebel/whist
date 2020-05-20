@@ -1,10 +1,16 @@
 import { INPUT_MODE } from '../constants/states';
+import { IPlayerScoresSummary } from './IPlayerModel';
 
 export type GameMode = 'local' | 'remote';
 
-export interface IRoundData {
+export enum GAME_STATUS {
+  ACTIVE = 'ACTIVE',
+  FINISHED = 'FINISHED',
+}
+
+export interface IBaseRoundData {
   [index: string]: any;
-  segment: number;
+  segment: string;
   totalBids: string | number;
   trump: string;
   check: boolean;
@@ -31,6 +37,10 @@ export interface IRoundData {
   won3: string | number;
 }
 
+export interface IRoundData extends IBaseRoundData {
+  round: number;
+}
+
 export interface IPlayerHand {
   player: number;
   hand: string;
@@ -44,4 +54,29 @@ export interface ICardsPosition {
 export interface ICardsFromTo {
   from?: ICardsPosition;
   to: ICardsPosition;
+}
+
+export interface IGameColumn {
+  playerName: string;
+  index: number;
+}
+
+export type GameViewType = 'table' | 'panel';
+
+export interface IBaseGameData {
+  rounds: IRoundData[];
+  currentRound: number;
+  totalScore0: number;
+  totalScore1: number;
+  totalScore2: number;
+  totalScore3: number;
+  status: GAME_STATUS;
+}
+
+export interface IGameData extends IBaseGameData {
+  gameID: string;
+}
+
+export interface IGamePlayersSummary {
+  [player: string]: IPlayerScoresSummary;
 }

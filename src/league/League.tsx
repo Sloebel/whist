@@ -16,16 +16,16 @@ import gameDataTpl from '../dataTemplates/gameTpl';
 import RcDrawer from 'rc-drawer';
 import 'rc-drawer/assets/index.css';
 import Loader from '../common/loader/Loader';
-import { GAME_STATUS } from '../constants/states';
 import LeagueSummary from '../leagueSummary/LeagueSummary';
 import Dialog from '../dialogs/Dialog';
 import { Dialogs } from '../constants/dialogs';
-import { ILeagueModel, IPlayer } from '../models/ILeagueModel';
+import { ILeagueModel } from '../models/ILeagueModel';
 import { ClickParam } from 'antd/lib/menu';
-import { GameMode } from '../models/IGameModel';
+import { GameMode, GAME_STATUS } from '../models/IGameModel';
 import { UserContext } from '../authentication/AuthUserContext';
 import LeagueService from '../services/LeagueSrv';
 import { shufflePlayers } from '../utils/game-utils';
+import { IPlayer } from '../models/IPlayerModel';
 
 const { Content } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -152,7 +152,7 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
                 !!leagueID ? (
                   <GameTab
                     {...props}
-                    players={players}
+                    players={players as IPlayer[]}
                     // loading={loading}
                     loaderStateCb={this.setLoaderState}
                   />
@@ -318,7 +318,7 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
 
     const newGameKey = fire.database().ref().child('games').push().key;
 
-    const gameTpl = gameDataTpl(players, gameMode);
+    const gameTpl = gameDataTpl(players as IPlayer[], gameMode);
     const updates: { [key: string]: any } = {};
 
     updates[`/games/${newGameKey}`] = {

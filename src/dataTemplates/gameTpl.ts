@@ -1,8 +1,20 @@
-import { INPUT_MODE, GAME_STATUS } from '../constants/states';
+import { INPUT_MODE } from '../constants/states';
+import {
+  GameMode,
+  GAME_STATUS,
+  IRoundData,
+  IBaseRoundData,
+  IGamePlayersSummary,
+} from '../models/IGameModel';
+import { IPlayer } from '../models/IPlayerModel';
+import { IGameDataTpl } from '../models/ILeagueModel';
 
-export default function gameDataTpl(players, gameMode) {
-  const rounds = [];
-  const initRoundData = {
+export default function gameDataTpl(
+  players: IPlayer[],
+  gameMode: GameMode
+): IGameDataTpl {
+  const rounds: IRoundData[] = [];
+  const initRoundData: IBaseRoundData = {
     segment: '',
     totalBids: '',
     trump: '',
@@ -48,7 +60,7 @@ export default function gameDataTpl(players, gameMode) {
       status: GAME_STATUS.ACTIVE,
     },
     gameSummary: {
-      players: players.reduce((summaryObj, player) => {
+      players: players.reduce((summaryObj: IGamePlayersSummary, player) => {
         summaryObj[player.key] = {
           leagueScore: '',
           successRate: '',
