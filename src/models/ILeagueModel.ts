@@ -1,13 +1,5 @@
-export interface IRawPlayer {
-  email: string;
-  name: string;
-  nickname: string;
-}
-
-export interface IPlayer {
-  key: string;
-  nickname: string;
-}
+import { IBaseGameData, IGamePlayersSummary } from './IGameModel';
+import { IPlayer } from './IPlayerModel';
 
 export interface ILeagueModel {
   leagueID: number;
@@ -16,4 +8,11 @@ export interface ILeagueModel {
   description: string;
   players: IPlayer[];
   blockedBy?: string;
+}
+
+export interface IGameDataTpl {
+  gameData: IBaseGameData;
+  gameSummary: {
+    players: IGamePlayersSummary;
+  };
 }

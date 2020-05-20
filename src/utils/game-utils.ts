@@ -1,4 +1,3 @@
-import { IPlayer } from '../models/ILeagueModel';
 import { fire } from '../firebase';
 import { CardsType } from '../constants/cards';
 import {
@@ -9,6 +8,7 @@ import {
 } from '../models/IGameModel';
 import { ThrownCardType } from '../game/ThrownCard/ThrownCard';
 import { shuffle } from './Utils';
+import { IPlayer } from '../models/IPlayerModel';
 
 export const getTotalWonBid = (roundData: IRoundData) => {
   let currentTotalBid: number = 0;
