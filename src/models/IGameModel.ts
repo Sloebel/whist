@@ -1,5 +1,6 @@
 import { INPUT_MODE } from '../constants/states';
-import { IPlayerScoresSummary } from './IPlayerModel';
+import { IPlayerScoresSummary, IPlayer } from './IPlayerModel';
+import { CARDS } from '../constants/cards';
 
 export type GameMode = 'local' | 'remote';
 
@@ -8,11 +9,25 @@ export enum GAME_STATUS {
   FINISHED = 'FINISHED',
 }
 
+export interface IThrownCard {
+  card: string;
+  player: number;
+}
+
+export interface IHandState {
+  handWinner?: number;
+  status: GAME_STATUS;
+  thrownCards: IThrownCard[];
+}
+export interface IHandsState {
+  [handKey: number]: IHandState;
+}
+
 export interface IBaseRoundData {
   [index: string]: any;
-  segment: string;
+  segment: string | number;
   totalBids: string | number;
-  trump: string;
+  trump: CARDS | string;
   check: boolean;
   factor: number;
   fell: boolean;
@@ -35,10 +50,12 @@ export interface IBaseRoundData {
   won1: string | number;
   won2: string | number;
   won3: string | number;
+  currentHand?: number;
 }
 
 export interface IRoundData extends IBaseRoundData {
   round: number;
+  handsState?: IHandsState;  
 }
 
 export interface IPlayerHand {
@@ -63,18 +80,45 @@ export interface IGameColumn {
 
 export type GameViewType = 'table' | 'panel';
 
-export interface IBaseGameData {
+export type LeagueScoreType =
+  | 'leagueScore0'
+  | 'leagueScore1'
+  | 'leagueScore2'
+  | 'leagueScore3';
+export type LeagueScoreTypeMap = {
+  [key in LeagueScoreType]?: number;
+};
+
+export type TotalScoreType =
+  | 'totalScore0'
+  | 'totalScore1'
+  | 'totalScore2'
+  | 'totalScore3';
+export type TotalScoreTypeMap = {
+  [key in TotalScoreType]?: number;
+};
+
+export interface IBaseGameData extends TotalScoreTypeMap {
+  [index: string]: any;
   rounds: IRoundData[];
   currentRound: number;
-  totalScore0: number;
-  totalScore1: number;
-  totalScore2: number;
-  totalScore3: number;
-  status: GAME_STATUS;
+  status?: GAME_STATUS;
 }
 
-export interface IGameData extends IBaseGameData {
+export interface ILeagueGameModel {
   gameID: string;
+  gameMode?: GameMode;
+  playersOrder?: IPlayer[];
+  status?: GAME_STATUS;
+}
+
+export interface IGameData extends IBaseGameData, ILeagueGameModel {
+  [index: string]: any;
+  gameID: string;
+  dealer?: string;
+  gameMode?: GameMode;
+  playersOrder?: IPlayer[];
+  ownCardsState?: string[];
 }
 
 export interface IGamePlayersSummary {

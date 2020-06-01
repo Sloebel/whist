@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
-import { fire } from './../firebase';
+import { fire } from '../firebase';
 import { Button, message } from 'antd';
 import { TableOutlined, BorderOuterOutlined } from '@ant-design/icons';
 import {
@@ -10,19 +10,62 @@ import {
   getTotalWonBid,
   calcIfRoundFell,
   getTotalRemoteWonBid,
+  calculateHandWinner,
 } from '../utils/game-utils';
 import './GameTab.scss';
-import { GAME_STATUS, INPUT_MODE } from '../constants/states';
-// import Loader from '../common/loader/Loader';
+import { INPUT_MODE } from '../constants/states';
 import GameMobileView from './GameMobileView';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
 import GameService from '../services/GameSrv';
-import { CardsType } from '../constants/cards';
+import {
+  IGameColumn,
+  GameViewType,
+  GAME_STATUS,
+  IGameData,
+  ILeagueGameModel,
+  IGamePlayersSummary,
+  IRoundData,
+  TotalScoreTypeMap,
+  TotalScoreType,
+  LeagueScoreTypeMap,
+  LeagueScoreType,
+  IThrownCard,
+} from '../models/IGameModel';
+import { RouteComponentProps } from 'react-router-dom';
+import { IPlayer } from '../models/IPlayerModel';
 
-export const PlayersContext = React.createContext();
+export const PlayersContext = React.createContext<{
+  players: IPlayer[];
+  reorderPlayers?: (newOrder: IPlayer[]) => void;
+}>({ players: [] });
 
-class GameTab extends Component {
-  constructor(props) {
+type GameRouteParams = {
+  leagueID: string;
+  gameID: string;
+};
+
+export interface IGameTabProps extends RouteComponentProps<GameRouteParams> {
+  players: IPlayer[];
+  loaderStateCb: (loading: boolean) => void;
+}
+
+export interface IGameTabState {
+  players: IPlayer[];
+  devicePlayerIndex: number | null;
+  columns: IGameColumn[];
+  currentView: GameViewType;
+  gameData: Partial<IGameData>;
+  gameSummary: IGamePlayersSummary;
+}
+
+class GameTab extends Component<IGameTabProps, IGameTabState> {
+  private gameRef?: firebase.database.Reference;
+  private leagueGamesRef?: firebase.database.Query;
+  private gameSummaryRef?: firebase.database.Reference;
+  private ownCardsStateRef?: firebase.database.Reference;
+  private gameKey: string = '';
+
+  constructor(props: IGameTabProps) {
     super(props);
 
     this.state = {
@@ -34,18 +77,13 @@ class GameTab extends Component {
         currentRound: 1,
         dealer: undefined,
         rounds: [],
-        totalScore0: 0,
-        totalScore1: 0,
-        totalScore2: 0,
-        totalScore3: 0,
-        status: '',
+        totalScore0: undefined,
+        totalScore1: undefined,
+        totalScore2: undefined,
+        totalScore3: undefined,
+        // status: '',
       },
-      gameSummary: {
-        // leagueScore0: '',
-        // leagueScore1: '',
-        // leagueScore2: '',
-        // leagueScore3: '',
-      },
+      gameSummary: {},
     };
 
     this.selectActiveRound = this.selectActiveRound.bind(this);
@@ -54,7 +92,7 @@ class GameTab extends Component {
     this.handleReorderPlayers = this.handleReorderPlayers.bind(this);
   }
 
-  fetch() {
+  private fetch() {
     const { match } = this.props;
     const { params } = match;
     const { leagueID, gameID } = params;
@@ -66,23 +104,21 @@ class GameTab extends Component {
     }
 
     this.leagueGamesRef = db
-      .ref(`leagueGames/_${leagueID * 1}`)
+      .ref(`leagueGames/_${leagueID}`)
       .orderByChild('gameID')
-      .equalTo(gameID * 1);
+      .equalTo(Number(gameID));
 
     this.leagueGamesRef.once('value', (snapshot) => {
-      const gameData = Object.values(snapshot.val())[0];
+      const gameData = Object.values(snapshot.val())[0] as ILeagueGameModel;
       const gameKey = Object.keys(snapshot.val())[0];
       this.gameKey = gameKey;
       this.gameRef = db.ref(`games/${gameKey}`);
       this.gameSummaryRef = db.ref(
-        `leagueGamesSummary/_${leagueID * 1}/${gameKey}/players`
+        `leagueGamesSummary/_${leagueID}/${gameKey}/players`
       );
-      const { gameMode } = gameData;
+      const { gameMode, playersOrder } = gameData;
 
-      const players = gameData.playersOrder
-        ? gameData.playersOrder
-        : this.props.players;
+      const players = playersOrder || this.props.players;
 
       this.setState({
         players,
@@ -114,19 +150,22 @@ class GameTab extends Component {
     });
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     this.fetch();
   }
 
-  componentWillUnmount() {
-    this.gameRef.off('value');
-    this.gameSummaryRef.off('value');
+  public componentWillUnmount() {
+    this.gameRef?.off('value');
+    this.gameSummaryRef?.off('value');
     if (this.ownCardsStateRef) {
       this.ownCardsStateRef.off('value');
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  public componentDidUpdate(
+    prevProps: IGameTabProps,
+    prevState: IGameTabState
+  ) {
     if (prevProps.match.params.gameID !== this.props.match.params.gameID) {
       this.fetch();
     }
@@ -142,11 +181,12 @@ class GameTab extends Component {
 
     if (prevState.gameData !== gameData) {
       const { currentRound, dealer, gameMode } = gameData;
-      const roundData = this.getRoundData(currentRound);
+      const roundData = this.getRoundData(currentRound as number);
 
       if (gameMode === 'remote' && roundData) {
         const { handsState, currentHand } = roundData;
-        const currentHandState = handsState && handsState[currentHand];
+        const currentHandState =
+          handsState && handsState[currentHand as number];
         const userId = fire.auth().currentUser?.uid;
 
         if (
@@ -163,7 +203,7 @@ class GameTab extends Component {
 
         if (
           currentHand === 13 &&
-          handsState[currentHand].status === 'FINISHED' &&
+          (handsState || {})[currentHand].status === 'FINISHED' &&
           dealer === userId
         ) {
           this.calculateHandScore(roundData);
@@ -172,10 +212,10 @@ class GameTab extends Component {
     }
   }
 
-  handleSave = (row, player) => {
-    const stateToUpdate = {};
+  private handleSave = (row: IRoundData, player: number) => {
+    const stateToUpdate: Partial<IGameData> = {};
     let summaryToUpdate;
-    const prevRounds = this.state.gameData.rounds;
+    const prevRounds = this.state.gameData.rounds || [];
     const newData = [...prevRounds];
     const index = newData.findIndex((item) => row.round === item.round);
 
@@ -200,7 +240,7 @@ class GameTab extends Component {
         allHasWonInput,
       } = getTotalWonBid(row);
 
-      row.segment = currentTotalBid !== null ? currentTotalBid - 13 : null;
+      row.segment = currentTotalBid !== null ? currentTotalBid - 13 : '';
       row.check = allHasWonInput && currentTotalWon === 13;
 
       // calculate if round fell - change next round factor
@@ -242,12 +282,18 @@ class GameTab extends Component {
             totalScore2,
             totalScore3,
           } = this.state.gameData;
-          const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
-          scores[`totalScore${player}`] = stateToUpdate[`totalScore${player}`];
+          const scores: TotalScoreTypeMap = {
+            totalScore0,
+            totalScore1,
+            totalScore2,
+            totalScore3,
+          };
+          const totalScore: TotalScoreType = `totalScore${player}` as TotalScoreType;
+          scores[totalScore] = stateToUpdate[totalScore];
           summaryToUpdate = this.calculateLeagueScores(scores, summaryToUpdate);
         }
 
-        this.gameSummaryRef.update(this.mapToPlayersObj(summaryToUpdate));
+        this.gameSummaryRef?.update(this.mapToPlayersObj(summaryToUpdate));
       }
     }
 
@@ -270,10 +316,15 @@ class GameTab extends Component {
     stateToUpdate.rounds = newData;
 
     // this.setState(stateToUpdate);
-    this.gameRef.update(stateToUpdate);
+    this.gameRef?.update(stateToUpdate);
   };
 
-  handleCardThrown = (card, player, currentRound, currentHand) => {
+  private handleCardThrown = (
+    card: string,
+    player: number,
+    currentRound: number,
+    currentHand: number
+  ) => {
     const roundData = this.getRoundData(currentRound);
     const thrownCards =
       (roundData &&
@@ -287,7 +338,7 @@ class GameTab extends Component {
     } = this.state;
 
     this.gameRef
-      .child(`rounds/${currentRound - 1}/handsState/${currentHand}`)
+      ?.child(`rounds/${currentRound - 1}/handsState/${currentHand}`)
       .update({
         status: 'ACTIVE',
         turnOf: newThrownCards.length !== 4 ? nextPlayerIndex(player) : null,
@@ -296,12 +347,12 @@ class GameTab extends Component {
       .then(() => this.updateOwnCardState(card, currentRound, ownCardsState));
   };
 
-  calculatePlayerScore = (
-    round,
-    player,
-    roundsData,
-    currentRound,
-    stateToUpdate
+  private calculatePlayerScore = (
+    round: IRoundData,
+    player: number,
+    roundsData: IRoundData[],
+    currentRound: number,
+    stateToUpdate: Partial<IGameData>
   ) => {
     let rowScore;
 
@@ -311,7 +362,7 @@ class GameTab extends Component {
     if (won !== '' && bid !== '') {
       if (won === bid) {
         if (won * 1 === 0) {
-          rowScore = round.segment > 0 ? 25 : 50;
+          rowScore = (round.segment as number) > 0 ? 25 : 50;
         } else {
           rowScore = Math.pow(won, 2) + 10;
         }
@@ -319,7 +370,8 @@ class GameTab extends Component {
         const diff = Math.abs(won - bid);
 
         if (bid * 1 === 0) {
-          rowScore = -(round.segment > 0 ? 25 : 50) + (diff - 1) * 10;
+          rowScore =
+            -((round.segment as number) > 0 ? 25 : 50) + (diff - 1) * 10;
         } else {
           rowScore = diff * -10;
         }
@@ -343,13 +395,19 @@ class GameTab extends Component {
     }
   };
 
-  calculateLeagueScores = (scores, summaryToUpdate) => {
-    const sortedScores = Object.keys(scores).sort(
-      (a, b) => scores[b] - scores[a]
+  private calculateLeagueScores = (
+    scores: TotalScoreTypeMap,
+    summaryToUpdate: IGamePlayersSummary
+  ): IGamePlayersSummary => {
+    const sortedScores: TotalScoreType[] = (Object.keys(
+      scores
+    ) as TotalScoreType[]).sort(
+      (a: TotalScoreType, b: TotalScoreType) =>
+        (scores[b] || 0) - (scores[a] || 0)
     );
 
-    sortedScores.forEach((scoreIndex, i) => {
-      const score = scores[scoreIndex];
+    sortedScores.forEach((scoreIndex: TotalScoreType, i) => {
+      const score = scores[scoreIndex] as number;
       let leagueScore = GAME_DEFAULT_SCORES[i];
 
       // score < 0 => -1
@@ -378,12 +436,15 @@ class GameTab extends Component {
     return summaryToUpdate;
   };
 
-  calculateSummary = (roundsData, currentRoundIndex) => {
+  private calculateSummary = (
+    roundsData: IRoundData[],
+    currentRoundIndex: number
+  ): IGamePlayersSummary => {
     const currentRound = currentRoundIndex + 1;
-    const playersSummary = {};
+    const playersSummary: IGamePlayersSummary = {};
 
     for (let pIndex = 0; pIndex < 4; pIndex++) {
-      playersSummary[pIndex] = {};
+      // playersSummary[pIndex] = {};
       let stood = 0;
       let totalRounds = 0;
       let totalHBrounds = 0;
@@ -411,7 +472,7 @@ class GameTab extends Component {
             totalStoodWhenLastBidder++;
           }
 
-          if (round.segment > 0) {
+          if (round.segment && round.segment > 0) {
             totalOverRounds++;
           }
 
@@ -432,7 +493,7 @@ class GameTab extends Component {
               stoodInNT++;
             }
 
-            round.segment > 0 ? stoodInOver++ : stoodInUnder++;
+            round.segment && round.segment > 0 ? stoodInOver++ : stoodInUnder++;
           }
         }
       }
@@ -451,7 +512,9 @@ class GameTab extends Component {
       };
 
       playersSummary[pIndex] = {
-        successRate: Number.isNaN(successRate) ? '' : successRate,
+        // successRate: Number.isNaN(successRate) ? '' : successRate,
+        leagueScore: 0,
+        successRate,
         successRateHB,
         successRateOver,
         successRateUnder,
@@ -463,10 +526,12 @@ class GameTab extends Component {
     return playersSummary;
   };
 
-  mapToPlayersObj = (summaryToUpdate) => {
+  private mapToPlayersObj = (
+    summaryToUpdate: IGamePlayersSummary
+  ): IGamePlayersSummary => {
     const { players, gameSummary } = this.state;
 
-    return players.reduce((obj, player, index) => {
+    return players.reduce((obj: IGamePlayersSummary, player, index) => {
       obj[player.key] = {
         ...gameSummary[player.key],
         ...summaryToUpdate[index],
@@ -476,36 +541,36 @@ class GameTab extends Component {
     }, {});
   };
 
-  updateGameStatus = (status) => {
+  private updateGameStatus = (status: GAME_STATUS) => {
     const { match } = this.props;
     const { params } = match;
     const { leagueID } = params;
 
     fire
       .database()
-      .ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`)
+      .ref(`leagueGames/_${leagueID}/${this.gameKey}`)
       .update({ status });
   };
 
-  toggleSlide = () => {
+  private toggleSlide = () => {
     const currentView = this.state.currentView === 'panel' ? 'table' : 'panel';
     this.setCurrentViewState(currentView);
   };
 
-  setCurrentViewState(currentView) {
+  private setCurrentViewState(currentView: GameViewType) {
     this.setState({ currentView });
   }
 
-  selectActiveRound(newRound) {
+  private selectActiveRound(newRound: number) {
     const { gameData, currentView } = this.state;
     const { rounds, currentRound, gameMode, dealer } = gameData;
     const userId = fire.auth().currentUser?.uid;
 
     if (
       Number(newRound) < Number(currentRound) ||
-      rounds[currentRound - 1].check
+      (rounds && rounds[(currentRound as number) - 1].check)
     ) {
-      this.gameRef.update({
+      this.gameRef?.update({
         currentRound: Number(newRound),
       });
 
@@ -516,7 +581,7 @@ class GameTab extends Component {
       if (
         gameMode === 'remote' &&
         dealer === userId &&
-        !rounds[newRound - 1].handsState
+        !(rounds as IRoundData[])[newRound - 1].handsState
       ) {
         // deal cards
         const { players } = this.state;
@@ -530,7 +595,7 @@ class GameTab extends Component {
     }
   }
 
-  handleReorderPlayers(newOrder) {
+  private handleReorderPlayers(newOrder: IPlayer[]) {
     this.setState({
       players: newOrder,
       devicePlayerIndex: getDevicePlayerIndex(newOrder),
@@ -541,30 +606,30 @@ class GameTab extends Component {
     const { leagueID } = params;
     fire
       .database()
-      .ref(`leagueGames/_${leagueID * 1}/${this.gameKey}`)
+      .ref(`leagueGames/_${leagueID}/${this.gameKey}`)
       .update({ playersOrder: newOrder });
   }
 
-  getLeagueScores = () => {
-    const players = this.state.players;
-    const { gameSummary } = this.state;
+  private getLeagueScores = (): LeagueScoreTypeMap => {
+    const { gameSummary, players } = this.state;
 
     if (Object.keys(gameSummary).length === 0) {
       return {
-        leagueScore0: '',
-        leagueScore1: '',
-        leagueScore2: '',
-        leagueScore3: '',
+        leagueScore0: 0,
+        leagueScore1: 0,
+        leagueScore2: 0,
+        leagueScore3: 0,
       };
     }
 
-    return players.reduce((summaryObj, player, i) => {
-      summaryObj[`leagueScore${i}`] = gameSummary[player.key].leagueScore;
+    return players.reduce((summaryObj: LeagueScoreTypeMap, player, i) => {
+      summaryObj[`leagueScore${i}` as LeagueScoreType] =
+        gameSummary[player.key].leagueScore;
       return summaryObj;
     }, {});
   };
 
-  render() {
+  public render() {
     const {
       columns,
       currentView,
@@ -618,7 +683,7 @@ class GameTab extends Component {
     );
   }
 
-  initColumns = (players) => {
+  private initColumns = (players: IPlayer[]): IGameColumn[] => {
     return players.map(({ nickname }, i) => {
       return {
         playerName: nickname,
@@ -627,13 +692,13 @@ class GameTab extends Component {
     });
   };
 
-  getRoundData(roundIndex) {
-    return this.state.gameData.rounds.find(
+  private getRoundData(roundIndex: number) {
+    return (this.state.gameData.rounds || []).find(
       (round) => round.round === roundIndex
     );
   }
 
-  handleGameModeChange() {
+  private handleGameModeChange() {
     const { gameData, players } = this.state;
     const { gameMode } = gameData;
 
@@ -661,13 +726,13 @@ class GameTab extends Component {
         const {
           gameData: { currentRound },
         } = this.state;
-        const roundData = this.getRoundData(currentRound);
+        const roundData = this.getRoundData(currentRound as number);
 
         // if current round === 1 and no handsState and gameMode === remote then deal cards
         if (
           !snap.val() &&
           currentRound === 1 &&
-          !roundData.handsState &&
+          !roundData?.handsState &&
           dealer === userId
         ) {
           const cardsByPlayer = dealCards(players);
@@ -688,24 +753,24 @@ class GameTab extends Component {
     }
   }
 
-  handleHandFinished(roundData) {
-    const winner = this.calculateHandWinner(roundData);
+  private handleHandFinished(roundData: IRoundData) {
+    const winner = calculateHandWinner(roundData);
     const { round, handsState, currentHand } = roundData;
 
     this.gameRef
-      .child(`rounds/${round - 1}`)
+      ?.child(`rounds/${round - 1}`)
       .update({
         [`won${winner.player}`]: roundData[`won${winner.player}`]
           ? roundData[`won${winner.player}`] + 1
           : 1,
         handsState: {
           ...handsState,
-          [currentHand]: {
-            ...handsState[currentHand],
+          [currentHand as number]: {
+            ...(handsState || {})[currentHand as number],
             status: 'FINISHED',
             handWinner: winner.player,
           },
-          [currentHand + 1]: {
+          [(currentHand as number) + 1]: {
             status: 'ACTIVE',
             turnOf: winner.player,
             thrownCards: [],
@@ -720,14 +785,14 @@ class GameTab extends Component {
       );
   }
 
-  goToNextHand(roundData, winner) {
+  private goToNextHand(roundData: IRoundData, winner: IThrownCard) {
     const { round, handsState, currentHand } = roundData;
 
-    this.gameRef.child(`rounds/${round - 1}`).update({
+    this.gameRef?.child(`rounds/${round - 1}`).update({
       // [`won${winner.player}`]: roundData[`won${winner.player}`]
       //   ? roundData[`won${winner.player}`] + 1
       //   : 1,
-      currentHand: currentHand + 1,
+      currentHand: (currentHand as number) + 1,
       // handsState: {
       //   // ...handsState,
       //   [currentHand + 1]: {
@@ -739,18 +804,18 @@ class GameTab extends Component {
     });
   }
 
-  calculateHandScore(roundData) {
+  private calculateHandScore(roundData: IRoundData) {
     const gameData = { ...this.state.gameData };
     const { rounds: allRounds, currentRound } = gameData;
     const newRound = { ...roundData };
-    const gameToUpdate = {};
+    const gameToUpdate: Partial<IGameData> = {};
 
     [0, 1, 2, 3].forEach((player) =>
       this.calculatePlayerScore(
         newRound,
         player,
-        allRounds,
-        currentRound - 1,
+        allRounds as IRoundData[],
+        (currentRound as number) - 1,
         gameToUpdate
       )
     );
@@ -762,7 +827,7 @@ class GameTab extends Component {
     newRound.check = currentTotalWon === 13;
 
     // calculate if round fell - change next round factor
-    if (newRound.check) {
+    if (newRound.check && allRounds) {
       const didRoundFell = calcIfRoundFell(newRound);
 
       if (didRoundFell) {
@@ -786,14 +851,17 @@ class GameTab extends Component {
             newRound,
             i,
             allRounds,
-            currentRound - 1,
+            (currentRound as number) - 1,
             gameToUpdate
           );
         }
       }
 
       // calculate round summary stats
-      let summaryToUpdate = this.calculateSummary(allRounds, currentRound - 1);
+      let summaryToUpdate = this.calculateSummary(
+        allRounds,
+        (currentRound as number) - 1
+      );
 
       if (newRound.round === 13 && !newRound.fell) {
         gameToUpdate.status = GAME_STATUS.FINISHED;
@@ -811,45 +879,23 @@ class GameTab extends Component {
         summaryToUpdate = this.calculateLeagueScores(scores, summaryToUpdate);
       }
 
-      this.gameSummaryRef.update(this.mapToPlayersObj(summaryToUpdate));
+      this.gameSummaryRef?.update(this.mapToPlayersObj(summaryToUpdate));
     }
 
-    allRounds.splice(currentRound - 1, 1, newRound);
+    allRounds?.splice((currentRound as number) - 1, 1, newRound);
 
     gameToUpdate.rounds = allRounds;
 
-    this.gameRef.update(gameToUpdate);
+    this.gameRef?.update(gameToUpdate);
   }
 
-  // TODO: move this method to game-utils once roundData is properly typed
-  calculateHandWinner(roundData) {
-    const { trump, handsState, currentHand } = roundData;
-    const currentHandState = handsState && handsState[currentHand];
-    const { thrownCards } = currentHandState;
-
-    const trumpCards = thrownCards.filter(
-      (thrown) => thrown.card.split('-')[1] === CardsType[trump]
-    );
-
-    if (trumpCards.length) {
-      const thrownSorted = trumpCards.sort(
-        (a, b) => +b.card.split('-')[0] - +a.card.split('-')[0]
-      );
-
-      return thrownSorted[0];
-    } else {
-      const handCardType = thrownCards[0].card.split('-')[1];
-      const thrownSorted = thrownCards
-        .filter((thrown) => thrown.card.split('-')[1] === handCardType)
-        .sort((a, b) => +b.card.split('-')[0] - +a.card.split('-')[0]);
-
-      return thrownSorted[0];
-    }
-  }
-
-  updateOwnCardState(thrownCard, currentRound, ownCardsState) {
+  private updateOwnCardState(
+    thrownCard: string,
+    currentRound: number,
+    ownCardsState: string[] = []
+  ) {
     const cardIndex = Object.keys(ownCardsState).find(
-      (index) => ownCardsState[index] === thrownCard
+      (index) => ownCardsState[+index] === thrownCard
     );
     GameService.updateHandCardsState(this.gameKey, currentRound, cardIndex);
   }
