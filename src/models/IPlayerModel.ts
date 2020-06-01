@@ -9,11 +9,17 @@ export interface IPlayer {
   nickname: string;
 }
 
+export interface ISuccessRate {
+  wins: number;
+  total: number;
+}
+
 export interface IPlayerScoresSummary {
-  leagueScore: string;
-  successRate: string;
-  successRateHB: string;
-  successRateOver: string;
-  successRateUnder: string;
-  successRateNT: string;
+  leagueScore: number;
+  successRate: ISuccessRate;
+  successRateHB: ISuccessRate;
+  successRateOver: ISuccessRate;
+  successRateUnder: ISuccessRate;
+  successRateNT: ISuccessRate;
+  successRateLastBidder: ISuccessRate;
 }

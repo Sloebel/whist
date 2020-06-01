@@ -1,10 +1,11 @@
 import { fire } from '../firebase';
-import { CardsType } from '../constants/cards';
+import { CardsType, CARDS_SHORT, CARDS } from '../constants/cards';
 import {
   IPlayerHand,
   ICardsFromTo,
   ICardsPosition,
   IRoundData,
+  IHandState,
 } from '../models/IGameModel';
 import { ThrownCardType } from '../game/ThrownCard/ThrownCard';
 import { shuffle } from './Utils';
@@ -270,5 +271,31 @@ export const getToWinnerCalc = (
           left: markerWidth / 2 - CARD_WIDTH / 2,
         },
       };
+  }
+};
+
+export const calculateHandWinner = (roundData: IRoundData) => {
+  const { trump, handsState, currentHand } = roundData;
+  const currentHandState = handsState && handsState[currentHand as number];
+  const { thrownCards } = currentHandState as IHandState;
+
+  const trumpCards = thrownCards.filter(
+    (thrown) =>
+      (thrown.card.split('-')[1] as CARDS_SHORT) === CardsType[trump as CARDS]
+  );
+
+  if (trumpCards.length) {
+    const thrownSorted = trumpCards.sort(
+      (a, b) => +b.card.split('-')[0] - +a.card.split('-')[0]
+    );
+
+    return thrownSorted[0];
+  } else {
+    const handCardType = thrownCards[0].card.split('-')[1];
+    const thrownSorted = thrownCards
+      .filter((thrown) => thrown.card.split('-')[1] === handCardType)
+      .sort((a, b) => +b.card.split('-')[0] - +a.card.split('-')[0]);
+
+    return thrownSorted[0];
   }
 };

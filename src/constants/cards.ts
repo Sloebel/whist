@@ -6,9 +6,17 @@ export enum CARDS {
   NT = 'NT',
 }
 
+export enum CARDS_SHORT {
+  C = 'C',
+  D = 'D',
+  H = 'H',
+  S = 'S',
+}
+
 export const CardsType = {
-  [CARDS.CLUB]: 'C',
-  [CARDS.DIAMOND]: 'D',
-  [CARDS.HART]: 'H',
-  [CARDS.SPADE]: 'S',
+  [CARDS.CLUB]: CARDS_SHORT.C,
+  [CARDS.DIAMOND]: CARDS_SHORT.D,
+  [CARDS.HART]: CARDS_SHORT.H,
+  [CARDS.SPADE]: CARDS_SHORT.S,
+  [CARDS.NT]: 'NT',
 };

@@ -1,10 +1,14 @@
-import { db } from "./fire";
+import { db } from './fire';
+
+// database refs
+export const usersRef = db.ref('users');
+export const leaguesRef = db.ref('leagues');
 
 // User API
 
 export const doCreateUser = (id: any, userInfo: any) =>
   db.ref(`users/${id}`).set(userInfo);
 
-export const onceGetUsers = () => db.ref("users").once("value");
+export const onceGetUsers = () => usersRef.once('value');
 
-export const onceGetLeagues = () => db.ref("leagues").once("value");
+export const onceGetLeagues = () => leaguesRef.once('value');

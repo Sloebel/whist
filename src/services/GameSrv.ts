@@ -30,7 +30,7 @@ export default class GameService {
   public static updateHandCardsState(
     gameKey: string,
     round: number,
-    cardIndex: string
+    cardIndex?: string
   ) {
     const userId = fire.auth().currentUser?.uid;
 

@@ -1,9 +1,9 @@
 import { fire } from '../firebase';
-import { IPlayer, ILeagueModel } from '../models/ILeagueModel';
+import { ILeagueModel } from '../models/ILeagueModel';
+import { IPlayer } from '../models/IPlayerModel';
 
 interface IInvited {
-  // [userID: string]: { [inviteKey: string]: boolean };
-  [userID: string]: string; //{ [inviteKey: string]: boolean };
+  [userID: string]: string;
 }
 
 export interface IGameInvite {
@@ -12,7 +12,6 @@ export interface IGameInvite {
   leagueTitle: string;
   newGameId: number;
   inviter: IPlayer;
-  // joinedPlayers
 }
 
 interface IInviteObj {

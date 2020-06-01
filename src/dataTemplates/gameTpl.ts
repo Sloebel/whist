@@ -49,6 +49,11 @@ export default function gameDataTpl(
     rounds.push({ round: i + 1, ...initRoundData });
   }
 
+  const rateInit = {
+    wins: 0,
+    total: 0,
+  };
+
   return {
     gameData: {
       rounds,
@@ -62,12 +67,13 @@ export default function gameDataTpl(
     gameSummary: {
       players: players.reduce((summaryObj: IGamePlayersSummary, player) => {
         summaryObj[player.key] = {
-          leagueScore: '',
-          successRate: '',
-          successRateHB: '',
-          successRateOver: '',
-          successRateUnder: '',
-          successRateNT: '',
+          leagueScore: 0,
+          successRate: rateInit,
+          successRateHB: rateInit,
+          successRateOver: rateInit,
+          successRateUnder: rateInit,
+          successRateNT: rateInit,
+          successRateLastBidder: rateInit,
         };
 
         return summaryObj;
