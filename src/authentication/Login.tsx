@@ -40,8 +40,8 @@ class Login extends React.Component<ILoginProps, ILoginState> {
       })
       .catch(error => {
         // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
+        // var errorCode = error.code;
+        // var errorMessage = error.message;
         // ...
         alert(error.message);
         this.setState({ isLoading: false });

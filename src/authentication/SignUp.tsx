@@ -73,19 +73,11 @@ class SignUp extends React.Component<ISignUpProps, ISignUpState> {
               this.props.history.push('/');
             })
             .catch(error => {
-              // Handle Errors here.
-              var errorCode = error.code;
-              var errorMessage = error.message;
-              // ...
               alert(error.message);
               this.setState({ isLoading: false });
             });
       })
       .catch(error => {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
         alert(error.message);
         this.setState({ isLoading: false });
       });

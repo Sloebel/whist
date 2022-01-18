@@ -7,7 +7,6 @@ import { ChangePlayers } from '../../common/cards/Icons';
 import NumbersPad from '../../common/numbers/Pad';
 import PlayerPad from '../../common/player/Pad';
 import { INPUT_MODE } from '../../constants/states';
-import './GamePad.scss';
 import Dialog from '../../dialogs/Dialog';
 import { Dialogs } from '../../constants/dialogs';
 import { PlayersContext } from '../GameTab';
@@ -24,6 +23,7 @@ import {
   getToWinnerCalc,
 } from '../../utils/game-utils';
 import playerTurn from '../../assets/sounds/playerTurn.mp3';
+import './GamePad.scss';
 
 const confirm = Modal.confirm;
 message.config({
@@ -230,9 +230,11 @@ class GamePad extends Component {
         }
       } else {
         const nextPlayer = this.getNextPlayer(selectedPlayer, players);
+        const nextPlayerBid = roundData[`bid${nextPlayer}`];
+        const beforePlayerBid = this.getBeforePlayerBid(selectedPlayer, players);
 
         if (
-          roundData[`bid${nextPlayer}`] === '' ||
+          nextPlayerBid === undefined || nextPlayerBid === '' ||
           nextPlayer === highestBidder
         ) {
           // validate first bid is more then 5
@@ -255,9 +257,7 @@ class GamePad extends Component {
               players
             );
           } else if (
-            !Number.isInteger(
-              roundData[`bid${this.getBeforePlayer(selectedPlayer, players)}`]
-            )
+           !beforePlayerBid && beforePlayerBid !== 0
           ) {
             return message.warning('The Bids are not in the right order!!');
           }
@@ -312,8 +312,6 @@ class GamePad extends Component {
     selectedPlayer,
     players
   ) {
-    const getBeforePlayer = this.getBeforePlayer;
-
     confirm({
       title: 'Change Highest Bidder?',
       content: '(will reset the rest of the bids)',
@@ -322,22 +320,24 @@ class GamePad extends Component {
         onChange(
           {
             ...roundData,
-            bid0: null,
-            bid1: null,
-            bid2: null,
-            bid3: null,
+            bid0: '',
+            bid1: '',
+            bid2: '',
+            bid3: '',
             [prop]: num,
             highestBidder: selectedPlayer,
           },
           selectedPlayer
         );
       },
-      onCancel() {
-        if (!roundData[`bid${getBeforePlayer(selectedPlayer, players)}`]) {
+      onCancel: () => {
+        const beforePlayerBid = this.getBeforePlayerBid(selectedPlayer, players);
+
+        if (beforePlayerBid || beforePlayerBid === 0) {
+          onChange({ ...roundData, [prop]: num }, selectedPlayer);
+        } else {
           message.warning('The Bids are not in the right order!!');
           onChange({ ...roundData }, selectedPlayer);
-        } else {
-          onChange({ ...roundData, [prop]: num }, selectedPlayer);
         }
       },
     });
@@ -360,6 +360,12 @@ class GamePad extends Component {
 
     return players[beforeIndex].index;
   };
+
+  getBeforePlayerBid = (selectedPlayer, players) => {
+    const roundData = this.getRoundData();
+    
+    return roundData[`bid${this.getBeforePlayer(selectedPlayer, players)}`];
+  }
 
   getBeforePlayers = (selectedPlayer, players) => {
     const index = players.findIndex(
@@ -701,7 +707,6 @@ class GamePad extends Component {
       currentRound,
       devicePlayerIndex,
       onCardThrown,
-      ownCardsState,
     } = this.props;
     const roundData = this.getRoundData();
     const { inputMode } = roundData;
