@@ -20,7 +20,7 @@ import LeagueSummary from '../leagueSummary/LeagueSummary';
 import Dialog from '../dialogs/Dialog';
 import { Dialogs } from '../constants/dialogs';
 import { ILeagueModel } from '../models/ILeagueModel';
-import { ClickParam } from 'antd/lib/menu';
+import { MenuInfo } from 'rc-menu/lib/interface';
 import { GameMode, GAME_STATUS } from '../models/IGameModel';
 import { UserContext } from '../authentication/AuthUserContext';
 import LeagueService from '../services/LeagueSrv';
@@ -243,7 +243,7 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
     this.setState({ loading });
   };
 
-  private handleMenuItemClick(item: ClickParam) {
+  private handleMenuItemClick(item: MenuInfo): void {
     const key = item.key;
 
     if (key === 'new_game') {

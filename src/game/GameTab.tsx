@@ -786,7 +786,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
   }
 
   private goToNextHand(roundData: IRoundData, winner: IThrownCard) {
-    const { round, handsState, currentHand } = roundData;
+    const { round, currentHand } = roundData;
 
     this.gameRef?.child(`rounds/${round - 1}`).update({
       // [`won${winner.player}`]: roundData[`won${winner.player}`]
