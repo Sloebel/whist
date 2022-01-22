@@ -2,8 +2,8 @@ import React from 'react';
 import { fire } from '../firebase';
 import AuthUserContext from './AuthUserContext';
 
-const withAuthentication = (Component: React.ComponentType) => {
-  class WithAuthentication extends React.Component {
+const withAuthentication = <TProps,>(Component: React.ComponentType<TProps>) => {
+  class WithAuthentication extends React.Component<TProps> {
     public state = {
       authUser: null,
     };

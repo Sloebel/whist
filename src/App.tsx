@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { withRouter, Route } from 'react-router-dom';
+import { withRouter, Route, RouteComponentProps } from 'react-router-dom';
 import NotificationService from './services/NotificationSrv';
 import { fire } from './firebase';
 import cards from './cards.png';
@@ -11,15 +11,26 @@ import 'antd/dist/antd.css';
 import Login from './authentication/Login';
 import SignUp from './authentication/SignUp';
 import Main from './main/Main';
-import League from './league/League.tsx';
-import { addListener, isMobileBrowser } from './utils/Utils';
+import League from './league/League';
+import { isMobileBrowser } from './utils/Utils';
 import { Dialogs } from './constants/dialogs';
 import Dialog from './dialogs/Dialog';
-import LeagueService from './services/LeagueSrv';
+import LeagueService, { IGameInvite } from './services/LeagueSrv';
 import Loader from './common/loader/Loader';
 
-class App extends Component {
-  constructor(props) {
+interface IAppProps extends RouteComponentProps {}
+
+interface IAppState {
+  inlineHeader: boolean;
+  showGameInvite: boolean;
+  loader: boolean;
+  invite?: IGameInvite;
+}
+
+class App extends Component<IAppProps, IAppState> {
+  private unlistenHistory: () => void;
+
+  constructor(props: IAppProps) {
     super(props);
 
     this.state = {
@@ -29,7 +40,6 @@ class App extends Component {
     };
 
     this.toggleHeaderInline = this.toggleHeaderInline.bind(this);
-    this.handleWindowSizeChange = this.handleWindowSizeChange.bind(this);
   }
 
   // set main header state by router value
@@ -38,18 +48,6 @@ class App extends Component {
     this.setState({
       inlineHeader: inline,
     });
-  }
-
-  // set if view is mobile size
-  handleWindowSizeChange() {
-    this.setState({
-      // isMobile: window.innerWidth < 1095,
-    });
-  }
-
-  // init window resize listener
-  listenToWinResize(callback) {
-    return addListener(window, 'resize', callback);
   }
 
   componentWillMount() {
@@ -62,15 +60,10 @@ class App extends Component {
       const { pathname } = location;
       this.toggleHeaderInline(pathname !== '/' && pathname !== '/login');
     });
-
-    this.unlistenWinResize = this.listenToWinResize(
-      this.handleWindowSizeChange
-    );
   }
 
   componentWillUnmount() {
     this.unlistenHistory();
-    this.unlistenWinResize();
   }
 
   componentDidMount() {
@@ -90,7 +83,7 @@ class App extends Component {
           isMobileBrowser() ? 'mobile-mode' : 'desktop-mode'
         }`}
       >
-        <img src={phoneImg} />
+        <img src={phoneImg} alt=""/>
         <div className={`app ${inlineHeader ? 'inline-header' : ''}`}>
           <header id="app-header">
             <img src={cards} className="app-logo" alt="logo" />
@@ -103,7 +96,7 @@ class App extends Component {
             <Route exact path={routes.SIGN_UP} component={SignUp} />
             <Route
               path={`${routes.LEAGUE}/:leagueID`}
-              render={(props) => <League {...props} screenSize={442} />}
+              render={(props) => <League {...props} />}
             />
           </div>
         </div>
@@ -122,7 +115,7 @@ class App extends Component {
     );
   }
 
-  onGameInvite = (invite) => {
+  onGameInvite = (invite: IGameInvite) => {
     this.setState({
       showGameInvite: true,
       invite,
@@ -133,7 +126,7 @@ class App extends Component {
     const { invite } = this.state;
 
     this.setState({ loader: true });
-    LeagueService.acceptGameInvite(invite).then(
+    invite && LeagueService.acceptGameInvite(invite).then(
       () => {
         this.setState({ loader: false });
         const { history } = this.props;
