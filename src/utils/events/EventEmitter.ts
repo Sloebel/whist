@@ -3,7 +3,7 @@ export interface IEventEmitter<T> {
   off(handler: (data?: T) => void): void;
 }
 
-export type IHandler<T> = (data?: T) => void;
+export type IHandler<T> = (data: T) => void;
 
 export class EventEmitter<T> {
   private handlers: Array<IHandler<T>> = [];
@@ -16,7 +16,7 @@ export class EventEmitter<T> {
     this.handlers = this.handlers.filter(h => h !== handler);
   }
 
-  public trigger(data?: T) {
+  public trigger(data: T) {
     this.handlers.slice(0).forEach(h => h(data));
   }
 }

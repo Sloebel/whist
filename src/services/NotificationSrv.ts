@@ -9,7 +9,7 @@ class NotificationsService {
     IGameInvite
   > = new EventEmitter();
 
-  public registerGameInvite(callback: () => void) {
+  public registerGameInvite(callback: (invite: IGameInvite) => void) {
     this.gameInviteEventEmitter.on(callback);
 
     const userId = fire.auth().currentUser?.uid;
