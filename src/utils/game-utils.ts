@@ -1,5 +1,5 @@
 import { fire } from '../firebase';
-import { CardsType, CARDS_SHORT, CARDS } from '../constants/cards';
+import { CardsType, DrawCardsType, CARDS_SHORT, CARDS } from '../constants/cards';
 import {
   IPlayerHand,
   ICardsFromTo,
@@ -69,7 +69,7 @@ export const calcIfRoundFell = (roundData: IRoundData): boolean => {
 
 export const cardsList: string[] = (function () {
   const arr: string[] = [];
-  for (const type of Object.values(CardsType)) {
+  for (const type of Object.values(DrawCardsType)) {
     for (let i = 2; i < 15; i++) {
       arr.push(`${i}-${type}`);
     }
@@ -214,9 +214,9 @@ export const getFromToCalc = (
         from:
           typeof fromTop === 'number' && typeof fromLeft === 'number'
             ? {
-                top: fromTop,
-                left: fromLeft,
-              }
+              top: fromTop,
+              left: fromLeft,
+            }
             : undefined,
         to: {
           top: CARD_MARKER_HEIGHT / 2 + markerTop - CARD_HEIGHT * 0.2,
