@@ -1,5 +1,5 @@
 import React from 'react';
-import './TwoWayArrow.css';
+import './TwoWayArrow.scss';
 
 export const TWO_WAY_ARROW_DIRECTION = {
   TOP: 'top',
