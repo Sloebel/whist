@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { fire } from '../firebase';
-import './LeagueSummary.css';
 import { Row, Col } from 'antd';
+
+import './LeagueSummary.scss';
 
 const statsObj = {
   successRate: 'Succes Win Rates',
