@@ -6,7 +6,9 @@
 		flex-direction: column;
 		align-items: center;
 
-		.summary-table {
+		.summary-table,
+		.league-chart,
+		.league-records {
 			width: 100%;
 			max-width: 580px;
 		}
@@ -16,15 +18,111 @@
 		text-align: center;
 	}
 
+	.summary-loading {
+		display: flex;
+		justify-content: center;
+		padding: 48px 0;
+	}
+
 	.table-cell {
 		background: #fff;
 		text-align: center;
 		padding: 4px 0;
+
+		&.header {
+			border-radius: 4px 4px 0 0;
+		}
+
+		&.score {
+			margin-top: 1px;
+			border-radius: 0 0 4px 4px;
+		}
+	}
+
+	.stats-row:not(.stats-row ~ .stats-row) {
+		margin-top: 12px;
 	}
 
 	.stats-row {
 		h4 {
 			margin-bottom: 0px;
+		}
+
+		.table-cell {
+			border-radius: 4px;
+		}
+	}
+
+	.league-records {
+		margin-top: 24px;
+		padding: 16px 0;
+
+		h3 {
+			text-align: center;
+			margin-bottom: 16px;
+		}
+
+		.records-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+			gap: 12px;
+			padding: 0 4px;
+		}
+
+		.record-card {
+			background: #faf7f0;
+			border-radius: 8px;
+			padding: 14px 12px;
+			text-align: center;
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+			transition: box-shadow 0.2s;
+
+			&:hover {
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+			}
+		}
+
+		.record-label {
+			font-size: 13px;
+			color: #4c423b;
+			margin-bottom: 6px;
+		}
+
+		.record-value {
+			font-size: 18px;
+			font-weight: 700;
+			color: #1a5c1a;
+			margin-bottom: 4px;
+			line-height: 1.2;
+
+			.anticon svg {
+				width: 1.4em;
+				height: 1.4em;
+				vertical-align: middle;
+			}
+		}
+
+		.record-detail {
+			font-size: 12px;
+			color: #4a4a4a;
+		}
+
+		.records-empty {
+			text-align: center;
+			padding: 32px 16px;
+			color: #8c7a6b;
+			font-size: 14px;
+			font-style: italic;
+		}
+	}
+
+	.league-chart {
+		margin-top: 24px;
+		padding: 16px 0;
+
+		h3 {
+			text-align: center;
+			margin-bottom: 12px;
 		}
 	}
 }

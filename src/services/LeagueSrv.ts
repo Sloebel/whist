@@ -83,7 +83,7 @@ export default class LeagueService {
                   .off('child_added');
 
                 LeagueService.removeAllInvited(invitedRefs);
-                resolve();
+                resolve(true);
               }
             });
         });
@@ -151,7 +151,7 @@ export default class LeagueService {
 
     // TODO: listen also if game was added before resolve,
     // otherwise the navigation to the new game is before the game is actually created
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       gameInviteRef.push(userId).then(() => {
         gameInviteRef.on('value', (snap) => {
           if (Object.values(snap.val()).length === 3) {
