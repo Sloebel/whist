@@ -24,6 +24,7 @@ interface IAppState {
   inlineHeader: boolean;
   showGameInvite: boolean;
   loader: boolean;
+  showPhoneFrame: boolean;
   invite?: IGameInvite;
 }
 
@@ -37,6 +38,7 @@ class App extends Component<IAppProps, IAppState> {
       inlineHeader: false,
       showGameInvite: false,
       loader: false,
+      showPhoneFrame: localStorage.getItem('showPhoneFrame') !== 'false',
     };
 
     this.toggleHeaderInline = this.toggleHeaderInline.bind(this);
@@ -74,16 +76,37 @@ class App extends Component<IAppProps, IAppState> {
     });
   }
 
+  getWrapperClassName(): string {
+    if (isMobileBrowser()) return 'app-wrapper mobile-mode';
+    return `app-wrapper ${this.state.showPhoneFrame ? 'desktop-mode' : 'desktop-mode-no-frame'}`;
+  }
+
+  togglePhoneFrame = () => {
+    this.setState((prev) => {
+      const showPhoneFrame = !prev.showPhoneFrame;
+      localStorage.setItem('showPhoneFrame', String(showPhoneFrame));
+      return { showPhoneFrame };
+    });
+  };
+
   render() {
-    const { inlineHeader, showGameInvite, invite, loader } = this.state;
+    const { inlineHeader, showGameInvite, showPhoneFrame, invite, loader } = this.state;
+    const isDesktop = !isMobileBrowser();
 
     return (
-      <div
-        className={`app-wrapper ${
-          isMobileBrowser() ? 'mobile-mode' : 'desktop-mode'
-        }`}
-      >
+      <div className={this.getWrapperClassName()}>
         <img src={phoneImg} alt=""/>
+        {isDesktop && (
+          <label className="phone-frame-toggle">
+            <input
+              type="checkbox"
+              checked={showPhoneFrame}
+              onChange={this.togglePhoneFrame}
+            />
+            <span className="toggle-slider" />
+            <span className="toggle-label" role="img" aria-label="Phone frame toggle">📱</span>
+          </label>
+        )}
         <div className={`app ${inlineHeader ? 'inline-header' : ''}`}>
           <header id="app-header">
             <img src={cards} className="app-logo" alt="logo" />

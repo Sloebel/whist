@@ -1,201 +1,255 @@
 @import 'style/mixin.scss';
 
 #root {
-  @include full-view();
-  overflow: auto;
-  background: rgb(52, 223, 52);
+	@include full-view();
+	overflow: auto;
+	background: rgb(52, 223, 52);
 }
 
 .full-view {
-  @include full-view();
+	@include full-view();
 }
 
 ul.app-menu {
-  list-style: none;
-  display: inline-block;
-  padding: 0px;
-  margin: 0px;
-  width: 250px;
+	list-style: none;
+	display: inline-block;
+	padding: 0px;
+	margin: 0px;
+	width: 250px;
 }
 
 ul.app-menu li {
-  display: block;
-  margin-top: 20px;
+	display: block;
+	margin-top: 20px;
 }
 
 $inline-header-height: 60px;
 
 .app-wrapper {
-  display: flex;
-  justify-content: center;
-  height: 100%;
-  position: relative;
+	display: flex;
+	justify-content: center;
+	height: 100%;
+	position: relative;
 
-  > img {
-    display: none;
-  }
+	> img {
+		display: none;
+	}
 
-  &.desktop-mode {
-    > img {
-      display: block;
-      height: 926px;
-      width: 493px;
-    }
+	&.desktop-mode {
+		> img {
+			display: block;
+			height: 926px;
+			width: 493px;
+		}
 
-    .app {
-      position: absolute;
-      top: 77px;
-      width: 442px;
-      height: 744px;
-    }
-  }
+		.app {
+			position: absolute;
+			top: 77px;
+			width: 442px;
+			height: 744px;
+		}
+	}
 
-  &.mobile-mode {
-    .app {
-      @include full-view();
-    }
-  }
+	&.mobile-mode {
+		.app {
+			@include full-view();
+		}
+	}
 
-  .drawer {
-    position: absolute;
-  }
+	&.desktop-mode-no-frame {
+		.app {
+			@include full-view();
+		}
+	}
+
+	.phone-frame-toggle {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		z-index: 1000;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		cursor: pointer;
+		user-select: none;
+
+		input {
+			display: none;
+		}
+
+		.toggle-slider {
+			width: 36px;
+			height: 20px;
+			background: #888;
+			border-radius: 10px;
+			position: relative;
+			transition: background 0.25s;
+
+			&::after {
+				content: '';
+				position: absolute;
+				top: 2px;
+				left: 2px;
+				width: 16px;
+				height: 16px;
+				background: #fff;
+				border-radius: 50%;
+				transition: transform 0.25s;
+			}
+		}
+
+		input:checked + .toggle-slider {
+			&::after {
+				transform: translateX(16px);
+			}
+		}
+
+		.toggle-label {
+			font-size: 18px;
+			line-height: 1;
+		}
+	}
+
+	.drawer {
+		position: absolute;
+	}
 }
 
 .app {
-  overflow: hidden;
+	overflow: hidden;
 
-  & header,
-  & .app-main,
-  & .league-stats {
-    text-align: center;
-  }
+	& header,
+	& .app-main,
+	& .league-stats {
+		text-align: center;
+	}
 
-  & .loader {
-    .ant-spin-dot i {
-      background-color: #000;
-    }
+	& .loader {
+		.ant-spin-dot i {
+			background-color: #000;
+		}
 
-    &.with-mask {
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
+		&.with-mask {
+			background: rgba(0, 0, 0, 0.5);
+			z-index: 999;
 
-      .ant-spin-dot i {
-        background-color: red;
-      }
-    }
-  }
+			.ant-spin-dot i {
+				background-color: red;
+			}
+		}
+	}
 }
 
 #app-header {
-  background-color: #222;
+	background-color: #222;
 
-  .app-title {
-    /* font-size: 1.5em; */
-    color: white;
-    display: inline-block;
-    vertical-align: middle;
-    margin-bottom: 0px;
-    transform: translate(-63px, 43px);
-    transition: all 0.5s;
-  }
+	.app-title {
+		/* font-size: 1.5em; */
+		color: white;
+		display: inline-block;
+		vertical-align: middle;
+		margin-bottom: 0px;
+		transform: translate(-63px, 43px);
+		transition: all 0.5s;
+	}
 
-  .app-logo {
-    height: 120px;
-    padding-bottom: 30px;
-    transform: translate(60px);
-    transition: all 0.5s;
-  }
+	.app-logo {
+		height: 120px;
+		padding-bottom: 30px;
+		transform: translate(60px);
+		transition: all 0.5s;
+	}
 
-  .inline-header & {
-    .app-logo {
-      transform: translate(0px);
-      padding-bottom: 0px;
-      height: $inline-header-height;
-    }
-    .app-title {
-      transform: translate(0px);
-    }
-  }
+	.inline-header & {
+		.app-logo {
+			transform: translate(0px);
+			padding-bottom: 0px;
+			height: $inline-header-height;
+		}
+		.app-title {
+			transform: translate(0px);
+		}
+	}
 
-  &:not(.inline-header) & {
-    .app-logo {
-      height: 120px;
-    }
+	&:not(.inline-header) & {
+		.app-logo {
+			height: 120px;
+		}
 
-    .app-title {
-      transform: translate(-63px, 43px);
-    }
-  }
+		.app-title {
+			transform: translate(-63px, 43px);
+		}
+	}
 }
 
 .app-content {
-  height: calc(100% - 120px);
+	height: calc(100% - 120px);
 
-  .inline-header & {
-    height: calc(100% - #{$inline-header-height});
-  }
+	.inline-header & {
+		height: calc(100% - #{$inline-header-height});
+	}
 }
 
 .drawer {
-  .ant-menu-inline,
-  .ant-menu-vertical {
-    border-right: none;
-  }
+	.ant-menu-inline,
+	.ant-menu-vertical {
+		border-right: none;
+	}
 
-  &-left {
-    .ant-menu-inline .ant-menu-item:after,
-    .ant-menu-vertical .ant-menu-item:after {
-      left: 0;
-      right: auto;
-    }
-  }
+	&-left {
+		.ant-menu-inline .ant-menu-item:after,
+		.ant-menu-vertical .ant-menu-item:after {
+			left: 0;
+			right: auto;
+		}
+	}
 
-  &-title {
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
-    font-weight: 500;
-    border-bottom: 1px solid #c7d1c5;
-  }
+	&-title {
+		height: 60px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 16px;
+		font-weight: 500;
+		border-bottom: 1px solid #c7d1c5;
+	}
 
-  &.drawer-left {
-    .drawer-handle {
-      top: 10px;
-      box-shadow: none;
-      background: transparent;
-      transition: all 0.3s;
-    }
+	&.drawer-left {
+		.drawer-handle {
+			top: 10px;
+			box-shadow: none;
+			background: transparent;
+			transition: all 0.3s;
+		}
 
-    .drawer-handle-icon {
-      background: #34df34;
-      &:after,
-      &:before {
-        background: #34df34;
-      }
-    }
-  }
+		.drawer-handle-icon {
+			background: #34df34;
+			&:after,
+			&:before {
+				background: #34df34;
+			}
+		}
+	}
 
-  &.drawer-open {
-    .drawer-handle {
-      background: #fff;
-    }
+	&.drawer-open {
+		.drawer-handle {
+			background: #fff;
+		}
 
-    .drawer-handle-icon {
-      &:after,
-      &:before {
-        background: #1a911a;
-      }
-    }
-  }
+		.drawer-handle-icon {
+			&:after,
+			&:before {
+				background: #1a911a;
+			}
+		}
+	}
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
