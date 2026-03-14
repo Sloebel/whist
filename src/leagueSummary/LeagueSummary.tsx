@@ -3,7 +3,7 @@ import { fire } from '../firebase';
 import { Row, Col, Tooltip as AntTooltip, Spin } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-import Icon from '@ant-design/icons';
+import Icon, { TrophyOutlined } from '@ant-design/icons';
 import { Spade, Hart, Diamond, Club } from '../common/cards/Icons';
 import { ILeagueModel } from '../models/ILeagueModel';
 import { IPlayer } from '../models/IPlayerModel';
@@ -437,13 +437,15 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 	renderLeagueRecords = (stats: LeagueStats) => {
 		const mostCommonTrump = Object.entries(stats.trumpDistribution).sort(([, a], [, b]) => b - a)[0];
 
-		const statCards: StatCard[] = [
-			{
+		const statCards: StatCard[] = [];
+
+		if (stats.totalGames > 0) {
+			statCards.push({
 				label: 'Total Games',
 				value: stats.totalGames,
 				detail: 'finished games'
-			}
-		];
+			});
+		}
 
 		if (mostCommonTrump) {
 			const trumpKey = mostCommonTrump[0];
@@ -522,22 +524,28 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 			}
 		}
 
+		if (statCards.length === 0) {
+			return (
+				<div className="league-records-empty">
+					<TrophyOutlined className="empty-icon" />
+					<p>No records yet</p>
+					<span>Finish your first game to unlock league records</span>
+				</div>
+			);
+		}
+
 		return (
 			<div className="league-records">
 				<h3>Other League Records:</h3>
-				{statCards.length === 0 ? (
-					<div className="records-empty">No statistics yet — finish a game to see league records here.</div>
-				) : (
-					<div className="records-grid">
-						{statCards.map((card, i) => (
-							<div className="record-card" key={i}>
-								<div className="record-label">{card.label}</div>
-								<div className="record-value">{card.value}</div>
-								<div className="record-detail">{card.detail}</div>
-							</div>
-						))}
-					</div>
-				)}
+				<div className="records-grid">
+					{statCards.map((card, i) => (
+						<div className="record-card" key={i}>
+							<div className="record-label">{card.label}</div>
+							<div className="record-value">{card.value}</div>
+							<div className="record-detail">{card.detail}</div>
+						</div>
+					))}
+				</div>
 			</div>
 		);
 	};
