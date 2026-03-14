@@ -47,6 +47,7 @@ type GameRouteParams = {
 
 export interface IGameTabProps extends RouteComponentProps<GameRouteParams> {
 	players: IPlayer[];
+	leagueTitle?: string;
 	loaderStateCb: (loading: boolean) => void;
 }
 
@@ -621,6 +622,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 					<GameMobileView
 						gameID={gameID}
 						gameMode={gameMode}
+						leagueTitle={this.props.leagueTitle}
 						currentView={currentView}
 						rounds={rounds}
 						ownCardsState={ownCardsState}

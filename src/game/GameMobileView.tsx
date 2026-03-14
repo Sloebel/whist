@@ -9,6 +9,7 @@ import { GameViewType, IGameColumn, IRoundData, LeagueScoreTypeMap } from '../mo
 interface GameMobileViewProps {
 	gameID: string;
 	gameMode?: string;
+	leagueTitle?: string;
 	currentView: GameViewType;
 	rounds?: IRoundData[];
 	ownCardsState?: string[];
@@ -126,6 +127,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 								players={playersColumns}
 								currentRound={currentRound}
 								gameID={gameID}
+								leagueTitle={this.props.leagueTitle}
 							/>
 						</div>
 						<div className="my-carousel-slide">
