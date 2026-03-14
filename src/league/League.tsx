@@ -210,8 +210,7 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
 					/>
 				)}
 				<Menu.Item key="main_menu">
-					<ExportOutlined className={'rotate-180'} />
-					<Link to={`/`}>To Main Menu</Link>
+					<ExportOutlined className={'rotate-180'} /> <Link to={`/`}>To Main Menu</Link>
 				</Menu.Item>
 			</Menu>
 		);

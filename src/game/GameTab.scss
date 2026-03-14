@@ -222,6 +222,10 @@
 			&.left {
 				margin-right: auto;
 			}
+
+			&[disabled] {
+				background: transparent;
+			}
 		}
 	}
 
