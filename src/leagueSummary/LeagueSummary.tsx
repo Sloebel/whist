@@ -30,6 +30,12 @@ const statsObj: Record<string, string> = {
 	successRateLastBidder: 'Last Bidder Win Rate'
 };
 
+const gameStatsObj: Record<string, string> = {
+	gameWins: 'Game Wins',
+	totalGamePoints: 'Total Game Points',
+	highestBidderWins: 'Highest Bidder Wins'
+};
+
 interface PlayerWithGames extends IPlayer {
 	games?: IPlayerScoresSummary[];
 }
@@ -70,6 +76,9 @@ interface LeagueStats {
 	bestRoundScore: NumericRecord | null;
 	worstRoundScore: NumericRecord | null;
 	totalRoundsFell: number;
+	totalGames: number;
+	overRounds: number;
+	underRounds: number;
 }
 
 interface LeagueSummaryProps {
@@ -223,7 +232,10 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 			mostTimesHighestBidder: null,
 			bestRoundScore: null,
 			worstRoundScore: null,
-			totalRoundsFell: 0
+			totalRoundsFell: 0,
+			totalGames: allGamesData.length,
+			overRounds: 0,
+			underRounds: 0
 		};
 
 		if (!allGamesData.length) return stats;
@@ -266,6 +278,10 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 
 				if (round.fell) {
 					stats.totalRoundsFell++;
+				} else if (round.segment && Number(round.segment) > 0) {
+					stats.overRounds++;
+				} else {
+					stats.underRounds++;
 				}
 
 				if (round.highestBidder !== undefined && round.highestBidder !== '') {
@@ -346,6 +362,16 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 								<Row gutter={4} className="table-header" style={{ marginBottom: 1 }}>
 									{this.getTableHeaders(players)}
 								</Row>
+								{allGamesData.length > 0 && (
+									<div className="game-stats-section">
+										{Object.keys(gameStatsObj).map(key =>
+											this.getGameStatsRow(
+												key,
+												this.computePlayerGameStats(allGamesData, league.players || [])
+											)
+										)}
+									</div>
+								)}
 								{Object.keys(statsObj).map(this.getStatsRow)}
 							</div>
 						)}
@@ -354,7 +380,7 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 
 						{chartData.length > 0 && (
 							<div className="league-chart">
-								<h3>League Points Over Games</h3>
+								<h3>League Points Over Games:</h3>
 								<ResponsiveContainer width="100%" height={350}>
 									<LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
 										<CartesianGrid strokeDasharray="3 3" />
@@ -387,13 +413,23 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 	}
 
 	renderRecordDetail = (entries: RecordEntry[]): React.ReactNode => {
-		if (entries.length === 1) {
-			return `${entries[0].player} · Game ${entries[0].gameNum}`;
+		const grouped: Record<string, number[]> = {};
+		for (const e of entries) {
+			if (!grouped[e.player]) grouped[e.player] = [];
+			grouped[e.player].push(e.gameNum);
 		}
-		const tooltipText = entries.map(e => `${e.player} - Game ${e.gameNum}`).join(', ');
+
+		const players = Object.keys(grouped);
+
+		if (players.length === 1 && grouped[players[0]].length === 1) {
+			return `${players[0]} · Game ${grouped[players[0]][0]}`;
+		}
+
+		const tooltipText = players.map(player => `${player}: Game ${grouped[player].join(', ')}`).join(' | ');
+
 		return (
 			<AntTooltip title={tooltipText}>
-				<span>{entries.length} players</span>
+				<span>{players.length === 1 ? players[0] : `${players.length} players`}</span>
 			</AntTooltip>
 		);
 	};
@@ -401,15 +437,14 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 	renderLeagueRecords = (stats: LeagueStats) => {
 		const mostCommonTrump = Object.entries(stats.trumpDistribution).sort(([, a], [, b]) => b - a)[0];
 
-		const statCards: StatCard[] = [];
+		const statCards: StatCard[] = [
+			{
+				label: 'Total Games',
+				value: stats.totalGames,
+				detail: 'finished games'
+			}
+		];
 
-		if (stats.highestBid) {
-			statCards.push({
-				label: 'Highest Single Bid',
-				value: stats.highestBid.value,
-				detail: this.renderRecordDetail(stats.highestBid.entries)
-			});
-		}
 		if (mostCommonTrump) {
 			const trumpKey = mostCommonTrump[0];
 			const trumpIcon = TRUMP_ICON_MAP[trumpKey];
@@ -419,6 +454,15 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 				detail: `${mostCommonTrump[1]} rounds`
 			});
 		}
+
+		if (stats.highestBid) {
+			statCards.push({
+				label: 'Highest Single Bid',
+				value: stats.highestBid.value,
+				detail: this.renderRecordDetail(stats.highestBid.entries)
+			});
+		}
+
 		if (stats.highestGameScore) {
 			statCards.push({
 				label: 'Highest Game Score',
@@ -426,6 +470,7 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 				detail: this.renderRecordDetail(stats.highestGameScore.entries)
 			});
 		}
+
 		if (stats.lowestGameScore) {
 			statCards.push({
 				label: 'Lowest Game Score',
@@ -433,13 +478,15 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 				detail: this.renderRecordDetail(stats.lowestGameScore.entries)
 			});
 		}
+
 		if (stats.mostTimesHighestBidder) {
 			statCards.push({
-				label: 'Most Times Highest Bidder',
+				label: 'Top Bidder',
 				value: stats.mostTimesHighestBidder.player,
 				detail: `${stats.mostTimesHighestBidder.count} times`
 			});
 		}
+
 		if (stats.bestRoundScore) {
 			statCards.push({
 				label: 'Best Round Score',
@@ -447,6 +494,7 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 				detail: this.renderRecordDetail(stats.bestRoundScore.entries)
 			});
 		}
+
 		if (stats.worstRoundScore) {
 			statCards.push({
 				label: 'Worst Round Score',
@@ -454,17 +502,29 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 				detail: this.renderRecordDetail(stats.worstRoundScore.entries)
 			});
 		}
+
 		if (statCards.length > 0) {
 			statCards.push({
 				label: 'Total Rounds Fell',
 				value: stats.totalRoundsFell,
 				detail: 'across all games'
 			});
+
+			const totalPlayed = stats.overRounds + stats.underRounds;
+			if (totalPlayed > 0) {
+				const overPct = Math.round((stats.overRounds / totalPlayed) * 100);
+				const underPct = 100 - overPct;
+				statCards.push({
+					label: 'Over vs Under',
+					value: `${overPct}% / ${underPct}%`,
+					detail: `${stats.overRounds} over · ${stats.underRounds} under`
+				});
+			}
 		}
 
 		return (
 			<div className="league-records">
-				<h3>League Records</h3>
+				<h3>Other League Records:</h3>
 				{statCards.length === 0 ? (
 					<div className="records-empty">No statistics yet — finish a game to see league records here.</div>
 				) : (
@@ -481,6 +541,68 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 			</div>
 		);
 	};
+
+	private getGamePosition(game: GameWithMeta, leaguePlayers: IPlayer[], leagueIdx: number): number {
+		if (game.playersOrder) {
+			const playerKey = leaguePlayers[leagueIdx].key;
+			return game.playersOrder.findIndex(p => p.key === playerKey);
+		}
+
+		return leagueIdx;
+	}
+
+	computePlayerGameStats = (allGamesData: GameWithMeta[], leaguePlayers: IPlayer[]): Record<string, number>[] => {
+		const playerStats = leaguePlayers.map(() => ({ gameWins: 0, totalGamePoints: 0, highestBidderWins: 0 }));
+
+		for (const game of allGamesData) {
+			const scores = [game.totalScore0, game.totalScore1, game.totalScore2, game.totalScore3];
+			const maxScore = Math.max(...scores);
+
+			for (let i = 0; i < leaguePlayers.length; i++) {
+				const pos = this.getGamePosition(game, leaguePlayers, i);
+				if (pos === -1) continue;
+
+				const score = scores[pos];
+				playerStats[i].totalGamePoints += score;
+
+				if (score === maxScore) {
+					playerStats[i].gameWins++;
+				}
+			}
+
+			for (const round of game.rounds) {
+				if (!round || round.highestBidder === undefined || round.highestBidder === '') continue;
+
+				const bidderPos = Number(round.highestBidder);
+				const bid = Number(round[`bid${bidderPos}`] || 0);
+				const won = Number(round[`won${bidderPos}`] || 0);
+
+				if (bid === won) {
+					const leagueIdx = leaguePlayers.findIndex(
+						(p, idx) => this.getGamePosition(game, leaguePlayers, idx) === bidderPos
+					);
+					if (leagueIdx !== -1) {
+						playerStats[leagueIdx].highestBidderWins++;
+					}
+				}
+			}
+		}
+
+		return playerStats;
+	};
+
+	getGameStatsRow = (statsKey: string, playerGameStats: Record<string, number>[]) => (
+		<div className="stats-row" key={statsKey}>
+			<h4>{gameStatsObj[statsKey]}</h4>
+			<Row gutter={4}>
+				{playerGameStats.map((stat, i) => (
+					<Col span={6} key={this.state.players[i]?.key ?? i}>
+						<div className="table-cell">{stat[statsKey]}</div>
+					</Col>
+				))}
+			</Row>
+		</div>
+	);
 
 	getTableHeaders = (players: PlayerWithGames[]) =>
 		players.map(({ key, nickname, games }) => (
