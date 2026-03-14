@@ -2,7 +2,7 @@ import React from 'react';
 import { fire } from '../firebase';
 import { Route, Link, RouteComponentProps } from 'react-router-dom';
 import withAuthorization from '../authentication/withAuthorization';
-import { Menu, Layout, message } from 'antd';
+import { Menu, Layout, message, Tag } from 'antd';
 import { DashboardOutlined, GoldOutlined, ExportOutlined, PlusOutlined } from '@ant-design/icons';
 import './League.scss';
 import GameTab from '../game/GameTab';
@@ -82,7 +82,7 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
 		this.setState({ loading: true });
 		this.leagueRef.on('value', snapshot => {
 			const leagueData: ILeagueModel = snapshot.val();
-			console.log(leagueData);
+
 			if (leagueData) {
 				this.setState({
 					league: {
@@ -133,7 +133,10 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
 					onHandleClick={this.toggleDrawer}
 					onClose={this.toggleDrawer}
 				>
-					<div className="drawer-title">{league.title}</div>
+					<div className="drawer-title">
+						{league.title}
+						{league.isDemo && <Tag color="orange" className="demo-tag">Demo</Tag>}
+					</div>
 					{this.getMenu()}
 				</RcDrawer>
 				{loading && <Loader className="with-mask" />}
@@ -143,12 +146,13 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
 							path={`${routes.LEAGUE}/:leagueID/game/:gameID`}
 							render={props =>
 								!!leagueID ? (
-									<GameTab
-										{...props}
-										players={players as IPlayer[]}
-										// loading={loading}
-										loaderStateCb={this.setLoaderState}
-									/>
+								<GameTab
+									{...props}
+									players={players as IPlayer[]}
+									leagueTitle={league.title}
+									// loading={loading}
+									loaderStateCb={this.setLoaderState}
+								/>
 								) : (
 									<Loader />
 								)

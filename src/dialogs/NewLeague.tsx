@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Modal, Form, Input, Select, Spin } from 'antd';
+import { Modal, Form, Input, Select, Spin, Checkbox } from 'antd';
 import { fire } from '../firebase';
 import { onceGetUsers, onceGetLeagues } from '../firebase/db';
 import { IBasicDialogProps } from './Dialog';
 import { FormInstance } from 'antd/lib/form/Form';
 import { IRawPlayer, IPlayer } from '../models/IPlayerModel';
+
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -80,6 +81,13 @@ class NewLeague extends Component<INewLeagueProps, INewLeagueState> {
           <FormItem label="Description" name="description">
             <Input type="textarea" />
           </FormItem>
+          <FormItem
+            name="isDemo"
+            valuePropName="checked"
+            initialValue={false}
+          >
+            <Checkbox>Demo league</Checkbox>
+          </FormItem>
           {
             <FormItem
               label="Players"
@@ -109,9 +117,9 @@ class NewLeague extends Component<INewLeagueProps, INewLeagueState> {
 
     form &&
       form
-        .validateFields(['title', 'description', 'players'])
+        .validateFields(['title', 'description', 'players', 'isDemo'])
         .then((values) => {
-          const { description } = values;
+          const { description, isDemo, ...rest } = values;
           this.setState({ savingLeagueLoader: true });
 
           const players: IPlayer[] = values.players.map((key: string) => ({
@@ -127,11 +135,12 @@ class NewLeague extends Component<INewLeagueProps, INewLeagueState> {
               .database()
               .ref('leagues/list/_' + newID)
               .set({
-                ...values,
+                ...rest,
                 players,
                 description: description || '',
                 leagueID: newID,
                 active: true,
+                ...(isDemo && { isDemo: true }),
               })
               .then(() => this.setNewLeagueID(newID));
             fire.database().ref('leagues/lastID').set(newID);

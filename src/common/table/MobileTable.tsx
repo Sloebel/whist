@@ -2,23 +2,28 @@ import React from 'react';
 import { Row, Col } from 'antd';
 import { TrophyTwoTone } from '@ant-design/icons';
 import { cardsRenderer } from './renderers';
+import { IGameColumn, IRoundData, LeagueScoreTypeMap } from '../../models/IGameModel';
 
-const MobileTable = (props) => {
-  const {
-    dataSource: rounds,
-    players,
-    currentRound,
-    leagueScores,
-    gameID,
-  } = props;
+interface MobileTableProps {
+  dataSource?: IRoundData[];
+  players: IGameColumn[];
+  currentRound?: number;
+  leagueScores: LeagueScoreTypeMap;
+  gameID: string;
+  leagueTitle?: string;
+}
 
-  // const onDragEnd = (fromIndex, toIndex) => {
-  //   console.log("onDragEnd");
-  // };
-
+const MobileTable: React.FC<MobileTableProps> = ({
+  dataSource: rounds = [],
+  players,
+  currentRound = 0,
+  leagueScores,
+  gameID,
+  leagueTitle,
+}) => {
   return (
     <div className="game-table">
-      <h3 className="game-header">Game {gameID}</h3>
+      <h3 className="game-header">{leagueTitle && `${leagueTitle} - `}Game {gameID}</h3>
       <Row gutter={1} className="table-header" style={{ marginBottom: 1 }}>
         <Col span={4}>
           <div className="table-cell">round</div>
@@ -60,20 +65,14 @@ const MobileTable = (props) => {
 
 export default MobileTable;
 
-///////////////////////////
-//
-// helpers
-//
-///////////////////////////
-
-export const getTableHeaders = (players) =>
+export const getTableHeaders = (players: IGameColumn[]) =>
   players.map(({ index: playerIndex, playerName }) => (
     <Col key={playerIndex} span={5}>
       <div className="table-cell">{playerName}</div>
     </Col>
   ));
 
-const getRoundCol = (players, roundData) =>
+const getRoundCol = (players: IGameColumn[], roundData: IRoundData) =>
   players.map(({ index: playerIndex }) => (
     <Col span={5} key={playerIndex}>
       <div
@@ -91,12 +90,12 @@ const getRoundCol = (players, roundData) =>
     </Col>
   ));
 
-const getLeagueScoresCol = (players, leagueScores) =>
+const getLeagueScoresCol = (players: IGameColumn[], leagueScores: LeagueScoreTypeMap) =>
   players.map(({ index: playerIndex }) => (
     <Col span={5} key={playerIndex}>
       <div className={`table-cell`}>
-        {leagueScores[`leagueScore${playerIndex}`] !== ''
-          ? leagueScores[`leagueScore${playerIndex}`]
+        {leagueScores[`leagueScore${playerIndex}` as keyof LeagueScoreTypeMap] != null
+          ? leagueScores[`leagueScore${playerIndex}` as keyof LeagueScoreTypeMap]
           : '-'}
       </div>
     </Col>

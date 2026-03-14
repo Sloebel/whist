@@ -4,6 +4,7 @@ import { INewGameDialogProps } from './NewGameDialog/NewGameDialog';
 import { IGameInviteProps } from './GameInvite';
 import { IReorderPlayersProps } from './ReorderPlayers';
 import { INewLeagueProps } from './NewLeague';
+import { IResumeLeagueProps } from './ResumeLeague';
 
 export interface IBasicDialogProps<T> {
   visible: boolean;
@@ -16,6 +17,7 @@ export type DialogProps =
   | IGameInviteProps
   | IReorderPlayersProps
   | INewLeagueProps
+  | IResumeLeagueProps
   | any;
 
 export interface IDialogProps {
