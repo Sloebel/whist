@@ -1,0 +1,29 @@
+.game-tab-root {
+	position: relative;
+	height: 100%;
+
+	.ant-modal-mask,
+	.ant-modal-wrap {
+		position: absolute;
+	}
+}
+
+.desktop-mode .game-tab-root .ant-modal {
+	width: 85% !important;
+}
+
+.mid-game-break-content {
+	text-align: center;
+	padding: 16px 0;
+
+	.mid-game-break-icon {
+		font-size: 48px;
+		color: #8b5e3c;
+		margin-bottom: 12px;
+	}
+
+	h2 {
+		margin: 0;
+		font-size: 20px;
+	}
+}
