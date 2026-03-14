@@ -9,23 +9,31 @@ interface MidGameBreakModalProps {
 	onClose: () => void;
 	onContinue: () => void;
 	getContainer: () => HTMLElement;
+	showContinue?: boolean;
 }
 
-const MidGameBreakModal: React.FC<MidGameBreakModalProps> = ({ visible, onClose, onContinue, getContainer }) => {
+const MidGameBreakModal: React.FC<MidGameBreakModalProps> = ({ visible, onClose, onContinue, getContainer, showContinue = true }) => {
+	const footer = [
+		<Button key="close" onClick={onClose}>
+			Close
+		</Button>
+	];
+
+	if (showContinue) {
+		footer.push(
+			<Button key="continue" type="primary" onClick={onContinue}>
+				Continue
+			</Button>
+		);
+	}
+
 	return (
 		<Modal
 			visible={visible}
 			maskClosable={false}
 			closable={false}
 			getContainer={getContainer}
-			footer={[
-				<Button key="close" onClick={onClose}>
-					Close
-				</Button>,
-				<Button key="continue" type="primary" onClick={onContinue}>
-					Continue
-				</Button>
-			]}
+			footer={footer}
 		>
 			<div className="mid-game-break-content">
 				<CoffeeOutlined className="mid-game-break-icon" />

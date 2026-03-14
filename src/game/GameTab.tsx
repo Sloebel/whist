@@ -644,6 +644,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 							this.selectActiveRound(8);
 						}}
 						getContainer={() => this.containerRef.current!}
+						showContinue={gameMode !== 'remote' || gameData.dealer === fire.auth().currentUser?.uid}
 					/>
 				</PlayersContext.Provider>
 			</div>
