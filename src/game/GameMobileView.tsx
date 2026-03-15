@@ -17,7 +17,8 @@ interface GameMobileViewProps {
 	playersColumns: IGameColumn[];
 	devicePlayerIndex: number | null;
 	currentRound?: number;
-	handleSave: (row: IRoundData, player: number) => void;
+	handleSave: (row: IRoundData, player?: number) => void;
+	isDealer?: boolean;
 	onCurrentViewChange: (view: GameViewType) => void;
 	goToRound: (round: number) => void;
 	leagueScores: LeagueScoreTypeMap;
@@ -110,6 +111,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 			devicePlayerIndex,
 			handleCardThrown,
 			disableNextRound,
+			isDealer,
 		} = this.props;
 
 		return (
@@ -140,6 +142,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 								players={playersColumns}
 								devicePlayerIndex={devicePlayerIndex}
 								onChange={handleSave}
+								isDealer={isDealer}
 							/>
 						</div>
 					</div>

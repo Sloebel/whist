@@ -228,7 +228,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 		}
 	}
 
-	private handleSave = (row: IRoundData, player: number) => {
+	private handleSave = (row: IRoundData, player?: number) => {
 		const stateToUpdate: Partial<IGameData> = {};
 		let summaryToUpdate;
 		const prevRounds = this.state.gameData.rounds || [];
@@ -457,7 +457,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 						totalStoodWhenLastBidder++;
 					}
 
-					if (round.segment && round.segment > 0) {
+					if (round.segment && Number(round.segment) > 0) {
 						totalOverRounds++;
 					}
 
@@ -478,7 +478,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 							stoodInNT++;
 						}
 
-						round.segment && round.segment > 0 ? stoodInOver++ : stoodInUnder++;
+						round.segment && Number(round.segment) > 0 ? stoodInOver++ : stoodInUnder++;
 					}
 				}
 			}
@@ -636,6 +636,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 						goToRound={this.selectActiveRound}
 						leagueScores={this.getLeagueScores()}
 						disableNextRound={this.state.pendingMidGameBreak}
+						isDealer={gameMode !== 'remote' || gameData.dealer === fire.auth().currentUser?.uid}
 					/>
 
 					<MidGameBreakModal
