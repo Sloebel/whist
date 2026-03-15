@@ -18,6 +18,7 @@ export interface IHandState {
   handWinner?: number;
   status: GAME_STATUS;
   thrownCards: IThrownCard[];
+  turnOf?: number | null;
 }
 export interface IHandsState {
   [handKey: number]: IHandState;
