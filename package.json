@@ -40,7 +40,10 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "test": "react-app-rewired test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "firebase:login": "npx firebase-tools login",
+    "firebase:deploy": "npx firebase-tools deploy --only functions",
+    "firebase:emulator": "npx firebase-tools emulators:start --only functions"
   },
   "eslintConfig": {
     "extends": "react-app"
