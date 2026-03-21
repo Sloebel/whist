@@ -4,7 +4,7 @@ import { RightOutlined, LeftOutlined } from '@ant-design/icons';
 import MobileTable from '../common/table/MobileTable';
 import GamePad from './GamePad/GamePad';
 import { hasTouch, addListener } from '../utils/Utils';
-import { GameViewType, IGameColumn, IRoundData, LeagueScoreTypeMap } from '../models/IGameModel';
+import { GameViewType, IGameColumn, IRoundData, LeagueScoreTypeMap, IClaimApproved } from '../models/IGameModel';
 
 interface GameMobileViewProps {
 	gameID: string;
@@ -12,7 +12,7 @@ interface GameMobileViewProps {
 	leagueTitle?: string;
 	currentView: GameViewType;
 	rounds?: IRoundData[];
-	ownCardsState?: string[];
+	ownCardsState?: (string | null)[];
 	handleCardThrown: (card: string, player: number, currentRound: number, currentHand: number) => void;
 	playersColumns: IGameColumn[];
 	devicePlayerIndex: number | null;
@@ -23,6 +23,11 @@ interface GameMobileViewProps {
 	goToRound: (round: number) => void;
 	leagueScores: LeagueScoreTypeMap;
 	disableNextRound?: boolean;
+	claimApproved?: IClaimApproved;
+	claimActivated?: boolean;
+	revealedCards?: { [playerIndex: number]: string[] };
+	onClaimActivated?: () => void;
+	onDropCards?: () => void;
 }
 
 export default class GameMobileView extends Component<GameMobileViewProps> {
@@ -112,6 +117,11 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 			handleCardThrown,
 			disableNextRound,
 			isDealer,
+			claimApproved,
+			claimActivated,
+			revealedCards,
+			onClaimActivated,
+			onDropCards,
 		} = this.props;
 
 		return (
@@ -143,6 +153,11 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 								devicePlayerIndex={devicePlayerIndex}
 								onChange={handleSave}
 								isDealer={isDealer}
+								claimApproved={claimApproved}
+								claimActivated={claimActivated}
+								revealedCards={revealedCards}
+								onClaimActivated={onClaimActivated}
+								onDropCards={onDropCards}
 							/>
 						</div>
 					</div>

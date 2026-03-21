@@ -24,6 +24,10 @@ export interface IHandsState {
   [handKey: number]: IHandState;
 }
 
+export interface IClaimApproved {
+  player: number;
+}
+
 export interface IBaseRoundData {
   [index: string]: any;
   segment: string | number;
@@ -52,6 +56,10 @@ export interface IBaseRoundData {
   won2: string | number;
   won3: string | number;
   currentHand?: number;
+  claimApproved?: IClaimApproved;
+  claimActivated?: boolean;
+  droppedCards?: { [playerIndex: number]: boolean };
+  revealedCards?: { [playerIndex: number]: string[] };
 }
 
 export interface IRoundData extends IBaseRoundData {
@@ -119,7 +127,7 @@ export interface IGameData extends IBaseGameData, ILeagueGameModel {
   dealer?: string;
   gameMode?: GameMode;
   playersOrder?: IPlayer[];
-  ownCardsState?: string[];
+  ownCardsState?: (string | null)[];
 }
 
 export interface IGamePlayersSummary {

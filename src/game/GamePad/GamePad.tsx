@@ -14,15 +14,22 @@ import { PlayersContext } from '../GameTab';
 import Css, { CSS_TRANSITIONS } from '../../common/transition/Css';
 import TwoWayArrow, { TWO_WAY_ARROW_DIRECTION } from '../../common/twoWayArrow/TwoWayArrow';
 import PlayCard from '../PlayCard/PlayCard';
-import ThrownCard from '../ThrownCard/ThrownCard';
-import { nextPlayerIndex, uniqueHand, getFromToCalc, getToWinnerCalc } from '../../utils/game-utils';
+import ThrownCard, { ThrownCardType } from '../ThrownCard/ThrownCard';
+import {
+	nextPlayerIndex,
+	uniqueHand,
+	getFromToCalc,
+	getToWinnerCalc,
+	CARD_MARKER_HEIGHT
+} from '../../utils/game-utils';
 import {
 	IRoundData,
 	IGameColumn,
 	IThrownCard,
 	ICardsPosition,
 	ICardsFromTo,
-	IPlayerHand
+	IPlayerHand,
+	IClaimApproved
 } from '../../models/IGameModel';
 
 import './GamePad.scss';
@@ -38,7 +45,7 @@ message.config({
 
 interface GamePadProps {
 	gameMode?: string;
-	ownCardsState?: string[];
+	ownCardsState?: (string | null)[];
 	onCardThrown: (card: string, player: number, currentRound: number, currentHand: number) => void;
 	currentRound?: number;
 	allRounds?: IRoundData[];
@@ -46,6 +53,11 @@ interface GamePadProps {
 	devicePlayerIndex: number | null;
 	onChange: (roundData: IRoundData, player?: number) => void;
 	isDealer?: boolean;
+	claimApproved?: IClaimApproved;
+	claimActivated?: boolean;
+	revealedCards?: { [playerIndex: number]: string[] };
+	onClaimActivated?: () => void;
+	onDropCards?: () => void;
 }
 
 interface GamePadState {
@@ -57,12 +69,14 @@ interface GamePadState {
 	thrownCards: IThrownCard[];
 	handCardType: string | undefined;
 	isMute: boolean;
+	claimWinnerAnimating: boolean;
 }
 
 class GamePad extends Component<GamePadProps, GamePadState> {
 	audio = new Audio(playerTurn);
 	private cardsMarkerRef: HTMLDivElement | null = null;
 	private ownThrownCardInitPos: ICardsPosition | undefined;
+	private claimAnimationTimer?: ReturnType<typeof setTimeout>;
 
 	constructor(props: GamePadProps) {
 		super(props);
@@ -75,7 +89,8 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 			thrownCard: undefined,
 			thrownCards: [],
 			handCardType: undefined,
-			isMute: false
+			isMute: false,
+			claimWinnerAnimating: false
 		};
 
 		this.handleSwitchMode = this.handleSwitchMode.bind(this);
@@ -151,6 +166,30 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 				}
 
 				this.setState(stateToUpdate as GamePadState);
+			}
+
+			const { revealedCards, claimActivated } = this.props;
+			const prevRevealed = prevProps.revealedCards;
+			const lastHand = currentHand as number;
+			const roundFinished = handsState && handsState[lastHand] && handsState[lastHand].status === 'FINISHED';
+
+			if (claimActivated && revealedCards && !roundFinished) {
+				const allRevealed = [0, 1, 2, 3].every(i => revealedCards[i] != null);
+				const prevAllRevealed = prevRevealed && [0, 1, 2, 3].every(i => prevRevealed[i] != null);
+
+				if (allRevealed && !prevAllRevealed && !this.state.claimWinnerAnimating) {
+					this.claimAnimationTimer = setTimeout(() => {
+						this.setState({ claimWinnerAnimating: true });
+					}, 1500);
+				}
+			}
+
+			if (!claimActivated && prevProps.claimActivated) {
+				this.setState({ claimWinnerAnimating: false });
+
+				if (this.claimAnimationTimer) {
+					clearTimeout(this.claimAnimationTimer);
+				}
 			}
 		}
 	}
@@ -493,7 +532,148 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 				</Row>
 				{isRemote && this.getThrownCardsPlacement()}
 				{this.getCards()}
+				{isRemote && this.getClaimControls()}
+				{isRemote && this.getRevealedCardsDisplay()}
 			</Radio.Group>
+		);
+	}
+
+	getClaimControls() {
+		const { claimApproved, claimActivated, revealedCards, devicePlayerIndex, onClaimActivated, onDropCards } =
+			this.props;
+		const roundData = this.getRoundData();
+		const { currentHand } = roundData;
+
+		if (!currentHand || currentHand < 8) return null;
+
+		const showClaimButton = claimApproved && claimApproved.player === devicePlayerIndex && !claimActivated;
+
+		const showDropButton =
+			claimActivated &&
+			claimApproved &&
+			devicePlayerIndex !== claimApproved.player &&
+			!(revealedCards && revealedCards[devicePlayerIndex!] != null);
+
+		if (!showClaimButton && !showDropButton) return null;
+
+		return (
+			<div className="claim-controls">
+				{showClaimButton && (
+					<Button type="primary" className="claim-btn" onClick={onClaimActivated}>
+						Claim Cards
+					</Button>
+				)}
+				{showDropButton && (
+					<Button type="primary" className="drop-cards-btn" onClick={onDropCards}>
+						Drop Cards
+					</Button>
+				)}
+			</div>
+		);
+	}
+
+	getRevealedCardsDisplay() {
+		const { claimActivated, claimApproved, revealedCards, devicePlayerIndex } = this.props;
+		const { claimWinnerAnimating } = this.state;
+
+		if (!claimActivated || !revealedCards || !this.cardsMarkerRef) return null;
+
+		const roundData = this.getRoundData();
+		const { handsState, currentHand } = roundData;
+		const lastHand = currentHand as number;
+
+		if (handsState && handsState[lastHand] && handsState[lastHand].status === 'FINISHED') return null;
+
+		const markerTop = this.cardsMarkerRef.offsetTop;
+		const markerWidth = this.cardsMarkerRef.offsetWidth;
+		const fn = nextPlayerIndex;
+
+		const playerOnPadMap: Record<number, ThrownCardType> = {
+			[devicePlayerIndex!]: 'bottom',
+			[fn(devicePlayerIndex!)]: 'left',
+			[fn(devicePlayerIndex! + 1)]: 'top',
+			[fn(devicePlayerIndex! + 2)]: 'right'
+		};
+
+		const winnerDirection = claimApproved ? playerOnPadMap[claimApproved.player] : undefined;
+		const toWinner =
+			claimWinnerAnimating && winnerDirection
+				? getToWinnerCalc(winnerDirection, markerTop, markerWidth)!.to
+				: null;
+
+		return (
+			<div className="revealed-cards-container">
+				{Object.entries(revealedCards).map(([idx, cards]) => {
+					const playerIndex = Number(idx);
+					if (!cards || cards.length === 0) return null;
+
+					const thrownType = playerOnPadMap[playerIndex];
+					const basePos = getFromToCalc(thrownType, markerTop, markerWidth, { top: 0, left: 0 });
+
+					const from =
+						thrownType === 'bottom' ? getToWinnerCalc('bottom', markerTop, markerWidth)!.to : basePos.from;
+
+					const fanSpacing = 18;
+					const cardWidth = 90;
+					const cardHeight = 126;
+					const centerLeft = markerWidth / 2;
+					const centerTop = markerTop + CARD_MARKER_HEIGHT / 2;
+
+					const inset = 100;
+					const gapAnchor: Record<ThrownCardType, { top: number; left: number }> = {
+						top: { top: centerTop - cardHeight - inset, left: centerLeft - cardWidth / 2 },
+						bottom: { top: centerTop + inset, left: centerLeft - cardWidth / 2 },
+						left: { top: centerTop - cardHeight / 2, left: centerLeft - cardWidth - inset },
+						right: { top: centerTop - cardHeight / 2, left: centerLeft + inset }
+					};
+
+					const anchor = gapAnchor[thrownType];
+
+					const getRevealedTo = (i: number) => {
+						if (toWinner) return toWinner;
+
+						const centerOffset = i - (cards.length - 1) / 2;
+						switch (thrownType) {
+							case 'top':
+								return {
+									top: anchor.top,
+									left: anchor.left + -centerOffset * fanSpacing
+								};
+							case 'left':
+								return {
+									top: anchor.top + centerOffset * fanSpacing,
+									left: anchor.left
+								};
+							case 'right':
+								return {
+									top: anchor.top + -centerOffset * fanSpacing,
+									left: anchor.left
+								};
+							case 'bottom':
+							default:
+								return {
+									top: anchor.top,
+									left: anchor.left + centerOffset * fanSpacing
+								};
+						}
+					};
+
+					return (
+						<div key={`revealed-group-${playerIndex}`} className={`revealed-player-group ${thrownType}`}>
+							{cards.map((card, i) => (
+								<ThrownCard
+									key={`revealed-${playerIndex}-${card}`}
+									thrownType={thrownType}
+									card={card}
+									from={from}
+									to={getRevealedTo(i)}
+									hasWinner={claimWinnerAnimating}
+								/>
+							))}
+						</div>
+					);
+				})}
+			</div>
 		);
 	}
 
@@ -597,23 +777,31 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 	}
 
 	getCards() {
-		const { ownCardsState, devicePlayerIndex } = this.props;
+		const { ownCardsState, devicePlayerIndex, claimActivated, claimApproved, revealedCards } = this.props;
 		const { preSelectedCard, thrownCard, handCardType, selectedPlayer } = this.state;
 
+		if (claimActivated && revealedCards && revealedCards[devicePlayerIndex!] != null) {
+			return null;
+		}
+
 		if (ownCardsState) {
-			const hasCardType = Object.values(ownCardsState).some(card => card.split('-')[1] === handCardType);
+			const cards = ownCardsState.filter((c): c is string => c !== null);
+			const hasCardType = cards.some(card => card.split('-')[1] === handCardType);
 			const isDevicePlayer = devicePlayerIndex === selectedPlayer;
 
 			return (
 				<div className="cards-container">
-					{Object.values(ownCardsState).map(card => (
+					{cards.map(card => (
 						<PlayCard
 							key={card}
 							card={card}
 							preSelected={preSelectedCard === card}
 							thrown={thrownCard === card}
 							onCardClick={this.handleCardClick(card)}
-							disabled={isDevicePlayer && hasCardType && card.split('-')[1] !== handCardType}
+							disabled={
+								!!claimApproved ||
+								(isDevicePlayer && hasCardType && card.split('-')[1] !== handCardType)
+							}
 						/>
 					))}
 				</div>
@@ -665,6 +853,10 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 	}
 
 	handleCardClick = (card: string) => (e: React.MouseEvent<HTMLDivElement>) => {
+		const { claimApproved } = this.props;
+
+		if (claimApproved) return;
+
 		const { preSelectedCard, selectedPlayer } = this.state;
 		const { currentRound, devicePlayerIndex, onCardThrown } = this.props;
 		const roundData = this.getRoundData();
