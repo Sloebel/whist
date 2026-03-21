@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { canClaimRemainingCards } from './claim-utils';
 
@@ -11,15 +11,15 @@ interface ValidateClaimData {
 	trump: string;
 }
 
-export const validateClaim = functions.https.onCall(async (data: ValidateClaimData, context) => {
-	if (!context.auth) {
-		throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated to validate a claim.');
+export const validateClaim = onCall({ cors: true }, async (request) => {
+	if (!request.auth) {
+		throw new HttpsError('unauthenticated', 'Must be authenticated to validate a claim.');
 	}
 
-	const { gameKey, round, trickWinnerIndex, gamePath, players, trump } = data;
+	const { gameKey, round, trickWinnerIndex, gamePath, players, trump } = request.data as ValidateClaimData;
 
 	if (!gameKey || !round || trickWinnerIndex == null || !gamePath || !players || !trump) {
-		throw new functions.https.HttpsError('invalid-argument', 'Missing required fields.');
+		throw new HttpsError('invalid-argument', 'Missing required fields.');
 	}
 
 	const db = admin.database();
