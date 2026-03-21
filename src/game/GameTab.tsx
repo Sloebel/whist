@@ -18,6 +18,7 @@ import GameMobileView from './GameMobileView';
 import MidGameBreakModal from './MidGameBreakModal/MidGameBreakModal';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
 import GameService from '../services/GameSrv';
+import FeatureFlagService from '../services/FeatureFlagSrv';
 import {
 	IGameColumn,
 	GameViewType,
@@ -60,6 +61,7 @@ export interface IGameTabState {
 	gameSummary: IGamePlayersSummary;
 	showMidGameBreak: boolean;
 	pendingMidGameBreak: boolean;
+	claimEnabled: boolean;
 }
 
 class GameTab extends Component<IGameTabProps, IGameTabState> {
@@ -68,7 +70,9 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 	private gameSummaryRef?: firebase.database.Reference;
 	private ownCardsStateRef?: firebase.database.Reference;
 	private containerRef = React.createRef<HTMLDivElement>();
+	private unsubscribeClaimFlag?: () => void;
 	private gameKey: string = '';
+	private handFinishScheduled: number | null = null;
 
 	constructor(props: IGameTabProps) {
 		super(props);
@@ -90,7 +94,8 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 			},
 			gameSummary: {},
 			showMidGameBreak: false,
-			pendingMidGameBreak: false
+			pendingMidGameBreak: false,
+			claimEnabled: false
 		};
 
 		this.selectActiveRound = this.selectActiveRound.bind(this);
@@ -154,11 +159,16 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 
 	public componentDidMount() {
 		this.fetch();
+
+		this.unsubscribeClaimFlag = FeatureFlagService.subscribe('CLAIM_ENABLED', value => {
+			this.setState({ claimEnabled: value === true });
+		});
 	}
 
 	public componentWillUnmount() {
 		this.gameRef?.off('value');
 		this.gameSummaryRef?.off('value');
+		this.unsubscribeClaimFlag?.();
 		if (this.ownCardsStateRef) {
 			this.ownCardsStateRef.off('value');
 		}
@@ -195,8 +205,11 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 				if (
 					currentHandState &&
 					(currentHandState.thrownCards || []).length === 4 &&
-					currentHandState.status === 'ACTIVE'
+					currentHandState.status === 'ACTIVE' &&
+					this.handFinishScheduled !== currentHand
 				) {
+					this.handFinishScheduled = currentHand as number;
+
 					setTimeout(() => {
 						if (dealer === userId) {
 							this.handleHandFinished(roundData);
@@ -204,8 +217,38 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 					}, 2500);
 				}
 
-				if (currentHand === 13 && (handsState || {})[currentHand].status === 'FINISHED' && dealer === userId) {
+				if (
+					currentHand === 13 &&
+					(handsState || {})[currentHand].status === 'FINISHED' &&
+					dealer === userId &&
+					!roundData.check
+				) {
 					this.calculateHandScore(roundData);
+				}
+
+				if (
+					roundData.claimActivated &&
+					roundData.revealedCards &&
+					(currentHand as number) < 13 &&
+					dealer === userId
+				) {
+					const allRevealed = [0, 1, 2, 3].every(i => roundData!.revealedCards![i] != null);
+
+					if (allRevealed) {
+						const prevRoundData = (prevState.gameData.rounds || []).find(r => r.round === currentRound);
+						const prevAllRevealed =
+							prevRoundData?.revealedCards &&
+							[0, 1, 2, 3].every(i => prevRoundData.revealedCards![i] != null);
+
+						if (!prevAllRevealed) {
+							setTimeout(() => {
+								const freshRoundData = this.getRoundData(currentRound as number);
+								if (freshRoundData) {
+									this.handleClaimAutoComplete(freshRoundData);
+								}
+							}, 3500);
+						}
+					}
 				}
 			}
 		}
@@ -605,6 +648,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 		const { params } = match;
 		const { gameID } = params;
 		const playersColumns = columns.slice(0, 4);
+		const currentRoundData = rounds && rounds[(currentRound as number) - 1];
 
 		return (
 			<div ref={this.containerRef} className="game-tab-root">
@@ -637,6 +681,11 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 						leagueScores={this.getLeagueScores()}
 						disableNextRound={this.state.pendingMidGameBreak}
 						isDealer={gameMode !== 'remote' || gameData.dealer === fire.auth().currentUser?.uid}
+						claimApproved={currentRoundData?.claimApproved}
+						claimActivated={currentRoundData?.claimActivated}
+						revealedCards={currentRoundData?.revealedCards}
+						onClaimActivated={this.handleClaimActivated}
+						onDropCards={this.handleDropCards}
 					/>
 
 					<MidGameBreakModal
@@ -680,12 +729,21 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 				.ref(`cardsByGame/${this.gameKey}/round${currentRound}/cardsState/${userId}`);
 
 			this.ownCardsStateRef.on('value', snap => {
-				console.log(snap.val());
+				const raw = snap.val();
+				let ownCardsState: (string | null)[] = [];
+
+				if (Array.isArray(raw)) {
+					ownCardsState = raw;
+				} else if (raw && typeof raw === 'object') {
+					const maxIndex = Math.max(...Object.keys(raw).map(Number));
+					ownCardsState = Array.from({ length: maxIndex + 1 }, (_, i) => raw[i] ?? null);
+				}
+
 				this.setState(state => {
 					return {
 						gameData: {
 							...state.gameData,
-							ownCardsState: snap.val() || []
+							ownCardsState
 						}
 					};
 				});
@@ -733,7 +791,86 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 					}
 				}
 			})
-			.then(() => setTimeout(() => currentHand !== 13 && this.goToNextHand(roundData, winner), 200));
+			.then(() => {
+				setTimeout(() => currentHand !== 13 && this.goToNextHand(roundData, winner), 200);
+
+				if ((currentHand as number) >= 8 && (currentHand as number) < 12) {
+					this.validateClaim(round, winner.player);
+				}
+			});
+	}
+
+	private async validateClaim(round: number, trickWinnerPlayerIndex: number) {
+		const { players } = this.state;
+		const roundData = this.getRoundData(round);
+
+		if (!roundData || roundData.claimActivated) return;
+
+		try {
+			await GameService.validateClaim({
+				gameKey: this.gameKey,
+				round,
+				trickWinnerIndex: trickWinnerPlayerIndex,
+				gamePath: `games/${this.gameKey}`,
+				players: players.map(p => ({ key: p.key })),
+				trump: roundData.trump
+			});
+		} catch {
+			return;
+		}
+	}
+
+	private handleClaimActivated = () => {
+		const { gameData, devicePlayerIndex } = this.state;
+		const { currentRound, ownCardsState } = gameData;
+		if (devicePlayerIndex === null || !currentRound) return;
+
+		const remainingCards = (ownCardsState || []).filter(Boolean);
+
+		this.gameRef?.child(`rounds/${currentRound - 1}`).update({
+			claimActivated: true,
+			[`revealedCards/${devicePlayerIndex}`]: remainingCards
+		});
+	};
+
+	private handleDropCards = () => {
+		const { gameData, devicePlayerIndex } = this.state;
+		const { currentRound, ownCardsState } = gameData;
+		if (devicePlayerIndex === null || !currentRound) return;
+
+		const remainingCards = (ownCardsState || []).filter(Boolean);
+
+		this.gameRef?.child(`rounds/${currentRound - 1}`).update({
+			[`revealedCards/${devicePlayerIndex}`]: remainingCards
+		});
+	};
+
+	private handleClaimAutoComplete(roundData: IRoundData) {
+		const { claimApproved, revealedCards } = roundData;
+
+		if (!claimApproved || !revealedCards) return;
+
+		const claimingPlayer = claimApproved.player;
+		const numberOfRemainingCards = (revealedCards[claimingPlayer] || []).length;
+		const currentWon = roundData[`won${claimingPlayer}`];
+		const wonSoFar = typeof currentWon === 'number' ? currentWon : 0;
+		const claimedFromHand = roundData.currentHand as number;
+
+		const filledHandsState = { ...roundData.handsState };
+
+		for (let h = claimedFromHand; h <= 13; h++) {
+			filledHandsState[h] = {
+				status: GAME_STATUS.FINISHED,
+				handWinner: claimingPlayer,
+				thrownCards: []
+			};
+		}
+
+		this.gameRef?.child(`rounds/${roundData.round - 1}`).update({
+			[`won${claimingPlayer}`]: wonSoFar + numberOfRemainingCards,
+			currentHand: 13,
+			handsState: filledHandsState
+		});
 	}
 
 	private goToNextHand(roundData: IRoundData, winner: IThrownCard) {
@@ -761,14 +898,11 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 		const newRound = { ...roundData };
 		const gameToUpdate: Partial<IGameData> = {};
 
+		const roundIndex = (currentRound as number) - 1;
+		allRounds?.splice(roundIndex, 1, newRound);
+
 		[0, 1, 2, 3].forEach(player =>
-			this.calculatePlayerScore(
-				newRound,
-				player,
-				allRounds as IRoundData[],
-				(currentRound as number) - 1,
-				gameToUpdate
-			)
+			this.calculatePlayerScore(newRound, player, allRounds as IRoundData[], roundIndex, gameToUpdate)
 		);
 
 		// calc if round check
@@ -797,12 +931,12 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 				}
 
 				for (let i = 0; i < 4; i++) {
-					this.calculatePlayerScore(newRound, i, allRounds, (currentRound as number) - 1, gameToUpdate);
+					this.calculatePlayerScore(newRound, i, allRounds, roundIndex, gameToUpdate);
 				}
 			}
 
 			// calculate round summary stats
-			let summaryToUpdate = this.calculateSummary(allRounds, (currentRound as number) - 1);
+			let summaryToUpdate = this.calculateSummary(allRounds, roundIndex);
 
 			if (newRound.round === 13 && !newRound.fell) {
 				gameToUpdate.status = GAME_STATUS.FINISHED;
@@ -818,14 +952,12 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 			this.gameSummaryRef?.update(this.mapToPlayersObj(summaryToUpdate));
 		}
 
-		allRounds?.splice((currentRound as number) - 1, 1, newRound);
-
 		gameToUpdate.rounds = allRounds;
 
 		this.gameRef?.update(gameToUpdate);
 	}
 
-	private updateOwnCardState(thrownCard: string, currentRound: number, ownCardsState: string[] = []) {
+	private updateOwnCardState(thrownCard: string, currentRound: number, ownCardsState: (string | null)[] = []) {
 		const cardIndex = Object.keys(ownCardsState).find(index => ownCardsState[+index] === thrownCard);
 		GameService.updateHandCardsState(this.gameKey, currentRound, cardIndex);
 	}
