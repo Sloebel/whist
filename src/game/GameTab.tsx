@@ -831,6 +831,8 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 			claimActivated: true,
 			[`revealedCards/${devicePlayerIndex}`]: remainingCards
 		});
+
+		this.ownCardsStateRef?.remove();
 	};
 
 	private handleDropCards = () => {
@@ -843,6 +845,8 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 		this.gameRef?.child(`rounds/${currentRound - 1}`).update({
 			[`revealedCards/${devicePlayerIndex}`]: remainingCards
 		});
+
+		this.ownCardsStateRef?.remove();
 	};
 
 	private handleClaimAutoComplete(roundData: IRoundData) {
