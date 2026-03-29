@@ -31,6 +31,8 @@ import {
 	IPlayerHand,
 	IClaimApproved
 } from '../../models/IGameModel';
+import PassTag from './Pass/PassTag';
+import PassButton from './Pass/PassButton';
 
 import './GamePad.scss';
 
@@ -420,6 +422,10 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 		const hasAnyBid = [0, 1, 2, 3].some(i => typeof currentRoundData[`bid${i}`] === 'number');
 		const hasAnyWon = [0, 1, 2, 3].some(i => typeof currentRoundData[`won${i}`] === 'number');
 		const showResetBids = inputMode === INPUT_MODE.BID && hasAnyBid && !hasAnyWon && (!isRemote || isDealer);
+		const showPassButton =
+			isRemote && inputMode === INPUT_MODE.BID && typeof currentRoundData.highestBidder !== 'number';
+		const devicePlayerPassed =
+			showPassButton && (currentRoundData.passedPlayers || []).includes(devicePlayerIndex!);
 
 		return (
 			<Radio.Group
@@ -520,6 +526,8 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 							)}
 						</div>
 					)}
+
+					{showPassButton && <PassButton checked={devicePlayerPassed} onChange={this.handlePassToggle} />}
 
 					{showResetBids && (
 						<div className="reset-bids-btn" onClick={this.handleResetBids}>
@@ -678,22 +686,37 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 	}
 
 	getPlayersButtons = () => {
-		const { allRounds, currentRound, players } = this.props;
+		const { allRounds, currentRound, players, devicePlayerIndex, gameMode } = this.props;
 		const currentRoundData = allRounds!.length && allRounds![currentRound! - 1];
 		const highestBidder = (currentRoundData as IRoundData).highestBidder;
+		const passedPlayers = (currentRoundData as IRoundData).passedPlayers || [];
+		const isRemote = gameMode === 'remote';
+		const showPassTag =
+			isRemote &&
+			(currentRoundData as IRoundData).inputMode === INPUT_MODE.BID &&
+			typeof highestBidder !== 'number';
 
 		return players.map(({ index: playerIndex, playerName }) => {
+			const isDevicePlayer = playerIndex === devicePlayerIndex;
+			const hasPassed = showPassTag && !isDevicePlayer && passedPlayers.includes(playerIndex);
+
 			return (
-				<Badge key={playerIndex} dot={highestBidder === playerIndex}>
-					<Radio.Button value={playerIndex}>
-						<PlayerPad
-							name={playerName}
-							bid={(currentRoundData as IRoundData)[`bid${playerIndex}`]}
-							won={(currentRoundData as IRoundData)[`won${playerIndex}`]}
-							score={this.getPlayerAggregateScore(allRounds!, currentRound! - 1, playerIndex)}
-						/>
-					</Radio.Button>
-				</Badge>
+				<div
+					key={playerIndex}
+					style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
+				>
+					<PassTag visible={hasPassed} />
+					<Badge dot={highestBidder === playerIndex}>
+						<Radio.Button value={playerIndex}>
+							<PlayerPad
+								name={playerName}
+								bid={(currentRoundData as IRoundData)[`bid${playerIndex}`]}
+								won={(currentRoundData as IRoundData)[`won${playerIndex}`]}
+								score={this.getPlayerAggregateScore(allRounds!, currentRound! - 1, playerIndex)}
+							/>
+						</Radio.Button>
+					</Badge>
+				</div>
 			);
 		});
 	};
@@ -709,6 +732,18 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 			reorderPlayersDialogVisible: false
 		});
 	}
+
+	handlePassToggle = () => {
+		const { devicePlayerIndex, onChange } = this.props;
+		const roundData = this.getRoundData();
+		const passedPlayers = roundData.passedPlayers || [];
+
+		const updatedPassedPlayers = passedPlayers.includes(devicePlayerIndex!)
+			? passedPlayers.filter((p: number) => p !== devicePlayerIndex)
+			: [...passedPlayers, devicePlayerIndex!];
+
+		onChange({ ...roundData, passedPlayers: updatedPassedPlayers });
+	};
 
 	handleResetBids = () => {
 		const { onChange } = this.props;
@@ -726,7 +761,8 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 					bid3: '',
 					highestBidder: '',
 					trump: '',
-					segment: ''
+					segment: '',
+					passedPlayers: []
 				});
 				this.setState({ selectedPlayer: undefined });
 			}
@@ -747,6 +783,7 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 				stateToUpdate.highestBidder = selectedPlayer;
 				stateToUpdate[`bid${selectedPlayer}`] = num;
 				stateToUpdate.currentBidder = nextPlayerIndex(selectedPlayer!);
+				stateToUpdate.passedPlayers = [];
 
 				if (!roundData.trump) {
 					setTimeout(

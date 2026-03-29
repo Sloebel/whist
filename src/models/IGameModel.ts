@@ -60,6 +60,7 @@ export interface IBaseRoundData {
   claimActivated?: boolean;
   droppedCards?: { [playerIndex: number]: boolean };
   revealedCards?: { [playerIndex: number]: string[] };
+  passedPlayers?: number[];
 }
 
 export interface IRoundData extends IBaseRoundData {
