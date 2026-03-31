@@ -8,7 +8,8 @@ import { Spade, Hart, Diamond, Club } from '../common/cards/Icons';
 import { ILeagueModel } from '../models/ILeagueModel';
 import { IPlayer } from '../models/IPlayerModel';
 import { ISuccessRate, IPlayerScoresSummary } from '../models/IPlayerModel';
-import { IRoundData } from '../models/IGameModel';
+import { IRoundData, GameWithMeta } from '../models/IGameModel';
+import { computePlayerGameStats, computeCumulativeScores, PlayerGameStats } from '../utils/league-stats';
 
 import './LeagueSummary.scss';
 
@@ -38,17 +39,6 @@ const gameStatsObj: Record<string, string> = {
 
 interface PlayerWithGames extends IPlayer {
 	games?: IPlayerScoresSummary[];
-}
-
-interface GameWithMeta {
-	gameKey: string;
-	gameID: number;
-	playersOrder: IPlayer[] | null;
-	rounds: IRoundData[];
-	totalScore0: number;
-	totalScore1: number;
-	totalScore2: number;
-	totalScore3: number;
 }
 
 interface StatCard {
@@ -343,6 +333,7 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 		const { title } = league;
 		const { players, allGamesData, loading } = this.state;
 		const hasFinishedGames = players.some(p => p.games && p.games.length > 0);
+		const cumulativeScores = computeCumulativeScores(players.map(p => p.games || []));
 		const chartData = this.buildChartData(players);
 		const leagueStats = this.computeLeagueStats(allGamesData, league.players || []);
 
@@ -360,14 +351,14 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 							<div className="summary-table">
 								<h3>League Score:</h3>
 								<Row gutter={4} className="table-header" style={{ marginBottom: 1 }}>
-									{this.getTableHeaders(players)}
+									{this.getTableHeaders(players, cumulativeScores)}
 								</Row>
 								{allGamesData.length > 0 && (
 									<div className="game-stats-section">
-										{Object.keys(gameStatsObj).map(key =>
+										{(Object.keys(gameStatsObj) as (keyof PlayerGameStats)[]).map(key =>
 											this.getGameStatsRow(
 												key,
-												this.computePlayerGameStats(allGamesData, league.players || [])
+												computePlayerGameStats(allGamesData, league.players || [])
 											)
 										)}
 									</div>
@@ -550,56 +541,7 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 		);
 	};
 
-	private getGamePosition(game: GameWithMeta, leaguePlayers: IPlayer[], leagueIdx: number): number {
-		if (game.playersOrder) {
-			const playerKey = leaguePlayers[leagueIdx].key;
-			return game.playersOrder.findIndex(p => p.key === playerKey);
-		}
-
-		return leagueIdx;
-	}
-
-	computePlayerGameStats = (allGamesData: GameWithMeta[], leaguePlayers: IPlayer[]): Record<string, number>[] => {
-		const playerStats = leaguePlayers.map(() => ({ gameWins: 0, totalGamePoints: 0, highestBidderWins: 0 }));
-
-		for (const game of allGamesData) {
-			const scores = [game.totalScore0, game.totalScore1, game.totalScore2, game.totalScore3];
-			const maxScore = Math.max(...scores);
-
-			for (let i = 0; i < leaguePlayers.length; i++) {
-				const pos = this.getGamePosition(game, leaguePlayers, i);
-				if (pos === -1) continue;
-
-				const score = scores[pos];
-				playerStats[i].totalGamePoints += score;
-
-				if (score === maxScore) {
-					playerStats[i].gameWins++;
-				}
-			}
-
-			for (const round of game.rounds) {
-				if (!round || round.highestBidder === undefined || round.highestBidder === '') continue;
-
-				const bidderPos = Number(round.highestBidder);
-				const bid = Number(round[`bid${bidderPos}`] || 0);
-				const won = Number(round[`won${bidderPos}`] || 0);
-
-				if (bid === won) {
-					const leagueIdx = leaguePlayers.findIndex(
-						(p, idx) => this.getGamePosition(game, leaguePlayers, idx) === bidderPos
-					);
-					if (leagueIdx !== -1) {
-						playerStats[leagueIdx].highestBidderWins++;
-					}
-				}
-			}
-		}
-
-		return playerStats;
-	};
-
-	getGameStatsRow = (statsKey: string, playerGameStats: Record<string, number>[]) => (
+	getGameStatsRow = (statsKey: keyof PlayerGameStats, playerGameStats: PlayerGameStats[]) => (
 		<div className="stats-row" key={statsKey}>
 			<h4>{gameStatsObj[statsKey]}</h4>
 			<Row gutter={4}>
@@ -612,11 +554,16 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 		</div>
 	);
 
-	getTableHeaders = (players: PlayerWithGames[]) =>
-		players.map(({ key, nickname, games }) => (
+	getTableHeaders = (players: PlayerWithGames[], cumulativeScores: number[]) =>
+		players.map(({ key, nickname }, idx) => (
 			<Col key={key} span={6}>
 				<div className="table-cell header">{nickname}</div>
-				<div className="table-cell score">{games && this.scoreReducer(games, 'leagueScore')}</div>
+				<div className="table-cell score">
+					{cumulativeScores[idx]}
+					{this.props.league.winner?.key === key && (
+						<TrophyOutlined className="winner-trophy" />
+					)}
+				</div>
 			</Col>
 		));
 

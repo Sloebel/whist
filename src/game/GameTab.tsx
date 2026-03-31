@@ -18,6 +18,7 @@ import GameMobileView from './GameMobileView';
 import MidGameBreakModal from './MidGameBreakModal/MidGameBreakModal';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
 import GameService from '../services/GameSrv';
+import LeagueService from '../services/LeagueSrv';
 import FeatureFlagService from '../services/FeatureFlagSrv';
 import {
 	IGameColumn,
@@ -325,7 +326,9 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 				// calculate round summary stats
 				summaryToUpdate = this.calculateSummary(newData, index);
 
-				if (row.round === 13 && !row.fell) {
+				const isGameFinished = row.round === 13 && !row.fell;
+
+				if (isGameFinished) {
 					stateToUpdate.status = GAME_STATUS.FINISHED;
 					this.updateGameStatus(GAME_STATUS.FINISHED);
 
@@ -342,7 +345,12 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 					summaryToUpdate = this.calculateLeagueScores(scores, summaryToUpdate);
 				}
 
-				this.gameSummaryRef?.update(this.mapToPlayersObj(summaryToUpdate));
+				const summaryPromise = this.gameSummaryRef?.update(this.mapToPlayersObj(summaryToUpdate));
+
+				if (isGameFinished) {
+					const { leagueID } = this.props.match.params;
+					summaryPromise?.then(() => LeagueService.checkAndSetWinner(leagueID, this.state.players));
+				}
 			}
 		}
 
@@ -942,18 +950,25 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 			// calculate round summary stats
 			let summaryToUpdate = this.calculateSummary(allRounds, roundIndex);
 
-			if (newRound.round === 13 && !newRound.fell) {
+			const isGameFinished = newRound.round === 13 && !newRound.fell;
+
+			if (isGameFinished) {
 				gameToUpdate.status = GAME_STATUS.FINISHED;
 				this.updateGameStatus(GAME_STATUS.FINISHED);
 
 				// round summary league scores
 				const { totalScore0, totalScore1, totalScore2, totalScore3 } = gameToUpdate;
 				const scores = { totalScore0, totalScore1, totalScore2, totalScore3 };
-				// scores[`totalScore${player}`] = gameToUpdate[`totalScore${player}`];
+
 				summaryToUpdate = this.calculateLeagueScores(scores, summaryToUpdate);
 			}
 
-			this.gameSummaryRef?.update(this.mapToPlayersObj(summaryToUpdate));
+			const summaryPromise = this.gameSummaryRef?.update(this.mapToPlayersObj(summaryToUpdate));
+
+			if (isGameFinished) {
+				const { leagueID } = this.props.match.params;
+				summaryPromise?.then(() => LeagueService.checkAndSetWinner(leagueID, this.state.players));
+			}
 		}
 
 		gameToUpdate.rounds = allRounds;

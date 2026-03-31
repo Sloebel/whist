@@ -134,3 +134,14 @@ export interface IGameData extends IBaseGameData, ILeagueGameModel {
 export interface IGamePlayersSummary {
   [player: string]: IPlayerScoresSummary;
 }
+
+export interface GameWithMeta {
+  gameKey: string;
+  gameID: number;
+  playersOrder: IPlayer[] | null;
+  rounds: IRoundData[];
+  totalScore0: number;
+  totalScore1: number;
+  totalScore2: number;
+  totalScore3: number;
+}

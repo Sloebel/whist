@@ -58,8 +58,18 @@
 		}
 
 		&.score {
+			position: relative;
 			margin-top: 1px;
 			border-radius: 0 0 4px 4px;
+
+			.winner-trophy {
+				position: absolute;
+				font-size: 16px;
+				margin-left: 4px;
+				color: #faad14;
+				top: 50%;
+				transform: translateY(-50%);
+			}
 		}
 	}
 

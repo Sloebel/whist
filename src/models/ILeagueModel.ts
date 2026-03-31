@@ -9,6 +9,7 @@ export interface ILeagueModel {
   description: string;
   players: IPlayer[];
   blockedBy?: string;
+  winner?: IPlayer;
 }
 
 export interface IGameDataTpl {
