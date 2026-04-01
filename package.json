@@ -11,6 +11,7 @@
     "antd": "^4.0.4",
     "firebase": "^7.13.0",
     "gh-pages": "^2.2.0",
+    "lottie-react": "^2.4.1",
     "pure-swipe": "^1.0.7",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

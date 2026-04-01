@@ -69,6 +69,7 @@
 				color: #faad14;
 				top: 50%;
 				transform: translateY(-50%);
+				animation: trophyFadeIn 0.3s ease-out;
 			}
 		}
 	}
@@ -162,5 +163,16 @@
 			text-align: center;
 			margin-bottom: 12px;
 		}
+	}
+}
+
+@keyframes trophyFadeIn {
+	0% {
+		opacity: 0;
+		transform: translateY(-50%) scale(0.5);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(-50%) scale(1);
 	}
 }

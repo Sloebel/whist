@@ -10,6 +10,7 @@ import { IPlayer } from '../models/IPlayerModel';
 import { ISuccessRate, IPlayerScoresSummary } from '../models/IPlayerModel';
 import { IRoundData, GameWithMeta } from '../models/IGameModel';
 import { computePlayerGameStats, computeCumulativeScores, PlayerGameStats } from '../utils/league-stats';
+import WinnerCelebration from './WinnerCelebration/WinnerCelebration';
 
 import './LeagueSummary.scss';
 
@@ -79,6 +80,7 @@ interface LeagueSummaryState {
 	players: PlayerWithGames[];
 	allGamesData: GameWithMeta[];
 	loading: boolean;
+	showCelebration: boolean;
 }
 
 interface ChartDataPoint {
@@ -93,12 +95,59 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 	constructor(props: LeagueSummaryProps) {
 		super(props);
 
+		const { league } = props;
+		const shouldCelebrate =
+			league.active === false && !!league.winner && this.isCelebrationExpired(league.leagueID);
+
 		this.state = {
 			players: props.league.players || [],
 			allGamesData: [],
-			loading: true
+			loading: true,
+			showCelebration: shouldCelebrate
 		};
 	}
+
+	private isCelebrationExpired(leagueID: number | undefined): boolean {
+		if (!leagueID) return false;
+
+		const stored = localStorage.getItem(`winner-celebrated-${leagueID}`);
+		if (!stored) return true;
+
+		const timestamp = Number(stored);
+		if (Number.isNaN(timestamp)) return true;
+
+		const ninetyDays = 90 * 24 * 60 * 60 * 1000;
+		return Date.now() - timestamp > ninetyDays;
+	}
+
+	private dismissCelebration = () => {
+		const leagueID = this.props.league.leagueID;
+
+		this.setState({ showCelebration: false });
+
+		if (!leagueID) return;
+
+		const currentKey = `winner-celebrated-${leagueID}`;
+		localStorage.setItem(currentKey, String(Date.now()));
+
+		const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+		const now = Date.now();
+		const keysToRemove: string[] = [];
+
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+
+			if (!key || key === currentKey || !key.startsWith('winner-celebrated-')) continue;
+
+			const ts = Number(localStorage.getItem(key));
+
+			if (Number.isNaN(ts) || now - ts > thirtyDays) {
+				keysToRemove.push(key);
+			}
+		}
+
+		keysToRemove.forEach(k => localStorage.removeItem(k));
+	};
 
 	componentDidMount() {
 		this.fetch();
@@ -331,7 +380,7 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 	render() {
 		const { league } = this.props;
 		const { title } = league;
-		const { players, allGamesData, loading } = this.state;
+		const { players, allGamesData, loading, showCelebration } = this.state;
 		const hasFinishedGames = players.some(p => p.games && p.games.length > 0);
 		const cumulativeScores = computeCumulativeScores(players.map(p => p.games || []));
 		const chartData = this.buildChartData(players);
@@ -339,6 +388,9 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 
 		return (
 			<div className="game-summery">
+				{showCelebration && league.winner && (
+					<WinnerCelebration winnerNickname={league.winner.nickname} onDismiss={this.dismissCelebration} />
+				)}
 				<h3 className="summary-title">{title}</h3>
 
 				{loading ? (
@@ -560,9 +612,7 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 				<div className="table-cell header">{nickname}</div>
 				<div className="table-cell score">
 					{cumulativeScores[idx]}
-					{this.props.league.winner?.key === key && (
-						<TrophyOutlined className="winner-trophy" />
-					)}
+					{this.props.league.winner?.key === key && <TrophyOutlined className="winner-trophy" />}
 				</div>
 			</Col>
 		));
