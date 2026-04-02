@@ -3,3 +3,4 @@ export const SIGN_UP = '/signup';
 export const MAIN = '/';
 export const LEAGUE = '/league';
 export const GAME = '/game';
+export const SCORE_BOARD = '/score-board';

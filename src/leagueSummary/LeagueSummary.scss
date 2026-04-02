@@ -57,9 +57,26 @@
 			border-radius: 4px 4px 0 0;
 		}
 
+		&.winner {
+			color: #1a5c1a;
+			font-weight: 700;
+			background: #e8f5e9;
+		}
+
 		&.score {
+			position: relative;
 			margin-top: 1px;
 			border-radius: 0 0 4px 4px;
+
+			.winner-trophy {
+				position: absolute;
+				font-size: 16px;
+				margin-left: 4px;
+				color: #faad14;
+				top: 50%;
+				transform: translateY(-50%);
+				animation: trophyFadeIn 0.3s ease-out;
+			}
 		}
 	}
 
@@ -152,5 +169,16 @@
 			text-align: center;
 			margin-bottom: 12px;
 		}
+	}
+}
+
+@keyframes trophyFadeIn {
+	0% {
+		opacity: 0;
+		transform: translateY(-50%) scale(0.5);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(-50%) scale(1);
 	}
 }

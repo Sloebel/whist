@@ -8,7 +8,7 @@ export interface IMainMenuItem {
   onClick?: () => void;
   dialog?: Dialogs;
   disabled?: boolean;
-  dialogProps: DialogProps;
+  dialogProps?: DialogProps;
 }
 
 export interface IMainMenuProps {
