@@ -103,8 +103,8 @@ class Main extends Component<IMainProps, IMainState> {
 								visible: this.state.newLeague
 							}
 						},
+						{ text: 'Leagues Score Board', onClick: () => this.props.history.push(routes.SCORE_BOARD) },
 						{ text: 'Settings' },
-						{ text: 'Scores' },
 						{
 							text: 'Sign Out',
 							onClick: auth.signOut

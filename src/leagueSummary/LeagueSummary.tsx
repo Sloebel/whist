@@ -606,16 +606,23 @@ export default class LeagueSummary extends Component<LeagueSummaryProps, LeagueS
 		</div>
 	);
 
-	getTableHeaders = (players: PlayerWithGames[], cumulativeScores: number[]) =>
-		players.map(({ key, nickname }, idx) => (
-			<Col key={key} span={6}>
-				<div className="table-cell header">{nickname}</div>
-				<div className="table-cell score">
-					{cumulativeScores[idx]}
-					{this.props.league.winner?.key === key && <TrophyOutlined className="winner-trophy" />}
-				</div>
-			</Col>
-		));
+	getTableHeaders = (players: PlayerWithGames[], cumulativeScores: number[]) => {
+		const maxScore = Math.max(...cumulativeScores);
+
+		return players.map(({ key, nickname }, idx) => {
+			const isLeader = cumulativeScores[idx] === maxScore;
+
+			return (
+				<Col key={key} span={6}>
+					<div className={`table-cell header${isLeader ? ' winner' : ''}`}>{nickname}</div>
+					<div className={`table-cell score${isLeader ? ' winner' : ''}`}>
+						{cumulativeScores[idx]}
+						{this.props.league.winner?.key === key && <TrophyOutlined className="winner-trophy" />}
+					</div>
+				</Col>
+			);
+		});
+	};
 
 	getStatsRow = (statsKey: string) => {
 		const { players } = this.state;

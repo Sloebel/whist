@@ -12,6 +12,7 @@ import Login from './authentication/Login';
 import SignUp from './authentication/SignUp';
 import Main from './main/Main';
 import League from './league/League';
+import ScoreBoard from './scoreBoard/ScoreBoard';
 import { isMobileBrowser } from './utils/Utils';
 import { Dialogs } from './constants/dialogs';
 import Dialog from './dialogs/Dialog';
@@ -121,6 +122,7 @@ class App extends Component<IAppProps, IAppState> {
               path={`${routes.LEAGUE}/:leagueID`}
               render={(props) => <League {...props} />}
             />
+            <Route exact path={routes.SCORE_BOARD} component={ScoreBoard} />
           </div>
         </div>
         {showGameInvite && (

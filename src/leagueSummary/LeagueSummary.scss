@@ -57,6 +57,12 @@
 			border-radius: 4px 4px 0 0;
 		}
 
+		&.winner {
+			color: #1a5c1a;
+			font-weight: 700;
+			background: #e8f5e9;
+		}
+
 		&.score {
 			position: relative;
 			margin-top: 1px;
