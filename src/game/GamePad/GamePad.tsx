@@ -497,7 +497,7 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 					</Col>
 					<Col className="item item6">{playersButtons[nextPlayerIndex(devicePlayerIndex! + 2)]}</Col>
 				</Row>
-				<Row justify="center" style={{ position: 'relative' }}>
+				<Row justify="center" style={{ position: 'relative', zIndex: 1 }}>
 					<Col className="item item8">{playersButtons[devicePlayerIndex!]}</Col>
 					{showReorderPlayers && (
 						<div>
@@ -698,7 +698,7 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 
 		return players.map(({ index: playerIndex, playerName }) => {
 			const isDevicePlayer = playerIndex === devicePlayerIndex;
-			const hasPassed = showPassTag && !isDevicePlayer && passedPlayers.includes(playerIndex);
+			const hasPassed = showPassTag && passedPlayers.includes(playerIndex);
 
 			return (
 				<div

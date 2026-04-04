@@ -53,28 +53,24 @@ class App extends Component<IAppProps, IAppState> {
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     const { pathname } = this.props.location;
-    // set initial header state
     this.toggleHeaderInline(pathname !== '/');
 
-    // listen to routing changes
     this.unlistenHistory = this.props.history.listen((location, action) => {
       const { pathname } = location;
       this.toggleHeaderInline(pathname !== '/' && pathname !== '/login');
     });
-  }
 
-  componentWillUnmount() {
-    this.unlistenHistory();
-  }
-
-  componentDidMount() {
     fire.auth().onAuthStateChanged((authUser) => {
       if (authUser) {
         NotificationService.registerGameInvite(this.onGameInvite);
       }
     });
+  }
+
+  componentWillUnmount() {
+    this.unlistenHistory();
   }
 
   getWrapperClassName(): string {

@@ -1,9 +1,10 @@
+@import 'style/theme-vars.scss';
 @import 'style/mixin.scss';
 
 #root {
 	@include full-view();
 	overflow: auto;
-	background: rgb(52, 223, 52);
+	background: rgb(var(--accent-rgb));
 }
 
 .full-view {
@@ -211,7 +212,7 @@ $inline-header-height: 60px;
 		align-items: center;
 		font-size: 16px;
 		font-weight: 500;
-		border-bottom: 1px solid #c7d1c5;
+		border-bottom: 1px solid var(--primary-bg);
 	}
 
 	&.drawer-left {
@@ -223,10 +224,10 @@ $inline-header-height: 60px;
 		}
 
 		.drawer-handle-icon {
-			background: #34df34;
+			background: var(--accent);
 			&:after,
 			&:before {
-				background: #34df34;
+				background: var(--accent);
 			}
 		}
 	}
@@ -239,7 +240,7 @@ $inline-header-height: 60px;
 		.drawer-handle-icon {
 			&:after,
 			&:before {
-				background: #1a911a;
+				background: var(--primary);
 			}
 		}
 	}
@@ -253,3 +254,5 @@ $inline-header-height: 60px;
 		transform: rotate(360deg);
 	}
 }
+
+@import 'style/antd-theme.scss';

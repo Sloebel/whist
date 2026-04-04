@@ -35,7 +35,7 @@
 
 .toggle-sound-btn {
 	&:not(.is-mute) {
-		color: #0e6b11;
+		color: var(--dark);
 	}
 }
 
@@ -144,15 +144,15 @@
 		}
 
 		.claim-btn {
-			background: #389e0d;
-			border-color: #389e0d;
+			background: var(--success);
+			border-color: var(--success);
 			color: #fff;
 
 			&:hover,
 			&:focus {
-				background: #52c41a;
-				border-color: #52c41a;
-				box-shadow: 0 3px 10px rgba(56, 158, 13, 0.35);
+				background: var(--success-hover);
+				border-color: var(--success-hover);
+				box-shadow: 0 3px 10px var(--success-shadow);
 				transform: translateY(-1px);
 			}
 

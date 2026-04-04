@@ -26,7 +26,7 @@
       height: 2px;
       position: relative;
       top: ($height / 2) * -1;
-      background: #0e6b11;
+      background: var(--dark);
 
       &:before,
       &:after {

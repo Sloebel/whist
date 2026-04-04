@@ -1,0 +1,29 @@
+:root {
+	/* Primary */
+	--primary: #1a911a;
+	--primary-hover: #1fb31f;
+	--primary-active: #399e36;
+	--primary-bg: #c7d1c5;
+	--primary-focus-ring: rgba(26, 145, 26, 0.2);
+
+	/* Accent / bright green (backgrounds, handle icons) */
+	--accent: #34df34;
+	--accent-rgb: 52, 223, 52;
+
+	/* Dark greens (headings, borders, table headers) */
+	--dark: #0e6b11;
+	--dark-alt: #1a5c1a;
+
+	/* Secondary greens (pads, buttons, icons) */
+	--secondary: #27a727;
+	--success: #389e0d;
+	--success-hover: #52c41a;
+	--success-shadow: rgba(56, 158, 13, 0.35);
+
+	/* Light mint backgrounds */
+	--bg-light: #e6fae5;
+	--bg-highlight: #e8f5e9;
+
+	/* Suit color (club green) */
+	--suit-club: #1a7a2e;
+}

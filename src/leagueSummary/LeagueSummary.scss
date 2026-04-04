@@ -23,7 +23,7 @@
 
 		.empty-icon {
 			font-size: 36px;
-			color: #0e6b11;
+			color: var(--dark);
 			margin-bottom: 12px;
 		}
 
@@ -58,9 +58,9 @@
 		}
 
 		&.winner {
-			color: #1a5c1a;
+			color: var(--dark-alt);
 			font-weight: 700;
-			background: #e8f5e9;
+			background: var(--bg-highlight);
 		}
 
 		&.score {
@@ -136,7 +136,7 @@
 		.record-value {
 			font-size: 18px;
 			font-weight: 700;
-			color: #1a5c1a;
+			color: var(--dark-alt);
 			margin-bottom: 4px;
 			line-height: 1.2;
 

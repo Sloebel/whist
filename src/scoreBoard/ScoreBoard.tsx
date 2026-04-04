@@ -10,7 +10,12 @@ import { fire } from '../firebase';
 import { ILeagueModel } from '../models/ILeagueModel';
 import { IPlayer, IPlayerScoresSummary, ISuccessRate } from '../models/IPlayerModel';
 import { GameWithMeta, IRoundData } from '../models/IGameModel';
-import { computeCumulativeScores, computePlayerGameStats, getGamePosition, PlayerGameStats } from '../utils/league-stats';
+import {
+	computeCumulativeScores,
+	computePlayerGameStats,
+	getGamePosition,
+	PlayerGameStats
+} from '../utils/league-stats';
 import { Spade, Hart, Diamond, Club } from '../common/cards/Icons';
 import * as routes from '../constants/routes';
 
@@ -90,7 +95,7 @@ function computeGroupInsights(leagues: LeagueWithScores[], players: IPlayer[]): 
 		fellPct: 0,
 		totalRounds: 0,
 		hbKing: null,
-		perPlayer: {},
+		perPlayer: {}
 	};
 
 	let fellCount = 0;
@@ -128,7 +133,12 @@ function computeGroupInsights(leagues: LeagueWithScores[], players: IPlayer[]): 
 				playerGameCounts[player.key]++;
 				playerGameResults[player.key].push(score === maxScore);
 
-				const record: InsightRecord = { value: score, player: nickname, leagueTitle: entry.league.title, gameNum: game.gameID };
+				const record: InsightRecord = {
+					value: score,
+					player: nickname,
+					leagueTitle: entry.league.title,
+					gameNum: game.gameID
+				};
 
 				if (!insights.highestGameScore || score > insights.highestGameScore.value) {
 					insights.highestGameScore = record;
@@ -172,20 +182,30 @@ function computeGroupInsights(leagues: LeagueWithScores[], players: IPlayer[]): 
 						playerBidSums[player.key] += bid;
 						playerBidCounts[player.key]++;
 
-						const bidRecord: InsightRecord = { value: bid, player: player.nickname, leagueTitle: entry.league.title, gameNum: game.gameID };
-						
+						const bidRecord: InsightRecord = {
+							value: bid,
+							player: player.nickname,
+							leagueTitle: entry.league.title,
+							gameNum: game.gameID
+						};
+
 						if (!insights.highestBid || bid > insights.highestBid.value) {
 							insights.highestBid = bidRecord;
 						}
 					}
 
 					if (score !== 0) {
-						const scoreRecord: InsightRecord = { value: score, player: player.nickname, leagueTitle: entry.league.title, gameNum: game.gameID };
-						
+						const scoreRecord: InsightRecord = {
+							value: score,
+							player: player.nickname,
+							leagueTitle: entry.league.title,
+							gameNum: game.gameID
+						};
+
 						if (!insights.bestRoundScore || score > insights.bestRoundScore.value) {
 							insights.bestRoundScore = scoreRecord;
 						}
-						
+
 						if (!insights.worstRoundScore || score < insights.worstRoundScore.value) {
 							insights.worstRoundScore = scoreRecord;
 						}
@@ -232,7 +252,7 @@ function computeGroupInsights(leagues: LeagueWithScores[], players: IPlayer[]): 
 			avgGameScore: totalGames > 0 ? Math.round(playerScoreSums[p.key] / totalGames) : 0,
 			avgBid: playerBidCounts[p.key] > 0 ? Number((playerBidSums[p.key] / playerBidCounts[p.key]).toFixed(1)) : 0,
 			gameWinRate: totalGames > 0 ? Number(((wins / totalGames) * 100).toFixed(0)) : 0,
-			longestWinStreak: longest,
+			longestWinStreak: longest
 		};
 	}
 
@@ -350,7 +370,17 @@ function groupByPlayers(leagues: LeagueWithScores[]): PlayerGroup[] {
 					aggregatedGames: {},
 					trumpDistribution: {},
 					totalGames: 0,
-					insights: { highestGameScore: null, lowestGameScore: null, highestBid: null, bestRoundScore: null, worstRoundScore: null, fellPct: 0, totalRounds: 0, hbKing: null, perPlayer: {} },
+					insights: {
+						highestGameScore: null,
+						lowestGameScore: null,
+						highestBid: null,
+						bestRoundScore: null,
+						worstRoundScore: null,
+						fellPct: 0,
+						totalRounds: 0,
+						hbKing: null,
+						perPlayer: {}
+					}
 				}
 			});
 		}
@@ -380,7 +410,7 @@ function groupByPlayers(leagues: LeagueWithScores[]): PlayerGroup[] {
 		});
 
 		group.stats.totalGames += entry.allGamesData.length;
-		
+
 		for (const game of entry.allGamesData) {
 			for (const round of game.rounds) {
 				if (!round || !round.trump) continue;
@@ -505,10 +535,7 @@ function renderTrumpDistribution(trumpDistribution: Record<string, number>) {
 					const pct = (count / totalRounds) * 100;
 					return (
 						<div className="legend-item" key={suit.key}>
-							<span
-								className="legend-swatch"
-								style={{ backgroundColor: suit.color }}
-							/>
+							<span className="legend-swatch" style={{ backgroundColor: suit.color }} />
 							<span className="legend-icon" style={{ color: suit.color }}>
 								{suit.key !== 'NT' ? <Icon component={suit.icon} /> : 'NT'}
 							</span>
@@ -525,31 +552,66 @@ function renderGroupInsights(insights: GroupInsights, players: IPlayer[]) {
 	const recordCards: { label: string; value: string; playerName: string; context: string }[] = [];
 
 	if (insights.highestGameScore) {
-		recordCards.push({ label: 'Highest Game Score', value: String(insights.highestGameScore.value), playerName: insights.highestGameScore.player, context: `${insights.highestGameScore.leagueTitle} · G#${insights.highestGameScore.gameNum}` });
+		recordCards.push({
+			label: 'Highest Game Score',
+			value: String(insights.highestGameScore.value),
+			playerName: insights.highestGameScore.player,
+			context: `${insights.highestGameScore.leagueTitle} · G#${insights.highestGameScore.gameNum}`
+		});
 	}
 	if (insights.lowestGameScore) {
-		recordCards.push({ label: 'Lowest Game Score', value: String(insights.lowestGameScore.value), playerName: insights.lowestGameScore.player, context: `${insights.lowestGameScore.leagueTitle} · G#${insights.lowestGameScore.gameNum}` });
+		recordCards.push({
+			label: 'Lowest Game Score',
+			value: String(insights.lowestGameScore.value),
+			playerName: insights.lowestGameScore.player,
+			context: `${insights.lowestGameScore.leagueTitle} · G#${insights.lowestGameScore.gameNum}`
+		});
 	}
 	if (insights.highestBid) {
-		recordCards.push({ label: 'Highest Bid', value: String(insights.highestBid.value), playerName: insights.highestBid.player, context: `${insights.highestBid.leagueTitle} · G#${insights.highestBid.gameNum}` });
+		recordCards.push({
+			label: 'Highest Bid',
+			value: String(insights.highestBid.value),
+			playerName: insights.highestBid.player,
+			context: `${insights.highestBid.leagueTitle} · G#${insights.highestBid.gameNum}`
+		});
 	}
 	if (insights.bestRoundScore) {
-		recordCards.push({ label: 'Best Round Score', value: String(insights.bestRoundScore.value), playerName: insights.bestRoundScore.player, context: `${insights.bestRoundScore.leagueTitle} · G#${insights.bestRoundScore.gameNum}` });
+		recordCards.push({
+			label: 'Best Round Score',
+			value: String(insights.bestRoundScore.value),
+			playerName: insights.bestRoundScore.player,
+			context: `${insights.bestRoundScore.leagueTitle} · G#${insights.bestRoundScore.gameNum}`
+		});
 	}
 	if (insights.worstRoundScore) {
-		recordCards.push({ label: 'Worst Round Score', value: String(insights.worstRoundScore.value), playerName: insights.worstRoundScore.player, context: `${insights.worstRoundScore.leagueTitle} · G#${insights.worstRoundScore.gameNum}` });
+		recordCards.push({
+			label: 'Worst Round Score',
+			value: String(insights.worstRoundScore.value),
+			playerName: insights.worstRoundScore.player,
+			context: `${insights.worstRoundScore.leagueTitle} · G#${insights.worstRoundScore.gameNum}`
+		});
 	}
-	recordCards.push({ label: 'Fell Rate', value: `${insights.fellPct.toFixed(0)}%`, playerName: `${insights.totalRounds} total rounds`, context: '' });
+	recordCards.push({
+		label: 'Fell Rate',
+		value: `${insights.fellPct.toFixed(0)}%`,
+		playerName: `${insights.totalRounds} total rounds`,
+		context: ''
+	});
 
 	if (insights.hbKing) {
-		recordCards.push({ label: 'HB Crown', value: insights.hbKing.player, playerName: `${insights.hbKing.count} HBs taken`, context: '' });
+		recordCards.push({
+			label: 'HB Crown',
+			value: insights.hbKing.player,
+			playerName: `${insights.hbKing.count} HBs taken`,
+			context: ''
+		});
 	}
 
 	const insightRows: { label: string; values: (string | number)[] }[] = [
 		{ label: 'Avg Game Score', values: players.map(p => insights.perPlayer[p.key]?.avgGameScore ?? 0) },
 		{ label: 'Avg Bid', values: players.map(p => insights.perPlayer[p.key]?.avgBid ?? 0) },
 		{ label: 'Game Win Rate', values: players.map(p => `${insights.perPlayer[p.key]?.gameWinRate ?? 0}%`) },
-		{ label: 'Game Win Streak', values: players.map(p => insights.perPlayer[p.key]?.longestWinStreak ?? 0) },
+		{ label: 'Game Win Streak', values: players.map(p => insights.perPlayer[p.key]?.longestWinStreak ?? 0) }
 	];
 
 	return (
@@ -571,7 +633,9 @@ function renderGroupInsights(insights: GroupInsights, players: IPlayer[]) {
 						<div className="detail-row-label">{row.label}</div>
 						<div className="detail-row-values">
 							{row.values.map((val, i) => (
-								<span className="detail-value" key={players[i].key}>{val}</span>
+								<span className="detail-value" key={players[i].key}>
+									{val}
+								</span>
 							))}
 						</div>
 					</div>

@@ -21,7 +21,7 @@ const ThrownCard = (props: IThrownCardProps) => {
 
 	return (
 		<div className={`thrown-card ${thrownType} ${hasWinner ? 'has-winner' : ''}`} style={{ ...style }}>
-			{card && <img src={require(`../../images/playCards/${card}.svg`)} style={{ width: '90px' }} />}
+			{card && <img src={require(`../../images/playCards/${card}.svg`)} alt="" style={{ width: '90px' }} />}
 		</div>
 	);
 };
