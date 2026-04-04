@@ -12,7 +12,11 @@
 		}
 
 		.ant-switch-handle:before {
-			background-color: #27a727;
+			background-color: var(--secondary);
+		}
+
+		&.ant-switch-checked .ant-switch-inner {
+			color: #fff7e6;
 		}
 	}
 }

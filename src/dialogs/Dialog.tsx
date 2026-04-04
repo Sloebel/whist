@@ -6,9 +6,9 @@ import { IReorderPlayersProps } from './ReorderPlayers';
 import { INewLeagueProps } from './NewLeague';
 import { IResumeLeagueProps } from './ResumeLeague';
 
-export interface IBasicDialogProps<T> {
+export interface IBasicDialogProps<T = unknown> {
   visible: boolean;
-  onAfterClose?: <T>(arg?: T) => void;
+  onAfterClose?: (arg?: T) => void;
 }
 
 // TODO: remove the any once all the dialogs are ts and implement dinamic typing

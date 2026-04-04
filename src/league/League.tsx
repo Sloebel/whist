@@ -2,14 +2,19 @@ import React from 'react';
 import { fire } from '../firebase';
 import { Route, Link, RouteComponentProps } from 'react-router-dom';
 import withAuthorization from '../authentication/withAuthorization';
-import { Menu, Layout, message, Tag } from 'antd';
-import { DashboardOutlined, GoldOutlined, ExportOutlined, PlusOutlined } from '@ant-design/icons';
+import { Menu, Layout, message, Tag, Drawer } from 'antd';
+import {
+	DashboardOutlined,
+	GoldOutlined,
+	ExportOutlined,
+	PlusOutlined,
+	MenuOutlined,
+	CloseOutlined
+} from '@ant-design/icons';
 import './League.scss';
 import GameTab from '../game/GameTab';
 import * as routes from '../constants/routes';
 import gameDataTpl from '../dataTemplates/gameTpl';
-import RcDrawer from 'rc-drawer';
-import 'rc-drawer/assets/index.css';
 import Loader from '../common/loader/Loader';
 import LeagueSummary from '../leagueSummary/LeagueSummary';
 import Dialog from '../dialogs/Dialog';
@@ -126,19 +131,28 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
 
 		return (
 			<Layout className="league-container">
-				<RcDrawer
-					getContainer=".app"
-					width="250px"
+				<Drawer
+					getContainer={false}
+					width={250}
 					open={drawerVisible}
-					onHandleClick={this.toggleDrawer}
+					placement="left"
+					closable={false}
+					bodyStyle={{ padding: 0 }}
 					onClose={this.toggleDrawer}
 				>
 					<div className="drawer-title">
 						{league.title}
-						{league.isDemo && <Tag color="orange" className="demo-tag">Demo</Tag>}
+						{league.isDemo && (
+							<Tag color="orange" className="demo-tag">
+								Demo
+							</Tag>
+						)}
 					</div>
 					{this.getMenu()}
-				</RcDrawer>
+				</Drawer>
+				<button className={`drawer-handle ${drawerVisible ? 'drawer-open' : ''}`} onClick={this.toggleDrawer}>
+					{drawerVisible ? <CloseOutlined /> : <MenuOutlined />}
+				</button>
 				{loading && <Loader className="with-mask" />}
 				<Layout>
 					<Content style={{ overflow: 'auto' }}>
@@ -146,13 +160,13 @@ class League extends React.Component<ILeagueProps, ILeagueState> {
 							path={`${routes.LEAGUE}/:leagueID/game/:gameID`}
 							render={props =>
 								!!leagueID ? (
-								<GameTab
-									{...props}
-									players={players as IPlayer[]}
-									leagueTitle={league.title}
-									// loading={loading}
-									loaderStateCb={this.setLoaderState}
-								/>
+									<GameTab
+										{...props}
+										players={players as IPlayer[]}
+										leagueTitle={league.title}
+										// loading={loading}
+										loaderStateCb={this.setLoaderState}
+									/>
 								) : (
 									<Loader />
 								)

@@ -58,7 +58,7 @@
 
 		.empty-icon {
 			font-size: 36px;
-			color: #0e6b11;
+			color: var(--dark);
 			margin-bottom: 12px;
 		}
 
@@ -174,15 +174,15 @@
 			margin-left: 4px;
 			cursor: pointer;
 			font-size: 18px;
-			color: #1890ff;
+			color: var(--primary);
 			vertical-align: middle;
 			border-radius: 3px;
 			padding: 1px;
 			transition: background 0.2s, color 0.2s;
 
 			&:hover {
-				background: rgba(24, 144, 255, 0.1);
-				color: #096dd9;
+				background: var(--primary-focus-ring);
+				color: var(--primary-active);
 			}
 		}
 	}
@@ -221,7 +221,7 @@
 		.insight-card-value {
 			font-size: 18px;
 			font-weight: 700;
-			color: #1a5c1a;
+			color: var(--dark-alt);
 			line-height: 1.2;
 		}
 
@@ -313,7 +313,7 @@
 		.summary-value {
 			font-size: 18px;
 			font-weight: 700;
-			color: #1a5c1a;
+			color: var(--dark-alt);
 			line-height: 1.2;
 		}
 
@@ -458,9 +458,9 @@
 			background: #f5f5f5;
 
 			&.winner {
-				color: #1a5c1a;
+				color: var(--dark-alt);
 				font-weight: 700;
-				background: #e8f5e9;
+				background: var(--bg-highlight);
 			}
 
 			.winner-trophy {

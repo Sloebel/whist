@@ -213,7 +213,7 @@ const PlayCard = (props: IPlayCardProps) => {
 			} ${disabled ? 'disabled' : ''}`}
 			onClick={clickHandler}
 		>
-			<img src={getCard(card)} />
+			<img src={getCard(card)} alt="" />
 		</div>
 	);
 };

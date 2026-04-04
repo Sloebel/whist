@@ -5,7 +5,7 @@
 //     z-index: 100;
 //     border-radius: 0;
 
-//     & > .ant-collapse-item:last-child, 
+//     & > .ant-collapse-item:last-child,
 //     .ant-collapse > .ant-collapse-item:last-child > .ant-collapse-header,
 //     .ant-collapse-item:last-child > .ant-collapse-content {
 //         border-radius: 0;
@@ -14,7 +14,7 @@
 //     .ant-collapse-header {
 //         height: 46px;
 //     }
-    
+
 //     .row-header {
 //         > div {
 //             font-weight: bold;
@@ -24,7 +24,6 @@
 //             border: 1px solid;
 //         }
 //     }
-    
 
 //     .row-data {
 //         > div {
@@ -51,8 +50,8 @@
 //                     color: #fff;
 //                     border: 1px solid;
 //                     text-align: center;
-//                 }   
-//             }  
+//                 }
+//             }
 //         }
 //     }
 // }
@@ -62,41 +61,75 @@
 // }
 
 .demo-tag {
-    margin-left: 8px;
+	margin-left: 8px;
 }
 
 .league-container {
-    background: transparent;
-    height: 100%;
+	background: transparent;
+	height: 100%;
 
-    .ant-layout {
-        background: transparent;
-    }
+	.ant-layout {
+		background: transparent;
+	}
 
-    .btn-menu-arrow-container {
-        float: right;
-    }
+	.btn-menu-arrow-container {
+		float: right;
+	}
 
-    .rotate-180 {
-        transform: rotate(180deg);
-    }
-    .ant-menu-inline-collapsed {
-        .ant-menu-item {
-            > a {
-                max-width: 0;
-                display: inline-block;
-                opacity: 0;
-            }
-        }
-    }
+	.rotate-180 {
+		transform: rotate(180deg);
+	}
+	.ant-menu-inline-collapsed {
+		.ant-menu-item {
+			> a {
+				max-width: 0;
+				display: inline-block;
+				opacity: 0;
+			}
+		}
+	}
 }
 
-.league-menu {    
-    .ant-menu-item {
-        > a {
-            display: inline;
-            transition: opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), width 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-            opacity: 1;
-        }
-    }
+.drawer-handle {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	z-index: 1001;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 20px;
+	color: var(--primary);
+	transition:
+		left 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86),
+		background 0.3s,
+		color 0.3s;
+
+	&.drawer-open {
+		left: 245px;
+		background: #fff;
+		color: #333;
+	}
+
+	&:hover {
+		color: var(--primary-hover);
+	}
+}
+
+.league-menu {
+	.ant-menu-item {
+		> a {
+			display: inline;
+			transition:
+				opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
+				width 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+			opacity: 1;
+		}
+	}
 }

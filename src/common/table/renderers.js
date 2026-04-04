@@ -15,5 +15,7 @@ export const cardsRenderer = (text) => {
       return <Icon component={Club} />;
     case CARDS.NT:
       return 'NT';
+    default:
+      return text;
   }
 };

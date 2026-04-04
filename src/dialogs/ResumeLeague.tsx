@@ -57,7 +57,7 @@ class ResumeLeague extends Component<IResumeLeagueProps, IResumeLeagueState> {
 						<List.Item>
 							<List.Item.Meta
 								title={
-									<a onClick={() => this.closeModal(item.leagueID)} className="league-item">
+									<a href="#!" onClick={(e) => { e.preventDefault(); this.closeModal(item.leagueID); }} className="league-item">
 										{item.title}
 										{item.isDemo && (
 											<Tag color="orange" style={{ marginLeft: 8 }}>

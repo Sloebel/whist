@@ -110,7 +110,7 @@
 	}
 
 	span.card-btn {
-		background: url(/src/images/spades.svg) no-repeat center;
+		background: url(../images/spades.svg) no-repeat center;
 		background-size: contain;
 		display: inline-block;
 		height: 52px;
@@ -143,11 +143,11 @@
 
 		&.current-round {
 			> div:first-child {
-				border-right: 2px solid #1a911a;
+				border-right: 2px solid var(--primary);
 
 				.table-cell {
-					background: #c7d1c5;
-					color: #1a911a;
+				background: var(--primary-bg);
+				color: var(--primary);
 				}
 			}
 		}
@@ -195,7 +195,7 @@
 			right: 1px;
 			bottom: 0;
 			font-size: 0.9em;
-			color: #34df34;
+			color: var(--accent);
 		}
 	}
 }

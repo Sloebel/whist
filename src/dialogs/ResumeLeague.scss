@@ -22,11 +22,11 @@
 
         &:hover {
             color: #fff;
-            background: #1890ff;  
+            background: var(--primary);  
             padding-left: 9px;       
         }
         &:active {
-            background: #096dd9;        
+            background: var(--primary-active);        
         }
     } 
 }
