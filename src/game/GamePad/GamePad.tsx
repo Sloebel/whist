@@ -686,7 +686,7 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 	}
 
 	getPlayersButtons = () => {
-		const { allRounds, currentRound, players, devicePlayerIndex, gameMode } = this.props;
+		const { allRounds, currentRound, players, gameMode } = this.props;
 		const currentRoundData = allRounds!.length && allRounds![currentRound! - 1];
 		const highestBidder = (currentRoundData as IRoundData).highestBidder;
 		const passedPlayers = (currentRoundData as IRoundData).passedPlayers || [];
@@ -697,7 +697,6 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 			typeof highestBidder !== 'number';
 
 		return players.map(({ index: playerIndex, playerName }) => {
-			const isDevicePlayer = playerIndex === devicePlayerIndex;
 			const hasPassed = showPassTag && passedPlayers.includes(playerIndex);
 
 			return (
