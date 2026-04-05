@@ -28,3 +28,11 @@ export const DrawCardsType = {
   [CARDS.HART]: CARDS_SHORT.H,
   [CARDS.SPADE]: CARDS_SHORT.S
 };
+
+export const TRUMP_RANK: Record<string, number> = {
+  [CARDS.CLUB]: 0,
+  [CARDS.DIAMOND]: 1,
+  [CARDS.HART]: 2,
+  [CARDS.SPADE]: 3,
+  [CARDS.NT]: 4,
+};

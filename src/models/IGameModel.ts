@@ -28,6 +28,17 @@ export interface IClaimApproved {
   player: number;
 }
 
+export interface TrumpBid {
+  number: number;
+  trump: CARDS | string;
+}
+
+export interface TrumpPass {
+  passed: true;
+}
+
+export type TrumpBiddingEntry = TrumpBid | TrumpPass;
+
 export interface IBaseRoundData {
   [index: string]: any;
   segment: string | number;
@@ -61,6 +72,10 @@ export interface IBaseRoundData {
   droppedCards?: { [playerIndex: number]: boolean };
   revealedCards?: { [playerIndex: number]: string[] };
   passedPlayers?: number[];
+  trumpBidding?: {
+    [playerIndex: number]: TrumpBiddingEntry;
+  };
+  trumpBiddingWinner?: number;
 }
 
 export interface IRoundData extends IBaseRoundData {

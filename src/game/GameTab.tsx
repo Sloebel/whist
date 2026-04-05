@@ -63,6 +63,7 @@ export interface IGameTabState {
 	showMidGameBreak: boolean;
 	pendingMidGameBreak: boolean;
 	claimEnabled: boolean;
+	fluidHighestBidderEnabled: boolean;
 }
 
 class GameTab extends Component<IGameTabProps, IGameTabState> {
@@ -72,6 +73,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 	private ownCardsStateRef?: firebase.database.Reference;
 	private containerRef = React.createRef<HTMLDivElement>();
 	private unsubscribeClaimFlag?: () => void;
+	private unsubscribeFluidBidFlag?: () => void;
 	private gameKey: string = '';
 	private handFinishScheduled: number | null = null;
 
@@ -96,7 +98,8 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 			gameSummary: {},
 			showMidGameBreak: false,
 			pendingMidGameBreak: false,
-			claimEnabled: false
+			claimEnabled: false,
+			fluidHighestBidderEnabled: false
 		};
 
 		this.selectActiveRound = this.selectActiveRound.bind(this);
@@ -164,12 +167,17 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 		this.unsubscribeClaimFlag = FeatureFlagService.subscribe('CLAIM_ENABLED', value => {
 			this.setState({ claimEnabled: value === true });
 		});
+
+		this.unsubscribeFluidBidFlag = FeatureFlagService.subscribe('FLUID_HIGHEST_BIDDER_FLOW', value => {
+			this.setState({ fluidHighestBidderEnabled: value === true });
+		});
 	}
 
 	public componentWillUnmount() {
 		this.gameRef?.off('value');
 		this.gameSummaryRef?.off('value');
 		this.unsubscribeClaimFlag?.();
+		this.unsubscribeFluidBidFlag?.();
 		if (this.ownCardsStateRef) {
 			this.ownCardsStateRef.off('value');
 		}
@@ -689,11 +697,12 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 						leagueScores={this.getLeagueScores()}
 						disableNextRound={this.state.pendingMidGameBreak}
 						isDealer={gameMode !== 'remote' || gameData.dealer === fire.auth().currentUser?.uid}
-						claimApproved={currentRoundData?.claimApproved}
-						claimActivated={currentRoundData?.claimActivated}
-						revealedCards={currentRoundData?.revealedCards}
-						onClaimActivated={this.handleClaimActivated}
-						onDropCards={this.handleDropCards}
+						claimApproved={this.state.claimEnabled ? currentRoundData?.claimApproved : undefined}
+						claimActivated={this.state.claimEnabled ? currentRoundData?.claimActivated : undefined}
+						revealedCards={this.state.claimEnabled ? currentRoundData?.revealedCards : undefined}
+						onClaimActivated={this.state.claimEnabled ? this.handleClaimActivated : undefined}
+						onDropCards={this.state.claimEnabled ? this.handleDropCards : undefined}
+						fluidHighestBidderEnabled={this.state.fluidHighestBidderEnabled}
 					/>
 
 					<MidGameBreakModal
@@ -802,7 +811,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 			.then(() => {
 				setTimeout(() => currentHand !== 13 && this.goToNextHand(roundData, winner), 200);
 
-				if ((currentHand as number) >= 8 && (currentHand as number) < 12) {
+				if (this.state.claimEnabled && (currentHand as number) >= 8 && (currentHand as number) < 12) {
 					this.validateClaim(round, winner.player);
 				}
 			});

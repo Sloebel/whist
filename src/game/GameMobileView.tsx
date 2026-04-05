@@ -28,6 +28,7 @@ interface GameMobileViewProps {
 	revealedCards?: { [playerIndex: number]: string[] };
 	onClaimActivated?: () => void;
 	onDropCards?: () => void;
+	fluidHighestBidderEnabled?: boolean;
 }
 
 export default class GameMobileView extends Component<GameMobileViewProps> {
@@ -122,6 +123,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 			revealedCards,
 			onClaimActivated,
 			onDropCards,
+			fluidHighestBidderEnabled,
 		} = this.props;
 
 		return (
@@ -158,6 +160,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 								revealedCards={revealedCards}
 								onClaimActivated={onClaimActivated}
 								onDropCards={onDropCards}
+								fluidHighestBidderEnabled={fluidHighestBidderEnabled}
 							/>
 						</div>
 					</div>
