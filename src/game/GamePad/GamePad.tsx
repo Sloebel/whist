@@ -274,6 +274,18 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 		return (TRUMP_RANK[a.trump] ?? 0) - (TRUMP_RANK[b.trump] ?? 0);
 	}
 
+	static getResolvedTrumpWinner(trumpBidding?: { [playerIndex: number]: TrumpBiddingEntry }): number | undefined {
+		if (!trumpBidding) return undefined;
+
+		const playerIndices = [0, 1, 2, 3];
+		const passedCount = playerIndices.filter(
+			i => trumpBidding[i] != null && 'passed' in trumpBidding[i]
+		).length;
+		const validBidders = playerIndices.filter(i => GamePad.isTrumpBidEntry(trumpBidding[i]));
+
+		return passedCount === 3 && validBidders.length === 1 ? validBidders[0] : undefined;
+	}
+
 	getHighestTrumpBidderIndex(trumpBidding?: { [playerIndex: number]: TrumpBiddingEntry }): number | undefined {
 		if (!trumpBidding) return undefined;
 
@@ -340,7 +352,7 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 		const newRoundData: Partial<IRoundData> = {};
 
 		if (inputMode === INPUT_MODE.BID) {
-			if (currentRound === 13) {
+			if (currentRound !== undefined && currentRound >= 13) {
 				if ((num >= 5 && !roundData[`bid${highestBidder}`]) || roundData[`bid${highestBidder}`] < num) {
 					newRoundData.highestBidder = selectedPlayer;
 				}
@@ -491,7 +503,7 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 		const showPassButton =
 			isRemote && inputMode === INPUT_MODE.BID && typeof currentRoundData.highestBidder !== 'number';
 		const showConfirmTrumpBid =
-			this.isTrumpBidding() && currentRoundData.trumpBiddingWinner === devicePlayerIndex;
+			this.isTrumpBidding() && GamePad.getResolvedTrumpWinner(currentRoundData.trumpBidding) === devicePlayerIndex;
 		const fluidPassEntry = currentRoundData.trumpBidding?.[devicePlayerIndex!];
 		const devicePlayerPassed = showPassButton && (
 			this.isTrumpBidding()
@@ -834,23 +846,11 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 
 			if (isPassed) {
 				delete trumpBidding[devicePlayerIndex!];
-				onChange({ ...roundData, trumpBidding, trumpBiddingWinner: null as any });
 			} else {
 				trumpBidding[devicePlayerIndex!] = { passed: true };
-
-				const playerIndices = [0, 1, 2, 3];
-				const passedCount = playerIndices.filter(
-					i => trumpBidding[i] != null && 'passed' in trumpBidding[i]
-				).length;
-				const validBidders = playerIndices.filter(i => GamePad.isTrumpBidEntry(trumpBidding[i]));
-
-				const updates: Partial<IRoundData> = { trumpBidding };
-				if (passedCount === 3 && validBidders.length === 1) {
-					updates.trumpBiddingWinner = validBidders[0];
-				}
-
-				onChange({ ...roundData, ...updates } as IRoundData);
 			}
+
+			onChange({ ...roundData, trumpBidding });
 			return;
 		}
 
@@ -889,14 +889,14 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 	confirmTrumpBidding = () => {
 		const { onChange } = this.props;
 		const roundData = this.getRoundData();
-		const winner = roundData.trumpBiddingWinner;
+		const winner = GamePad.getResolvedTrumpWinner(roundData.trumpBidding);
 
 		if (winner === undefined) return;
 
 		const winnerEntry = roundData.trumpBidding?.[winner];
 		if (!GamePad.isTrumpBidEntry(winnerEntry)) return;
 
-		const { trumpBidding: _tb, trumpBiddingWinner: _tbw, ...restRoundData } = roundData;
+		const { trumpBidding: _tb, ...restRoundData } = roundData;
 
 		onChange({
 			...restRoundData,

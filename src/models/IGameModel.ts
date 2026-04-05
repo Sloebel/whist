@@ -75,7 +75,6 @@ export interface IBaseRoundData {
   trumpBidding?: {
     [playerIndex: number]: TrumpBiddingEntry;
   };
-  trumpBiddingWinner?: number;
 }
 
 export interface IRoundData extends IBaseRoundData {

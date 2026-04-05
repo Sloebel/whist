@@ -17,6 +17,7 @@ import { INPUT_MODE } from '../constants/states';
 import GameMobileView from './GameMobileView';
 import MidGameBreakModal from './MidGameBreakModal/MidGameBreakModal';
 import { GAME_DEFAULT_SCORES } from '../constants/scores';
+import { createEmptyRound } from '../dataTemplates/gameTpl';
 import GameService from '../services/GameSrv';
 import LeagueService from '../services/LeagueSrv';
 import FeatureFlagService from '../services/FeatureFlagSrv';
@@ -317,12 +318,24 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 					if (row.round < 12) {
 						// because metaData index is zero based row.round value is next round index
 						newData[row.round].factor = row.factor * 2;
+					} else if (row.round >= 13) {
+						const extraRound = createEmptyRound(row.round + 1, this.state.gameData.gameMode!);
+						extraRound.factor = row.factor > 1 ? row.factor : 1;
+						newData.push(extraRound);
 					} else if (row.factor > 1) {
 						newData[row.round].factor = row.factor;
 					}
 				} else if (row.fell) {
 					row.fell = false;
-					if (newData[row.round]) {
+
+					if (row.round >= 13) {
+						const lastRound = newData[newData.length - 1];
+						if (lastRound && lastRound.round === row.round + 1
+							&& lastRound.bid0 === '' && lastRound.bid1 === ''
+							&& lastRound.bid2 === '' && lastRound.bid3 === '') {
+							newData.pop();
+						}
+					} else if (newData[row.round]) {
 						newData[row.round].factor = row.factor > 1 ? row.factor / 2 : row.factor;
 					}
 
@@ -334,7 +347,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 				// calculate round summary stats
 				summaryToUpdate = this.calculateSummary(newData, index);
 
-				const isGameFinished = row.round === 13 && !row.fell;
+				const isGameFinished = row.round >= 13 && !row.fell;
 
 				if (isGameFinished) {
 					stateToUpdate.status = GAME_STATUS.FINISHED;
@@ -942,12 +955,24 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 				if (newRound.round < 12) {
 					// because metaData index is zero based row.round value is next round index
 					allRounds[newRound.round].factor = newRound.factor * 2;
+				} else if (newRound.round >= 13) {
+					const extraRound = createEmptyRound(newRound.round + 1, this.state.gameData.gameMode!);
+					extraRound.factor = newRound.factor > 1 ? newRound.factor : 1;
+					allRounds.push(extraRound);
 				} else if (newRound.factor > 1) {
 					allRounds[newRound.round].factor = newRound.factor;
 				}
 			} else if (newRound.fell) {
 				newRound.fell = false;
-				if (allRounds[newRound.round]) {
+
+				if (newRound.round >= 13) {
+					const lastRound = allRounds[allRounds.length - 1];
+					if (lastRound && lastRound.round === newRound.round + 1
+						&& lastRound.bid0 === '' && lastRound.bid1 === ''
+						&& lastRound.bid2 === '' && lastRound.bid3 === '') {
+						allRounds.pop();
+					}
+				} else if (allRounds[newRound.round]) {
 					allRounds[newRound.round].factor = newRound.factor > 1 ? newRound.factor / 2 : newRound.factor;
 				}
 
@@ -959,7 +984,7 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 			// calculate round summary stats
 			let summaryToUpdate = this.calculateSummary(allRounds, roundIndex);
 
-			const isGameFinished = newRound.round === 13 && !newRound.fell;
+			const isGameFinished = newRound.round >= 13 && !newRound.fell;
 
 			if (isGameFinished) {
 				gameToUpdate.status = GAME_STATUS.FINISHED;

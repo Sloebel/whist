@@ -9,12 +9,11 @@ import {
 import { IPlayer } from '../models/IPlayerModel';
 import { IGameDataTpl } from '../models/ILeagueModel';
 
-export default function gameDataTpl(
-  players: IPlayer[],
+export function createEmptyRound(
+  roundNumber: number,
   gameMode: GameMode
-): IGameDataTpl {
-  const rounds: IRoundData[] = [];
-  const initRoundData: IBaseRoundData = {
+): IRoundData {
+  const base: IBaseRoundData = {
     segment: '',
     totalBids: '',
     trump: '',
@@ -42,11 +41,20 @@ export default function gameDataTpl(
   };
 
   if (gameMode === 'remote') {
-    initRoundData.currentHand = 1;
+    base.currentHand = 1;
   }
 
+  return { round: roundNumber, ...base };
+}
+
+export default function gameDataTpl(
+  players: IPlayer[],
+  gameMode: GameMode
+): IGameDataTpl {
+  const rounds: IRoundData[] = [];
+
   for (let i = 0; i < 13; i++) {
-    rounds.push({ round: i + 1, ...initRoundData });
+    rounds.push(createEmptyRound(i + 1, gameMode));
   }
 
   const rateInit = {

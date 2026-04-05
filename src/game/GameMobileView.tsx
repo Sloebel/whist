@@ -86,10 +86,11 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 	}
 
 	nextRound = () => {
-		const { goToRound, currentRound } = this.props;
+		const { goToRound, currentRound, rounds } = this.props;
 		const round = Number(currentRound);
+		const totalRounds = rounds?.length ?? 13;
 
-		if (round < 13) {
+		if (round < totalRounds) {
 			goToRound?.(round + 1);
 		}
 	};
@@ -179,7 +180,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 							</Button>
 						)}
 
-						{currentRound !== 13 && (
+						{currentRound !== (rounds?.length ?? 13) && (
 							<Button type="primary" ghost onClick={this.nextRound} disabled={disableNextRound}>
 								{`Round ${Number(currentRound) + 1}`}
 								<RightOutlined />
