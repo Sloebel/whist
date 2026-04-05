@@ -8,6 +8,8 @@ export default class FeatureFlagService {
 
 		const listener = ref.on('value', (snap) => {
 			callback(snap.val() as T);
+		}, (error: Error) => {
+			console.error(`[FeatureFlagService] Failed to read featureFlags/${flagKey}:`, error);
 		});
 
 		return () => ref.off('value', listener);

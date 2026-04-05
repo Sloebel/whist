@@ -1,10 +1,43 @@
 import React from 'react';
+import { Spade, Hart, Diamond, Club } from '../cards/Icons';
 import Css, { CSS_TRANSITIONS } from '../transition/Css';
 
 import './Pad.scss';
 
+const TRUMP_ICONS = {
+	SPADE: Spade,
+	HART: Hart,
+	DIAMOND: Diamond,
+	CLUB: Club
+};
+
 const PlayerPad = props => {
-	const { name, bid, won, score } = props;
+	const { name, bid, won, score, trumpBiddingEntry } = props;
+
+	const renderBidLine = () => {
+		if (trumpBiddingEntry === null) {
+			return <div className="pad-bid-won">&mdash;</div>;
+		}
+
+		if (trumpBiddingEntry) {
+			if (trumpBiddingEntry.passed) {
+				return <div className="pad-bid-won trump-bid-pass">Pass</div>;
+			}
+			const TrumpIcon = TRUMP_ICONS[trumpBiddingEntry.trump];
+
+			return (
+				<div className="pad-bid-won trump-bid-info">
+					{trumpBiddingEntry.number} {TrumpIcon ? <TrumpIcon /> : trumpBiddingEntry.trump}
+				</div>
+			);
+		}
+
+		return (
+			<div className="pad-bid-won">
+				Bid: {typeof bid === 'number' ? bid : ' '} Won: {won}
+			</div>
+		);
+	};
 
 	return (
 		<div className="player-pad">
@@ -16,10 +49,7 @@ const PlayerPad = props => {
 					</span>
 				)}
 			</div>
-
-			<div className="pad-bid-won">
-				Bid: {typeof bid === 'number' ? bid : ' '} Won: {won}
-			</div>
+			{renderBidLine()}
 		</div>
 	);
 };

@@ -28,6 +28,7 @@ interface GameMobileViewProps {
 	revealedCards?: { [playerIndex: number]: string[] };
 	onClaimActivated?: () => void;
 	onDropCards?: () => void;
+	fluidHighestBidderEnabled?: boolean;
 }
 
 export default class GameMobileView extends Component<GameMobileViewProps> {
@@ -85,10 +86,11 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 	}
 
 	nextRound = () => {
-		const { goToRound, currentRound } = this.props;
+		const { goToRound, currentRound, rounds } = this.props;
 		const round = Number(currentRound);
+		const totalRounds = rounds?.length ?? 13;
 
-		if (round < 13) {
+		if (round < totalRounds) {
 			goToRound?.(round + 1);
 		}
 	};
@@ -122,6 +124,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 			revealedCards,
 			onClaimActivated,
 			onDropCards,
+			fluidHighestBidderEnabled,
 		} = this.props;
 
 		return (
@@ -158,6 +161,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 								revealedCards={revealedCards}
 								onClaimActivated={onClaimActivated}
 								onDropCards={onDropCards}
+								fluidHighestBidderEnabled={fluidHighestBidderEnabled}
 							/>
 						</div>
 					</div>
@@ -176,7 +180,7 @@ export default class GameMobileView extends Component<GameMobileViewProps> {
 							</Button>
 						)}
 
-						{currentRound !== 13 && (
+						{currentRound !== (rounds?.length ?? 13) && (
 							<Button type="primary" ghost onClick={this.nextRound} disabled={disableNextRound}>
 								{`Round ${Number(currentRound) + 1}`}
 								<RightOutlined />
