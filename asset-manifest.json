@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/whist/static/css/main.cc0d70f3.css",
-    "main.js": "/whist/static/js/main.e9680cbd.js",
+    "main.css": "/whist/static/css/main.56aa593e.css",
+    "main.js": "/whist/static/js/main.e6f832cd.js",
     "static/media/phone.png": "/whist/static/media/phone.ae86ecc30c648d66d404.png",
     "static/media/cards.png": "/whist/static/media/cards.f3410fac501a57cfc3eb.png",
     "static/media/13-S.svg": "/whist/static/media/13-S.6634d6775de8fe16857b348f7d9a88b6.svg",
@@ -60,11 +60,11 @@
     "static/media/14-H.svg": "/whist/static/media/14-H.094f5c7e432ceb320aa89f7ae27480dd.svg",
     "static/media/14-D.svg": "/whist/static/media/14-D.e5e8a5a0ad4736840dc49e48b5f14bba.svg",
     "index.html": "/whist/index.html",
-    "main.cc0d70f3.css.map": "/whist/static/css/main.cc0d70f3.css.map",
-    "main.e9680cbd.js.map": "/whist/static/js/main.e9680cbd.js.map"
+    "main.56aa593e.css.map": "/whist/static/css/main.56aa593e.css.map",
+    "main.e6f832cd.js.map": "/whist/static/js/main.e6f832cd.js.map"
   },
   "entrypoints": [
-    "static/css/main.cc0d70f3.css",
-    "static/js/main.e9680cbd.js"
+    "static/css/main.56aa593e.css",
+    "static/js/main.e6f832cd.js"
   ]
 }
