@@ -3,7 +3,7 @@ import Icon from '@ant-design/icons';
 import { Spade, Hart, Diamond, Club } from '../cards/Icons';
 import { CARDS } from '../../constants/cards';
 
-export const cardsRenderer = (text) => {
+export const cardsRenderer = (text: CARDS): React.ReactNode => {
   switch (text) {
     case CARDS.SPADE:
       return <Icon component={Spade} />;
