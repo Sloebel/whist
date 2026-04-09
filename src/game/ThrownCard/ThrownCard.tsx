@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useLayoutEffect, useRef } from 'react';
 import './ThrownCard.scss';
 
 export type ThrownCardType = 'top' | 'left' | 'right' | 'bottom';
@@ -13,14 +13,18 @@ export interface IThrownCardProps {
 
 const ThrownCard = (props: IThrownCardProps) => {
 	const { card, thrownType, from, to, hasWinner } = props;
-	const [style, setStyle] = useState(from ? from : to);
+	const [style, setStyle] = useState(from ?? to);
+	const ref = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
+		if (ref.current) {
+			void ref.current.offsetHeight;
+		}
 		setStyle(to);
-	}, [to]);
+	}, [to.top, to.left]);
 
 	return (
-		<div className={`thrown-card ${thrownType} ${hasWinner ? 'has-winner' : ''}`} style={{ ...style }}>
+		<div ref={ref} className={`thrown-card ${thrownType} ${hasWinner ? 'has-winner' : ''}`} style={{ ...style }}>
 			{card && <img src={require(`../../images/playCards/${card}.svg`)} alt="" style={{ width: '90px' }} />}
 		</div>
 	);

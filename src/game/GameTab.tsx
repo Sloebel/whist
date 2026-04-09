@@ -330,9 +330,14 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 
 					if (row.round >= 13) {
 						const lastRound = newData[newData.length - 1];
-						if (lastRound && lastRound.round === row.round + 1
-							&& lastRound.bid0 === '' && lastRound.bid1 === ''
-							&& lastRound.bid2 === '' && lastRound.bid3 === '') {
+						if (
+							lastRound &&
+							lastRound.round === row.round + 1 &&
+							lastRound.bid0 === '' &&
+							lastRound.bid1 === '' &&
+							lastRound.bid2 === '' &&
+							lastRound.bid3 === ''
+						) {
 							newData.pop();
 						}
 					} else if (newData[row.round]) {
@@ -911,29 +916,20 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 		const { round, currentHand } = roundData;
 
 		this.gameRef?.child(`rounds/${round - 1}`).update({
-			// [`won${winner.player}`]: roundData[`won${winner.player}`]
-			//   ? roundData[`won${winner.player}`] + 1
-			//   : 1,
 			currentHand: (currentHand as number) + 1
-			// handsState: {
-			//   // ...handsState,
-			//   [currentHand + 1]: {
-			//     status: 'ACTIVE',
-			//     turnOf: winner.player,
-			//     thrownCards: [],
-			//   },
-			// },
 		});
 	}
 
 	private calculateHandScore(roundData: IRoundData) {
 		const gameData = { ...this.state.gameData };
-		const { rounds: allRounds, currentRound } = gameData;
+		const { currentRound } = gameData;
+		// Clone rounds so we do not mutate React state in place (breaks checkMidGameBreak transition for the dealer).
+		const allRounds = (gameData.rounds ?? []).map(r => ({ ...r }));
 		const newRound = { ...roundData };
 		const gameToUpdate: Partial<IGameData> = {};
 
 		const roundIndex = (currentRound as number) - 1;
-		allRounds?.splice(roundIndex, 1, newRound);
+		allRounds.splice(roundIndex, 1, newRound);
 
 		[0, 1, 2, 3].forEach(player =>
 			this.calculatePlayerScore(newRound, player, allRounds as IRoundData[], roundIndex, gameToUpdate)
@@ -967,9 +963,14 @@ class GameTab extends Component<IGameTabProps, IGameTabState> {
 
 				if (newRound.round >= 13) {
 					const lastRound = allRounds[allRounds.length - 1];
-					if (lastRound && lastRound.round === newRound.round + 1
-						&& lastRound.bid0 === '' && lastRound.bid1 === ''
-						&& lastRound.bid2 === '' && lastRound.bid3 === '') {
+					if (
+						lastRound &&
+						lastRound.round === newRound.round + 1 &&
+						lastRound.bid0 === '' &&
+						lastRound.bid1 === '' &&
+						lastRound.bid2 === '' &&
+						lastRound.bid3 === ''
+					) {
 						allRounds.pop();
 					}
 				} else if (allRounds[newRound.round]) {
