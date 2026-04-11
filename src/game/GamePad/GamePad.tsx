@@ -278,9 +278,7 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 		if (!trumpBidding) return undefined;
 
 		const playerIndices = [0, 1, 2, 3];
-		const passedCount = playerIndices.filter(
-			i => trumpBidding[i] != null && 'passed' in trumpBidding[i]
-		).length;
+		const passedCount = playerIndices.filter(i => trumpBidding[i] != null && 'passed' in trumpBidding[i]).length;
 		const validBidders = playerIndices.filter(i => GamePad.isTrumpBidEntry(trumpBidding[i]));
 
 		return passedCount === 3 && validBidders.length === 1 ? validBidders[0] : undefined;
@@ -313,8 +311,8 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 
 		if (this.isTrumpBidding()) {
 			const existing = roundData.trumpBidding?.[devicePlayerIndex!];
-			const bidNumber = this.state.pendingTrumpBidNumber
-				?? (GamePad.isTrumpBidEntry(existing) ? existing.number : undefined);
+			const bidNumber =
+				this.state.pendingTrumpBidNumber ?? (GamePad.isTrumpBidEntry(existing) ? existing.number : undefined);
 
 			if (bidNumber === undefined) return;
 
@@ -491,25 +489,26 @@ class GamePad extends Component<GamePadProps, GamePadState> {
 	render() {
 		const { devicePlayerIndex, gameMode, isDealer } = this.props;
 		const currentRoundData = this.getRoundData();
-		const { round, check, trump, segment, inputMode, fell, factor } = currentRoundData;
+		const { round, check, segment, inputMode, fell, factor } = currentRoundData;
 		const { selectedPlayer, reorderPlayersDialogVisible, trumpModalVisible, isMute } = this.state;
 		const isAllBids = this.isAllBids(currentRoundData);
 		const playersButtons = this.getPlayersButtons();
 		const isRemote = gameMode === 'remote';
-		const showReorderPlayers = !isRemote && round === 1 && inputMode === INPUT_MODE.BID;
 		const hasAnyBid = [0, 1, 2, 3].some(i => typeof currentRoundData[`bid${i}`] === 'number');
 		const hasAnyWon = [0, 1, 2, 3].some(i => typeof currentRoundData[`won${i}`] === 'number');
+		const showReorderPlayers = !isRemote && round === 1 && inputMode === INPUT_MODE.BID && !hasAnyBid;
 		const showResetBids = inputMode === INPUT_MODE.BID && hasAnyBid && !hasAnyWon && (!isRemote || isDealer);
 		const showPassButton =
 			isRemote && inputMode === INPUT_MODE.BID && typeof currentRoundData.highestBidder !== 'number';
 		const showConfirmTrumpBid =
-			this.isTrumpBidding() && GamePad.getResolvedTrumpWinner(currentRoundData.trumpBidding) === devicePlayerIndex;
+			this.isTrumpBidding() &&
+			GamePad.getResolvedTrumpWinner(currentRoundData.trumpBidding) === devicePlayerIndex;
 		const fluidPassEntry = currentRoundData.trumpBidding?.[devicePlayerIndex!];
-		const devicePlayerPassed = showPassButton && (
-			this.isTrumpBidding()
+		const devicePlayerPassed =
+			showPassButton &&
+			(this.isTrumpBidding()
 				? fluidPassEntry != null && 'passed' in fluidPassEntry
-				: (currentRoundData.passedPlayers || []).includes(devicePlayerIndex!)
-		);
+				: (currentRoundData.passedPlayers || []).includes(devicePlayerIndex!));
 
 		return (
 			<Radio.Group
