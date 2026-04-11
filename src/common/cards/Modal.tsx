@@ -25,10 +25,10 @@ const CardsModal: React.FC<CardsModalProps> = ({ trump, onChange, disabled, visi
 	const [visible, setVisible] = useState(false);
 
 	useEffect(() => {
-		if (visibleProp !== undefined && visibleProp !== visible) {
+		if (visibleProp !== undefined) {
 			setVisible(visibleProp);
 		}
-	}, [visibleProp, visible]);
+	}, [visibleProp]);
 
 	const onTrumpSelect = useCallback(
 		(value: string) => {
@@ -44,7 +44,7 @@ const CardsModal: React.FC<CardsModalProps> = ({ trump, onChange, disabled, visi
 			<Button ghost className="card-btn" onClick={() => setVisible(true)} disabled={disabled}>
 				{trump ? trump === 'NT' ? 'NT' : <Icon component={trumpIconMap[trump]} /> : <QuestionOutlined />}
 			</Button>
-			<Modal footer={null} visible={visible} onCancel={() => setVisible(false)} className="cards-modal-dialog">
+			<Modal footer={null} open={visible} onCancel={() => setVisible(false)} className="cards-modal-dialog">
 				{Object.values(CARDS).map(card => (
 					<Button key={card} className="card-btn" onClick={() => onTrumpSelect(card)}>
 						{trumpIconMap[card] ? <Icon component={trumpIconMap[card]} /> : card}
