@@ -3,7 +3,7 @@ export const hasTouch = (): boolean =>
   'ontouchstart' in document.documentElement;
 
 export function addListener(
-  element: HTMLElement,
+  element: Window | HTMLElement,
   type: string,
   callback: (e: Event) => void
 ) {

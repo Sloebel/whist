@@ -1,7 +1,7 @@
 import React from 'react';
 
-export const Spade = () => (
-	<svg  x="0px" y="0px" viewBox="0 0 511.96 511.96" style={{enableBackground:'new 0 0 511.96 511.96'}} width="1em" height="1em">
+export const Spade: React.FC = () => (
+	<svg  x="0px" y="0px" viewBox="0 0 511.96 511.96" style={{enableBackground:'new 0 0 511.96 511.96'} as React.CSSProperties} width="1em" height="1em">
 		<g>
 			<path d="M302.728,390.351c16.49,15.934,26.368,25.759,55.905,24.541c43.494-1.783,83.871-25.459,106.364-62.729
 				c38.78-64.247,17.576-128.53-23.702-166.824L272.705,6.528c-9.507-8.704-24.082-8.704-33.589,0L68.073,185.34
@@ -17,8 +17,8 @@ export const Spade = () => (
 	</svg>
 );
 
-export const Hart = () => (
-  <svg x="0px" y="0px" viewBox="0 0 510.977 510.977" style={{enableBackground:'new 0 0 510.977 510.977'}} width="1em" height="1em">
+export const Hart: React.FC = () => (
+  <svg x="0px" y="0px" viewBox="0 0 510.977 510.977" style={{enableBackground:'new 0 0 510.977 510.977'} as React.CSSProperties} width="1em" height="1em">
     <g>
       <path style={{fill:'#D71E00'}} d="M255.22,105.177c19.535-49.77,61.325-87.79,113.231-87.79c43.705,0,79.625,23.111,108.871,54.44
         c38.859,41.622,56.17,137.216-15.863,209.24c-36.546,36.546-205.815,212.524-205.815,212.524S86.384,317.613,49.838,281.066
@@ -32,8 +32,8 @@ export const Hart = () => (
   </svg>
 );
 
-export const Diamond = () => (
-  <svg x="0px" y="0px" viewBox="0 0 512 512" style={{enableBackground: 'new 0 0 512 512'}} width="1em" height="1em">
+export const Diamond: React.FC = () => (
+  <svg x="0px" y="0px" viewBox="0 0 512 512" style={{enableBackground: 'new 0 0 512 512'} as React.CSSProperties} width="1em" height="1em">
     <g>
       <polygon style={{fill:'#D71E00'}} points="256,0 45.714,256 256,512 466.286,256 	"/>
       <path style={{fill:'#B21606'}} d="M248.872,448.656c-3.162,3.937-2.533,9.692,1.404,12.853c3.937,3.162,9.692,2.533,12.853-1.404
@@ -42,8 +42,8 @@ export const Diamond = () => (
   </svg>
 );
 
-export const Club = () => (
-  <svg x="0px" y="0px" viewBox="0 0 511.998 511.998" style={{enableBackground: 'new 0 0 511.998 511.998'}} width="1em" height="1em">
+export const Club: React.FC = () => (
+  <svg x="0px" y="0px" viewBox="0 0 511.998 511.998" style={{enableBackground: 'new 0 0 511.998 511.998'} as React.CSSProperties} width="1em" height="1em">
     <g>
       <path d="M419.381,199.229c-26.651-12.378-51.541-12.674-74.177-7.186c18.441-21.827,29.058-50.472,27.396-81.642
         C369.438,51,320.017,2.36,260.58,0.087c-66.578-2.542-121.353,50.67-121.353,116.682c0,28.699,10.393,54.937,27.567,75.273
@@ -59,8 +59,8 @@ export const Club = () => (
   </svg>  
 );
 
-export const ChangePlayers = () => (
-  <svg x="0px" y="0px" viewBox="0 0 512 512" style={{enableBackground: 'new 0 0 512 512'}} width="1em" height="1em">
+export const ChangePlayers: React.FC = () => (
+  <svg x="0px" y="0px" viewBox="0 0 512 512" style={{enableBackground: 'new 0 0 512 512'} as React.CSSProperties} width="1em" height="1em">
     <g>
       <g>
         <path d="M170.256,403.875c10.65-12.234,17.122-28.196,17.122-45.652c0-38.393-31.234-69.627-69.627-69.627

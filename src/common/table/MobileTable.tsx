@@ -3,6 +3,7 @@ import { Row, Col } from 'antd';
 import { TrophyTwoTone } from '@ant-design/icons';
 import { cardsRenderer } from './renderers';
 import { IGameColumn, IRoundData, LeagueScoreTypeMap } from '../../models/IGameModel';
+import { CARDS } from '../../constants/cards';
 
 interface MobileTableProps {
   dataSource?: IRoundData[];
@@ -84,7 +85,7 @@ const getRoundCol = (players: IGameColumn[], roundData: IRoundData) =>
       >
         {roundData[`aggregateScore${playerIndex}`]}
         {playerIndex === roundData.highestBidder && (
-          <span className="trump">{cardsRenderer(roundData.trump)}</span>
+          <span className="trump">{cardsRenderer(roundData.trump as CARDS)}</span>
         )}
       </div>
     </Col>
